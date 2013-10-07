@@ -12,6 +12,7 @@ namespace StatsdClient
 
         public bool ShouldSend(double sampleRate)
         {
+            if (sampleRate >= 1) return true;
             return _random.NextDouble() < sampleRate;
         }
     }
