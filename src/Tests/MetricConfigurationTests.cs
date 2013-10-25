@@ -11,12 +11,12 @@ namespace Tests
     public class MetricConfigurationTest
     {
         private void testReceive(string testServerName, int testPort, string testCounterName, 
-                                 string expectedOutput)
+                                 string expectedOutput, string[] tags = null)
         {
             UdpListener udpListener = new UdpListener(testServerName, testPort);
-            Thread listenThread = new Thread(new ThreadStart(udpListener.Listen));
+            Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
             listenThread.Start();
-            Metrics.Increment(testCounterName);
+            Metrics.Increment(testCounterName, tags:tags);
             while(listenThread.IsAlive);
             Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
             udpListener.Dispose();
@@ -70,5 +70,44 @@ namespace Tests
             StatsdClient.Metrics.Configure(metricsConfig);
             testReceive("127.0.0.1", 8125, "test", "prefix.test:1|c");
         }
+
+        [Test]
+        public void setting_globaltag()
+        {
+            var metricsConfig = new MetricsConfig
+            {
+                StatsdServerName = "127.0.0.1",
+                Prefix = "prefix",
+                Tags = new[] { "tag1" }
+            };
+            StatsdClient.Metrics.Configure(metricsConfig);
+            testReceive("127.0.0.1", 8125, "test", "prefix.test:1|c|#tag1");
+        }
+
+        [Test]
+        public void setting_localtagonly()
+        {
+            var metricsConfig = new MetricsConfig
+            {
+                StatsdServerName = "127.0.0.1",
+                Prefix = "prefix"                
+            };
+            StatsdClient.Metrics.Configure(metricsConfig);
+            testReceive("127.0.0.1", 8125, "test", "prefix.test:1|c|#tag1", new []{ "tag1"});
+        }
+
+        [Test]
+        public void setting_local_andglobal_tag()
+        {
+            var metricsConfig = new MetricsConfig
+            {
+                StatsdServerName = "127.0.0.1",
+                Prefix = "prefix",
+                Tags = new[] { "tag1" }
+            };
+            StatsdClient.Metrics.Configure(metricsConfig);
+            testReceive("127.0.0.1", 8125, "test", "prefix.test:1|c|#tag1,tag2", new []{ "tag2" });
+        }
+
     }
 }
