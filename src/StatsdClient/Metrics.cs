@@ -16,12 +16,10 @@ namespace StatsdClient
                 throw new ArgumentNullException("config.StatsdServername");
 
             _prefix = config.Prefix;
-            _statsD = string.IsNullOrEmpty(config.StatsdServerName)
-                      ? null
-                      : new Statsd(new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize));
+            _statsD = new Statsd(new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize));
         }
 
-        public static void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)  
+        public static void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
             if (_statsD == null)
             {
@@ -30,7 +28,7 @@ namespace StatsdClient
             _statsD.Send<Statsd.Counting,T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
-        public static void Increment(string statName, double sampleRate = 1.0, string[] tags = null)  
+        public static void Increment(string statName, double sampleRate = 1.0, string[] tags = null)
         {
             if (_statsD == null)
             {
@@ -39,7 +37,7 @@ namespace StatsdClient
             _statsD.Send<Statsd.Counting,int>(BuildNamespacedStatName(statName), 1, sampleRate, tags);
         }
 
-        public static void Decrement(string statName, double sampleRate = 1.0, params string[] tags)  
+        public static void Decrement(string statName, double sampleRate = 1.0, params string[] tags)
         {
             if (_statsD == null)
             {
@@ -68,7 +66,7 @@ namespace StatsdClient
 
         public static void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            if (_statsD == null) 
+            if (_statsD == null)
             {
                 return;
             }
@@ -91,7 +89,7 @@ namespace StatsdClient
             return new MetricsTimer(name, sampleRate, tags);
         }
 
-        public static void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null) 
+        public static void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null)
         {
             if (_statsD == null)
             {
