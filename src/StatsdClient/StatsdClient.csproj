@@ -38,6 +38,7 @@
   <ItemGroup>
     <Compile Include="DogStatsdService.cs" />
     <Compile Include="ICommandType.cs" />
+    <Compile Include="IDogStatsd.cs" />
     <Compile Include="IRandomGenerator.cs" />
     <Compile Include="IStatsd.cs" />
     <Compile Include="IStatsdUDP.cs" />
