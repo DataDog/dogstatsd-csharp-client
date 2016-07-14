@@ -36,6 +36,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DogStatsdService.cs" />
     <Compile Include="ICommandType.cs" />
     <Compile Include="IRandomGenerator.cs" />
     <Compile Include="IStatsd.cs" />
