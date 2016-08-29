@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable"
+  },
+  "dependencies": {
+    "System.Runtime.Serialization.Primitives": "4.1.1",
+    "NUnit": "3.4.1",
+    //"NUnit": "2.5.7.10213",
+    "dotnet-test-nunit": "3.4.0-beta-2",
+    "StatsdClient": {
+      "target": "project"
+    },
+    "Configuration": {
+      "target": "project"
+    },
+    // "RhinoMocks": "3.6.1"
+  },
+  "testRunner": "nunit",
+  "frameworks": {
+    // "net451": {
+    //   "bin": {
+    //     "assembly": "../../src/Configuration/bin/Debug/net451/Configuration.dll"
+    //   }
+    // },
+    // "netcoreapp1.0": {
+    //   "imports": "portable-net45+win8",
+    //   "dependencies": {
+    //     "Microsoft.NETCore.App": {
+    //       "version": "1.0.0-*",
+    //       "type": "platform"
+    //     }
+    //   },
+    //   "bin": {
+    //     "assembly": "../../src/Configuration/bin/Debug/net451/Configuration.dll"
+    //   }
+    // }
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+      "imports": [
+        "dotnet5.4",
+        "portable-net451+win8"
+      ]
+    }
+  }
+}
