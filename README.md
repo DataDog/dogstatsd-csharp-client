@@ -1,22 +1,20 @@
-DogStatsD for C#
-================
+# DogStatsD for C#
+
 [![Build status](https://ci.appveyor.com/api/projects/status/bg8e39b5f9iiavvj/branch/master?svg=true)](https://ci.appveyor.com/project/Datadog/dogstatsd-csharp-client/branch/master)
 
 A C# [DogStatsD](http://docs.datadoghq.com/guides/dogstatsd/) client. DogStatsD
 is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/)
 metric server for [Datadog](http://datadoghq.com).
 
-What's new ?
-------------
+## What's new ?
+
 See [CHANGELOG](CHANGELOG.md) for details.
 
-Installation
-------------
+## Installation
 
 Grab the [package from NuGet](https://nuget.org/packages/DogStatsD-CSharp-Client/), or get the source from here and build it yourself.
 
-Usage via the static DogStatsd class:
------------------------------
+## Usage via the static DogStatsd class:
 
 At start of your app, configure the `DogStatsd` class like this:
 
@@ -102,8 +100,7 @@ DogStatsd.Event("SO MUCH SNOW", "Started yesterday and it won't stop !!", alertT
 ```
 
 
-Usage via the Statsd class:
----------------------------
+## Usage via the Statsd class:
 
 In most cases, the static DogStatsd class is probably better to use.
 However, the Statsd is useful when you want to queue up a number of metrics/events to be sent in
@@ -178,14 +175,44 @@ timing, a timer metric containing the time elapsed before the exception
 occurred will be sent or added to the send queue (depending on whether Send or
 Add is being called).
 
-Feedback
---------
+## Testing
+
+### on Windows
+
+1. Build the project
+  ```
+  msbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+  ```
+
+2. Run tests using NUnit-Console runner
+  ```
+  nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  ```
+
+### on Linux, OS X
+
+_Requirements:_
+_* Mono JIT compiler (tested with version 4.6.0)_
+
+1. Build the project
+  ```
+  xbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+  ```
+
+2. Run tests using NUnit-Console runner
+  ```
+  nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  ```
+
+
+
+
+## Feedback
 
 To suggest a feature, report a bug, or general discussion, head over
 [here](https://github.com/DataDog/statsd-csharp-client/issues).
 
-Credits
--------
+## Credits
 
 dogstatsd-csharp-client is forked from Goncalo Pereira's [original Statsd
 client](https://github.com/goncalopereira/statsd-csharp-client).

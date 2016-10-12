@@ -48,7 +48,7 @@ namespace Tests
         // then asserts that the passed string is equal to the message received.
         private void AssertWasReceived(string shouldBe, int index = 0)
         {
-            // Stall until the the listener receives a message or times out 
+            // Stall until the the listener receives a message or times out
             while (listenThread.IsAlive) ;
             Assert.AreEqual(shouldBe, udpListener.GetAndClearLastMessages()[index]);
         }
@@ -574,10 +574,9 @@ namespace Tests
             catch (Exception)
             {
                 AssertWasReceivedMatches(@"timer:\d{3}\|ms");
-                Assert.Pass();
             }
         }
-        
+
         [Test]
         public void events_priority_and_date()
         {
