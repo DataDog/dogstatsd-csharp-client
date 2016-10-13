@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-# 2.2.1 / Unreleased
+# 2.2.1 / 10-13-2016
 * [BUGFIX] Remove the `TRACE` directive from release builds. See [#33][], [#34][] (Thanks [@albertofem][])
 
 # 2.2.0 / 08-08-2016
