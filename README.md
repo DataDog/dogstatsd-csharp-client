@@ -1,4 +1,5 @@
-# DogStatsD for C#
+DogStatsD for C#
+================
 
 [![Build status](https://ci.appveyor.com/api/projects/status/bg8e39b5f9iiavvj/branch/master?svg=true)](https://ci.appveyor.com/project/Datadog/dogstatsd-csharp-client/branch/master)
 
