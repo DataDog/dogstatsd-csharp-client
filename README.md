@@ -196,12 +196,12 @@ _* Mono JIT compiler (tested with version 4.6.0)_
 
 1. Build the project
   ```
-  xbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+  xbuild StatsdClient.sln /p:Configuration=Release /t:Rebuild
   ```
 
 2. Run tests using NUnit-Console runner
   ```
-  nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  nunit-console tests/StatsdClient.Tests/bin/Debug/Tests.dll --config=Release
   ```
 
 

@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{77B1707A-9123-4CD9-9A18-A8D7F4794D71}</ProjectGuid>
+    <ProjectGuid>1701b62f-1078-4748-9d7a-f1eabc703971</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>StatsdClient</RootNamespace>

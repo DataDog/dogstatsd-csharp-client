@@ -1,5 +1,5 @@
 build_script:
-  msbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+  msbuild StatsdClient.sln /p:Configuration=Release /t:Rebuild
 
 test_script:
-  - nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  - nunit-console tests/StatsdClient.Tests/bin/Debug/Tests.dll --config=Release
