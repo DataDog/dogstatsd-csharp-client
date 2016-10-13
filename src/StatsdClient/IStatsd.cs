@@ -14,5 +14,13 @@ namespace StatsdClient
         void Send();
         void Add(Action actionToTime, string statName, double sampleRate, params string[] tags);
         void Send(Action actionToTime, string statName, double sampleRate, params string[] tags);
+        /// <summary>
+        /// Add service check
+        /// </summary>
+        void Add(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage);
+        /// <summary>
+        /// Send service check
+        /// </summary>
+        void Send(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong);
     }
 }
