@@ -72,7 +72,6 @@ namespace Tests
             Statsd s = new Statsd(udp, _randomGenerator, _stopwatch);
             udp.Stub(x => x.Send(Arg<string>.Is.Anything)).Throw(new Exception());
             s.Send<Statsd.Counting,int>("counter", 5);
-            Assert.Pass();
         }
 
         [Test]
@@ -164,7 +163,6 @@ namespace Tests
             udp.Stub(x => x.Send(Arg<string>.Is.Anything)).Throw(new Exception());
             Statsd s = new Statsd(udp);
             s.Send<Statsd.Timing,int>("timer", 5);
-            Assert.Pass();
         }
 
         [Test]
@@ -178,7 +176,7 @@ namespace Tests
             Statsd s = new Statsd(udp, _randomGenerator, _stopwatch);
             s.Send(() => testMethod(), statName);
 
-            udp.AssertWasCalled(x => x.Send("name:500|ms"));       
+            udp.AssertWasCalled(x => x.Send("name:500|ms"));
         }
 
         [Test]
@@ -192,7 +190,7 @@ namespace Tests
             Statsd s = new Statsd(udp, _randomGenerator, _stopwatch);
             s.Send(() => testMethod(), statName, tags: new[] {"tag1:true", "tag2"});
 
-            udp.AssertWasCalled(x => x.Send("name:500|ms|#tag1:true,tag2"));       
+            udp.AssertWasCalled(x => x.Send("name:500|ms|#tag1:true,tag2"));
         }
 
         [Test]
@@ -206,7 +204,7 @@ namespace Tests
             Statsd s = new Statsd(udp, _randomGenerator, _stopwatch);
             s.Send(() => testMethod(), statName, sampleRate: 1.1);
 
-            udp.AssertWasCalled(x => x.Send("name:500|ms|@1.1"));       
+            udp.AssertWasCalled(x => x.Send("name:500|ms|@1.1"));
         }
 
         [Test]
@@ -319,7 +317,7 @@ namespace Tests
         }
 
         // =-=-=-=- GAUGE -=-=-=-=
-        
+
         [Test]
         public void send_gauge()
         {
@@ -375,7 +373,6 @@ namespace Tests
             udp.Stub(x => x.Send(Arg<string>.Is.Anything)).Throw(new Exception());
             Statsd s = new Statsd(udp);
             s.Send<Statsd.Gauge,int>("gauge", 5);
-            Assert.Pass();
         }
 
         [Test]
@@ -438,7 +435,7 @@ namespace Tests
             Assert.That(s.Commands.Count, Is.EqualTo(1));
             Assert.That(s.Commands[0], Is.EqualTo("gauge:5|g|@0.5|#tag1:true,tag2"));
         }
-        
+
         // =-=-=-=- COMBINATION -=-=-=-=
 
         [Test]
@@ -740,7 +737,7 @@ namespace Tests
             Assert.That(s.Commands[0], Is.EqualTo("histogram:5|h|#tag1:true,tag2"));
         }
 
-        
+
         [Test]
         public void add_histogram_with_sample_rate()
         {
