@@ -1,5 +1,9 @@
 CHANGELOG
 =========
+
+# 2.3.0 / Unreleased
+* [BUGFIX] Remove the `TRACE` directive from release builds. See [#33][], [#34][] (Thanks [@albertofem][])
+
 # 2.2.0 / 08-08-2016
 * [BUGFIX] Fix `Random` generator thread safety. See [#26][] (Thanks [@windsnow98][])
 * [FEATURE] Service check support. See [#29][] (Thanks [@nathanrobb][])
@@ -38,6 +42,9 @@ CHANGELOG
 [#22]: https://github.com/DataDog/dogstatsd-csharp-client/issues/22
 [#26]: https://github.com/DataDog/dogstatsd-csharp-client/issues/26
 [#29]: https://github.com/DataDog/dogstatsd-csharp-client/issues/29
+[#33]: https://github.com/DataDog/dogstatsd-csharp-client/issues/33
+[#34]: https://github.com/DataDog/dogstatsd-csharp-client/issues/34
+[@albertofem]: https://github.com/albertofem
 [@anthonychu]: https://github.com/anthonychu
 [@daniel-chambers]: https://github.com/daniel-chambers
 [@michaellockwood]: https://github.com/michaellockwood
