@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient.Tests", "tests\StatsdClient.Tests\StatsdClient.Tests.csproj", "{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient.Tests", "tests\StatsdClient.Tests\StatsdClient.Tests.xproj", "{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1701B62F-1078-4748-9D7A-F1EABC703971} = {1701B62F-1078-4748-9D7A-F1EABC703971}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient", "src\StatsdClient\StatsdClient.csproj", "{1701B62F-1078-4748-9D7A-F1EABC703971}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient", "src\StatsdClient\StatsdClient.xproj", "{1701B62F-1078-4748-9D7A-F1EABC703971}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,18 +18,18 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{1701B62F-1078-4748-9D7A-F1EABC703971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1701B62F-1078-4748-9D7A-F1EABC703971}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1701B62F-1078-4748-9D7A-F1EABC703971}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1701B62F-1078-4748-9D7A-F1EABC703971}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1701B62F-1078-4748-9D7A-F1EABC703971}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{1701B62F-1078-4748-9D7A-F1EABC703971}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = src\StatsdClient\StatsdClient.csproj
+		StartupItem = src\StatsdClient\StatsdClient.xproj
 		Policies = $0
 		$0.TextStylePolicy = $3
 		$1.inheritsSet = null

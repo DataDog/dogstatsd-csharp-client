@@ -177,35 +177,16 @@ Add is being called).
 
 ## Testing
 
-### on Windows
+### .NET Framework 4.5
 
-1. Build the project
+1. Restore packages
   ```
-  msbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+  dotnet restore
   ```
-
-2. Run tests using NUnit-Console runner
+2. Run the tests
   ```
-  nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  dotnet test tests/StatsdClient.Tests/`
   ```
-
-### on Linux, OS X
-
-_Requirements:_
-_* Mono JIT compiler (tested with version 4.6.0)_
-
-1. Build the project
-  ```
-  xbuild StatsdClient.sln /p:Configuration=Release /t:Rebuild
-  ```
-
-2. Run tests using NUnit-Console runner
-  ```
-  nunit-console tests/StatsdClient.Tests/bin/Debug/Tests.dll --config=Release
-  ```
-
-
-
 
 ## Feedback
 
