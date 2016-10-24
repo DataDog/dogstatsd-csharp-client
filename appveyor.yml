@@ -13,4 +13,5 @@ after_test:
   - cmd: dotnet pack -c Release src/StatsdClient/
 
 artifacts:
-  path: 'src\StatsdClient\bin\Release\*.nupkg'
+  - name: NuGet package
+    path: 'src\StatsdClient\bin\Release\*.nupkg'
