@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>DogStatsD-CSharp-Client</id>
-    <version>3.0.0</version>
+    <version>$version$</version>
     <authors>Datadog</authors>
     <owners>Datadog</owners>
     <licenseUrl>https://github.com/DataDog/dogstatsd-csharp-client/blob/master/MIT-LICENCE.md</licenseUrl>
