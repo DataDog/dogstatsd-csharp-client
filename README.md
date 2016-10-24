@@ -6,13 +6,20 @@ A C# [DogStatsD](http://docs.datadoghq.com/guides/dogstatsd/) client. DogStatsD
 is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/)
 metric server for [Datadog](http://datadoghq.com).
 
-## What's new ?
+## CHANGELOG
 
 See [CHANGELOG](CHANGELOG.md) for details.
 
 ## Installation
 
 Grab the [package from NuGet](https://nuget.org/packages/DogStatsD-CSharp-Client/), or get the source from here and build it yourself.
+
+## Platforms
+
+DogStatsD-CSharp-Client supports the following platforms:
+* .NET Framework 4.5.1
+* .NET Standard 1.3
+
 
 ## Usage via the static DogStatsd class:
 
@@ -176,8 +183,6 @@ occurred will be sent or added to the send queue (depending on whether Send or
 Add is being called).
 
 ## Testing
-
-### .NET Framework 4.5
 
 1. Restore packages
   ```
