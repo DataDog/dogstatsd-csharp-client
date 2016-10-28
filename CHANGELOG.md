@@ -11,7 +11,8 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 
 ## Changes
 
-* [IMPROVEMENT] Move to .NET Core, and drop .NET Framework 3.5 compatibility
+* [IMPROVEMENT] Move to .NET Core, and drop .NET Framework 3.5 compatibility. See [#28][], [#39][] (Thanks [@wjdavis5][])
+* [IMPROVEMENT] Abstract DogStatsD service. See [#30][], [#40][] (Thanks [@nrjohnstone][])
 
 # 2.2.1 / 10-13-2016
 * [BUGFIX] Remove the `TRACE` directive from release builds. See [#33][], [#34][] (Thanks [@albertofem][])
@@ -53,13 +54,19 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#18]: https://github.com/DataDog/dogstatsd-csharp-client/issues/18
 [#22]: https://github.com/DataDog/dogstatsd-csharp-client/issues/22
 [#26]: https://github.com/DataDog/dogstatsd-csharp-client/issues/26
+[#28]: https://github.com/DataDog/dogstatsd-csharp-client/issues/28
 [#29]: https://github.com/DataDog/dogstatsd-csharp-client/issues/29
+[#30]: https://github.com/DataDog/dogstatsd-csharp-client/issues/30
 [#33]: https://github.com/DataDog/dogstatsd-csharp-client/issues/33
 [#34]: https://github.com/DataDog/dogstatsd-csharp-client/issues/34
+[#39]: https://github.com/DataDog/dogstatsd-csharp-client/issues/39
+[#40]: https://github.com/DataDog/dogstatsd-csharp-client/issues/40
 [@albertofem]: https://github.com/albertofem
 [@anthonychu]: https://github.com/anthonychu
 [@daniel-chambers]: https://github.com/daniel-chambers
 [@michaellockwood]: https://github.com/michaellockwood
 [@nathanrobb]: https://github.com/nathanrobb
+[@nrjohnstone]: https://github.com/nrjohnstone
 [@windsnow98]: https://github.com/windsnow98
+[@wjdavis5]: https://github.com/wjdavis5
 [@yori-s]: https://github.com/yori-s
