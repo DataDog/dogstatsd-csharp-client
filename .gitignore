@@ -4,6 +4,10 @@
 *.suo
 _ReSharper*
 *.nupkg
+*.lock.json
+TestResult.xml
 test-results/
 .DS_Store
 src/StatsdClient.userprefs
+src/packages/
+src/.vs/

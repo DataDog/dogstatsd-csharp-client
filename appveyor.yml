@@ -1,5 +1,23 @@
-build_script:
-  msbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+version: 3.0.0.{build}
+os: Visual Studio 2015
+configuration: Release
+
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+
+before_build:
+  - cmd: dotnet --info
+  - cmd: dotnet restore
 
 test_script:
-  - nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  - cmd: dotnet test tests/StatsdClient.Tests/
+
+after_test:
+  - cmd: dotnet pack -c Release src/StatsdClient/
+
+artifacts:
+  - name: NuGet package
+    path: 'src\StatsdClient\bin\Release\*.nupkg'

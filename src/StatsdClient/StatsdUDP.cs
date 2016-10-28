@@ -35,7 +35,11 @@ namespace StatsdClient
 
             if (!isValidIPAddress)
             {
-                IPAddress[] addressList = Dns.GetHostEntry(Name).AddressList;
+#if NET451
+                IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
+#else
+                IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
+#endif            
 
                 int positionForIpv4 = addressList.Length - 1;
 
@@ -88,7 +92,7 @@ namespace StatsdClient
 
         public void Dispose()
         {
-            UDPSocket.Close();
+            UDPSocket.Dispose();
         }
     }
 }

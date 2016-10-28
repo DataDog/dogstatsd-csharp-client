@@ -1,5 +1,4 @@
 using System;
-using System.Configuration;
 using System.Threading;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -16,8 +15,8 @@ namespace Tests
     {
         private UdpListener udpListener;
         private Thread listenThread;
-        private int serverPort = Convert.ToInt32(ConfigurationManager.AppSettings["StatsdServerPort"]);
-        private string serverName = ConfigurationManager.AppSettings["StatsdServerName"];
+        private int serverPort = Convert.ToInt32("8126");
+        private string serverName = "127.0.0.1";
         private StatsdUDP udp;
         private Statsd statsd;
         private List<string> lastPulledMessages;
@@ -91,7 +90,7 @@ namespace Tests
             var msg = new String('f', StatsdConfig.DefaultStatsdMaxUDPPacketSize);
             listenThread.Start();
             udp.Send(msg);
-            // As long as we're at or below the limit, the packet should still be sent 
+            // As long as we're at or below the limit, the packet should still be sent
             AssertWasReceived(msg);
         }
 

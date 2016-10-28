@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Threading;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -14,8 +13,8 @@ namespace Tests
     {
         private UdpListener udpListener;
         private Thread listenThread;
-        private int serverPort = Convert.ToInt32(ConfigurationManager.AppSettings["StatsdServerPort"]);
-        private string serverName = ConfigurationManager.AppSettings["StatsdServerName"];
+        private int serverPort = Convert.ToInt32("8126");
+        private string serverName = "127.0.0.1";
 
         [TestFixtureSetUp]
         public void SetUpUdpListener()
@@ -66,8 +65,8 @@ namespace Tests
         [Test]
         public void _udp_listener_sanity_test()
         {
-            var client = new StatsdUDP(ConfigurationManager.AppSettings["StatsdServerName"],
-                                       Convert.ToInt32(ConfigurationManager.AppSettings["StatsdServerPort"]));
+            var client = new StatsdUDP("127.0.0.1",
+                                       Convert.ToInt32("8126"));
             client.Send("iamnotinsane!");
             AssertWasReceived("iamnotinsane!");
         }

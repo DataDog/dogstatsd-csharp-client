@@ -7,13 +7,20 @@ A C# [DogStatsD](http://docs.datadoghq.com/guides/dogstatsd/) client. DogStatsD
 is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/)
 metric server for [Datadog](http://datadoghq.com).
 
-## What's new ?
+## CHANGELOG
 
 See [CHANGELOG](CHANGELOG.md) for details.
 
 ## Installation
 
 Grab the [package from NuGet](https://nuget.org/packages/DogStatsD-CSharp-Client/), or get the source from here and build it yourself.
+
+## Platforms
+
+DogStatsD-CSharp-Client supports the following platforms:
+* .NET Framework 4.5.1
+* .NET Standard 1.3
+
 
 ## Usage via the static DogStatsd class:
 
@@ -178,35 +185,14 @@ Add is being called).
 
 ## Testing
 
-### on Windows
-
-1. Build the project
+1. Restore packages
   ```
-  msbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
+  dotnet restore
   ```
-
-2. Run tests using NUnit-Console runner
+2. Run the tests
   ```
-  nunit-console src/Tests/bin/Release/Tests.dll --config=Release
+  dotnet test tests/StatsdClient.Tests/`
   ```
-
-### on Linux, OS X
-
-_Requirements:_
-_* Mono JIT compiler (tested with version 4.6.0)_
-
-1. Build the project
-  ```
-  xbuild src/StatsdClient.sln /p:Configuration=Release /t:Rebuild
-  ```
-
-2. Run tests using NUnit-Console runner
-  ```
-  nunit-console src/Tests/bin/Release/Tests.dll --config=Release
-  ```
-
-
-
 
 ## Feedback
 

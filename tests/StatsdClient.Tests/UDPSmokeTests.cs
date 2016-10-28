@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Net.Sockets;
 using NUnit.Framework;
 using StatsdClient;
@@ -9,8 +8,8 @@ namespace Tests
     [TestFixture]
     public class UDPSmokeTests
     {
-        private static readonly int ServerPort = Convert.ToInt32(ConfigurationManager.AppSettings["StatsdServerPort"]);
-        private static readonly string ServerName = ConfigurationManager.AppSettings["StatsdServerName"];
+        private static readonly int ServerPort = Convert.ToInt32("8126");
+        private static readonly string ServerName = "127.0.0.1";
 
         [Test]
         public void Sends_a_counter()

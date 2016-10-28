@@ -1,6 +1,18 @@
 CHANGELOG
 =========
 
+# 3.0.0 / Unreleased
+
+## .NET Core support, end of .NET Framework 3.5 compatibility
+
+DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.5. As of `3.0.0`, DogStatsD-CSharp-Client supports the following platforms:
+* .NET Framework 4.5.1
+* .NET Standard 1.3
+
+## Changes
+
+* [IMPROVEMENT] Move to .NET Core, and drop .NET Framework 3.5 compatibility
+
 # 2.2.1 / 10-13-2016
 * [BUGFIX] Remove the `TRACE` directive from release builds. See [#33][], [#34][] (Thanks [@albertofem][])
 
