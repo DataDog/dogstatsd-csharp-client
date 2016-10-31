@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-# 3.0.0 / Unreleased
+# 3.0.0 / 10-31-2016
 
 ## .NET Core support, end of .NET Framework 3.5 compatibility
 
