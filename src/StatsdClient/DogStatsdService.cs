@@ -2,8 +2,9 @@ using System;
 
 namespace StatsdClient
 {
-    public class DogStatsdService
+    public class DogStatsdService : IDisposable
     {
+        private IDisposable _disposable;
         private Statsd _statsD;
         private string _prefix;
 
@@ -16,9 +17,13 @@ namespace StatsdClient
                 throw new ArgumentNullException("config.StatsdServername");
 
             _prefix = config.Prefix;
-            _statsD = string.IsNullOrEmpty(config.StatsdServerName)
-                      ? null
-                      : new Statsd(new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize));
+            Dispose();
+            if (!string.IsNullOrEmpty(config.StatsdServerName))
+            {
+                var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
+                _statsD = new Statsd(statsdUdp);
+                _disposable = statsdUdp;
+            }
         }
 
         public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
@@ -144,6 +149,14 @@ namespace StatsdClient
             }
 
             return _prefix + "." + statName;
+        }
+
+        public void Dispose()
+        {
+            var disposable = _disposable;
+            _disposable = null;
+            _statsD = null;
+            disposable?.Dispose();
         }
     }
 }
