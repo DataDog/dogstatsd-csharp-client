@@ -15,13 +15,17 @@ namespace StatsdClient
         private string Name { get; set; }
         private int Port { get; set; }
 
-        public StatsdUDP(string name, int port, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        public StatsdUDP(string name, int port, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize, int? sendBufferSize = null)
         {
             Name = name;
             Port = port;
             MaxUDPPacketSize = maxUDPPacketSize;
 
             UDPSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            if (sendBufferSize != null)
+            {
+                UDPSocket.SendBufferSize = sendBufferSize.Value;
+            }
 
             var ipAddress = GetIpv4Address(name);
 

@@ -20,7 +20,7 @@ namespace StatsdClient
             Dispose();
             if (!string.IsNullOrEmpty(config.StatsdServerName))
             {
-                var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
+                var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize, config.SendBufferSize);
                 _statsD = new Statsd(statsdUdp);
                 _disposable = statsdUdp;
             }
