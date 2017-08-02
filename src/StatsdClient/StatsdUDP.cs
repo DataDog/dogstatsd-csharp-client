@@ -35,15 +35,25 @@ namespace StatsdClient
 
             if (!isValidIPAddress)
             {
+                ipAddress = null;
 #if NET451
                 IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
 #else
                 IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
 #endif            
+                //The IPv4 address is usually the last one, but not always
+                for(int positionToTest = addressList.Length - 1; positionToTest >= 0; --positionToTest)
+                {
+                    if(addressList[positionToTest].AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        ipAddress = addressList[positionToTest];
+                        break;
+                    }
+                }
 
-                int positionForIpv4 = addressList.Length - 1;
-
-                ipAddress = addressList[positionForIpv4];
+                //If no IPV4 address is found, throw an exception here, rather than letting it get squashed when encountered at sendtime
+                if(ipAddress == null)
+                    throw new SocketException((int)SocketError.AddressFamilyNotSupported);
             }
             return ipAddress;
         }
