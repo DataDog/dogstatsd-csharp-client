@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
@@ -16,7 +17,7 @@ namespace Tests
         private int serverPort = Convert.ToInt32("8126");
         private string serverName = "127.0.0.1";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetUpUdpListener()
         {
             udpListener = new UdpListener(serverName, serverPort);
@@ -24,7 +25,7 @@ namespace Tests
             StatsdClient.DogStatsd.Configure(metricsConfig);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownUdpListener()
         {
             udpListener.Dispose();
@@ -427,7 +428,7 @@ namespace Tests
         [Test]
         public void timer_method()
         {
-            DogStatsd.Time(() => Thread.Sleep(500), "timer");
+            DogStatsd.Time(() => Thread.Sleep(100), "timer");
             // Make sure that the received timer is of the right order of magnitude.
             // The measured value will probably be a few ms longer than the sleep value.
             AssertWasReceivedMatches(@"timer:\d{3}\|ms");
@@ -436,7 +437,7 @@ namespace Tests
         [Test]
         public void timer_method_tags()
         {
-            DogStatsd.Time(() => Thread.Sleep(500), "timer", tags: new[] { "tag1:true", "tag2" });
+            DogStatsd.Time(() => Thread.Sleep(100), "timer", tags: new[] { "tag1:true", "tag2" });
             // Make sure that the received timer is of the right order of magnitude.
             // The measured value will probably be a few ms longer than the sleep value.
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|#tag1:true,tag2");
@@ -445,7 +446,7 @@ namespace Tests
         [Test]
         public void timer_method_sample_rate()
         {
-            DogStatsd.Time(() => Thread.Sleep(500), "timer", sampleRate: 1.1);
+            DogStatsd.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1);
             // Make sure that the received timer is of the right order of magnitude.
             // The measured value will probably be a few ms longer than the sleep value.
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
@@ -454,7 +455,7 @@ namespace Tests
         [Test]
         public void timer_method_sample_rate_tags()
         {
-            DogStatsd.Time(() => Thread.Sleep(500), "timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+            DogStatsd.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
             // Make sure that the received timer is of the right order of magnitude.
             // The measured value will probably be a few ms longer than the sleep value.
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
@@ -463,14 +464,14 @@ namespace Tests
         // [Helper]
         private int pauseAndReturnInt()
         {
-            Thread.Sleep(500);
+            Thread.Sleep(100);
             return 42;
         }
 
         [Test]
         public void timer_method_sets_return_value()
         {
-            var returnValue = DogStatsd.Time(() => pauseAndReturnInt(), "lifetheuniverseandeverything");
+            var returnValue = DogStatsd.Time(pauseAndReturnInt, "lifetheuniverseandeverything");
             AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms");
             Assert.AreEqual(42, returnValue);
         }
@@ -478,7 +479,7 @@ namespace Tests
         [Test]
         public void timer_method_sets_return_value_tags()
         {
-            var returnValue = DogStatsd.Time(() => pauseAndReturnInt(), "lifetheuniverseandeverything", tags: new[] { "towel:present" });
+            var returnValue = DogStatsd.Time(pauseAndReturnInt, "lifetheuniverseandeverything", tags: new[] { "towel:present" });
             AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|#towel:present");
             Assert.AreEqual(42, returnValue);
         }
@@ -486,7 +487,7 @@ namespace Tests
         [Test]
         public void timer_method_sets_return_value_sample_rate()
         {
-            var returnValue = DogStatsd.Time(() => pauseAndReturnInt(), "lifetheuniverseandeverything", sampleRate: 4.2);
+            var returnValue = DogStatsd.Time(pauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2);
             AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2");
             Assert.AreEqual(42, returnValue);
         }
@@ -494,7 +495,7 @@ namespace Tests
         [Test]
         public void timer_method_sets_return_value_sample_rate_and_tag()
         {
-            var returnValue = DogStatsd.Time(() => pauseAndReturnInt(), "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
+            var returnValue = DogStatsd.Time(pauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
             AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2\|#fjords");
             Assert.AreEqual(42, returnValue);
         }
@@ -502,14 +503,14 @@ namespace Tests
         // [Helper]
         private int throwException()
         {
-            Thread.Sleep(500);
+            Thread.Sleep(100);
             throw new Exception("test exception");
         }
 
         [Test]
         public void timer_method_doesnt_swallow_exception_and_submits_metric()
         {
-            Assert.Throws<Exception>(() => DogStatsd.Time(() => throwException(), "somebadcode"));
+            Assert.Throws<Exception>(() => DogStatsd.Time(throwException, "somebadcode"));
             AssertWasReceivedMatches(@"somebadcode:\d{3}\|ms");
         }
 
@@ -518,8 +519,8 @@ namespace Tests
         {
             using (DogStatsd.StartTimer("timer"))
             {
-                Thread.Sleep(200);
-                Thread.Sleep(300);
+                Thread.Sleep(50);
+                Thread.Sleep(60);
             }
             AssertWasReceivedMatches(@"timer:\d{3}\|ms");
         }
@@ -529,8 +530,8 @@ namespace Tests
         {
             using (DogStatsd.StartTimer("timer", tags: new[] { "tag1:true", "tag2" }))
             {
-                Thread.Sleep(200);
-                Thread.Sleep(300);
+                Thread.Sleep(50);
+                Thread.Sleep(60);
             }
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|#tag1:true,tag2");
         }
@@ -540,8 +541,8 @@ namespace Tests
         {
             using (DogStatsd.StartTimer("timer", sampleRate: 1.1))
             {
-                Thread.Sleep(200);
-                Thread.Sleep(300);
+                Thread.Sleep(50);
+                Thread.Sleep(60);
             }
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
         }
@@ -551,8 +552,8 @@ namespace Tests
         {
             using (DogStatsd.StartTimer("timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" }))
             {
-                Thread.Sleep(200);
-                Thread.Sleep(300);
+                Thread.Sleep(50);
+                Thread.Sleep(60);
             }
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
         }
