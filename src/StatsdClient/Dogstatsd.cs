@@ -44,7 +44,7 @@ namespace StatsdClient
         public static void Timer<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Timer<T>(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 
-        public static IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null) =>
+        public static IMetricsTimer StartTimer(string name, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.StartTimer(name: name, sampleRate: sampleRate, tags: tags);
 
         public static void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null) =>
