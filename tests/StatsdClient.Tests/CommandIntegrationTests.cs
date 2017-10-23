@@ -60,7 +60,12 @@ namespace Tests
             // Stall until the the listener receives a message or times out
             while (listenThread.IsAlive) ;
             StringAssert.IsMatch(pattern, udpListener.GetAndClearLastMessages()[index]);
+        }
 
+        private void AssertWasExpectedLength(int expectedLength, int index = 0)
+        {
+            while (listenThread.IsAlive) ;
+            Assert.AreEqual(expectedLength, udpListener.GetAndClearLastMessages()[index].Length);
         }
 
         [Test]
@@ -558,6 +563,39 @@ namespace Tests
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
         }
 
+        [Test]
+        public void timer_block_tags_added_later()
+        {
+            using (var timer = DogStatsd.StartTimer("timer", tags: new[] { "tag1:true", "tag2" }))
+            {
+                Thread.Sleep(50);
+                Thread.Sleep(60);
+                timer.AddTag("tag3:addedlater");
+            }
+            AssertWasReceivedMatches(@"timer:\d{3}\|ms\|#tag1:true,tag2,tag3:addedlater");
+        }
+
+        [Test]
+        public async Task timer_block_tags_added_later_threadsafe()
+        {
+            var addTagTasks = new List<Task>();
+            using (var timer = DogStatsd.StartTimer("timer"))
+            {
+                Thread.Sleep(100);
+
+                for (int i = 0; i < 10000; i++)
+                {
+                    var iteration = i;
+                    addTagTasks.Add(Task.Run(() => timer.AddTag(iteration.ToString().PadLeft(5, '0'))));
+                }
+
+                await Task.WhenAll(addTagTasks);
+            }
+
+            const int tagLength = 6 * 10000-1; // "ddddd," minus trailing comma
+            const int prefixLength = 14; // timer:ddd|ms|#
+            AssertWasExpectedLength(prefixLength + tagLength);
+        }
 
         [Test]
         public void timer_block_doesnt_swallow_exception_and_submits_metric()
