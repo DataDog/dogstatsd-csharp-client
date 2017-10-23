@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Configuration;
 using System.Text;
 using System.Collections.Generic;
 
@@ -65,7 +64,7 @@ namespace Tests
                     if (ex.ErrorCode == 10060) // WSAETIMEDOUT; Timeout error
                         return;
                     else
-                        throw;
+                    throw;
                 }
             }
 

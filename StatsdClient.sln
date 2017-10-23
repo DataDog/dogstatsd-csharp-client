@@ -1,14 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient.Tests", "tests\StatsdClient.Tests\StatsdClient.Tests.xproj", "{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1701B62F-1078-4748-9D7A-F1EABC703971} = {1701B62F-1078-4748-9D7A-F1EABC703971}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatsdClient", "src\StatsdClient\StatsdClient.csproj", "{2CE53BEB-3B63-4F14-9705-E79EA1F9C972}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient", "src\StatsdClient\StatsdClient.xproj", "{1701B62F-1078-4748-9D7A-F1EABC703971}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatsdClient.Tests", "tests\StatsdClient.Tests\StatsdClient.Tests.csproj", "{BBB49491-308B-4A1B-96C7-581D819C97F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,36 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4355D8F-BAB4-4C53-8E10-3CBB571B6F05}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{1701B62F-1078-4748-9D7A-F1EABC703971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1701B62F-1078-4748-9D7A-F1EABC703971}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1701B62F-1078-4748-9D7A-F1EABC703971}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{1701B62F-1078-4748-9D7A-F1EABC703971}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{2CE53BEB-3B63-4F14-9705-E79EA1F9C972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CE53BEB-3B63-4F14-9705-E79EA1F9C972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CE53BEB-3B63-4F14-9705-E79EA1F9C972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CE53BEB-3B63-4F14-9705-E79EA1F9C972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBB49491-308B-4A1B-96C7-581D819C97F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBB49491-308B-4A1B-96C7-581D819C97F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBB49491-308B-4A1B-96C7-581D819C97F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBB49491-308B-4A1B-96C7-581D819C97F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = src\StatsdClient\StatsdClient.xproj
-		Policies = $0
-		$0.TextStylePolicy = $3
-		$1.inheritsSet = null
-		$1.scope = text/x-csharp
-		$0.CSharpFormattingPolicy = $2
-		$2.ElseIfNewLinePlacement = SameLine
-		$2.BeforeMethodCallParentheses = False
-		$2.AfterDelegateDeclarationParameterComma = True
-		$2.inheritsSet = Mono
-		$2.inheritsScope = text/x-csharp
-		$2.scope = text/x-csharp
-		$3.FileWidth = 120
-		$3.inheritsSet = VisualStudio
-		$3.inheritsScope = text/plain
-		$3.scope = text/plain
-		$0.StandardHeader = $4
-		$4.IncludeInNewFiles = True
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AEC4DCA6-4E8A-455E-B83A-98B45F7B4390}
 	EndGlobalSection
 EndGlobal
