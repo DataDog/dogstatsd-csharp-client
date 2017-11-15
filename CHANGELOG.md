@@ -16,10 +16,10 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 
 # 2.2.1 / 10-13-2016
 * [BUGFIX] Remove the `TRACE` directive from release builds. See [#33][], [#34][] (Thanks [@albertofem][])
+* [FEATURE] Service check support. See [#29][] (Thanks [@nathanrobb][])
 
 # 2.2.0 / 08-08-2016
 * [BUGFIX] Fix `Random` generator thread safety. See [#26][] (Thanks [@windsnow98][])
-* [FEATURE] Service check support. See [#29][] (Thanks [@nathanrobb][])
 
 #  2.1.1 / 12-04-2015
 * [BUGFIX] Optional automatic truncation of events that exceed the message length limit. See [#22][] (Thanks [@daniel-chambers][])
