@@ -2,7 +2,7 @@ using System;
 
 namespace StatsdClient
 {
-    public class DogStatsdService : IDisposable
+    public class DogStatsdService : IDogStatsd, IDisposable
     {
         private IDisposable _disposable;
         private Statsd _statsD;
