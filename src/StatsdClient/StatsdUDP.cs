@@ -40,7 +40,7 @@ namespace StatsdClient
                 IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
 #else
                 IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
-#endif            
+#endif
                 //The IPv4 address is usually the last one, but not always
                 for(int positionToTest = addressList.Length - 1; positionToTest >= 0; --positionToTest)
                 {
@@ -89,9 +89,9 @@ namespace StatsdClient
 
                         return; // We're done here if we were able to split the message.
                     }
-                    // At this point we found an oversized message but we weren't able to find a 
-                    // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message 
-                    // will fail silently if the user is running in release mode or report a SocketException if the user is 
+                    // At this point we found an oversized message but we weren't able to find a
+                    // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message
+                    // will fail silently if the user is running in release mode or report a SocketException if the user is
                     // running in debug mode.
                     // Since we're conservative with our MAX_UDP_PACKET_SIZE, the oversized message might even
                     // be sent without issue.
