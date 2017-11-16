@@ -1,6 +1,26 @@
 CHANGELOG
 =========
 
+# 3.1.0 / Unreleased
+
+## Supported target framework versions
+
+DogStatsD-CSharp-Client `3.1.0` supports the following platforms:
+* .NET Standard 1.3
+* .NET Standard 1.6
+* .NET Core Application 1.1
+* .NET Core Application 2.0
+* .NET Framework 4.5.1
+* .NET Framework 4.6.1
+
+## Changes
+
+* [BUGFIX] `DogStatsdService` implements `IDogStatsd`. See [#43][], [#54][]
+* [BUGFIX] Fix IP host name resolution when IPv6 addresses are available. See [#50][] (Thanks [@DanielVukelich][])
+* [IMPROVEMENT] Add `IDisposable` interface to `DogStatsdService` to manage the release of resources. See [#44][] (Thanks [@bcuff][])
+* [IMPROVEMENT] New `StatsdConfig.StatsdTruncateIfTooLong` option to truncate Events and Service checks larger than 8 kB (default to True). See [#48][], [#55][]
+* [IMPROVEMENT] New supported targeted frameworks: .NET Standard 1.6, .NET Core Application 1.1, .NET Core Application 2.0, .NET Framework 4.6.1. See [#52][] (Thanks [@pdpurcell][])
+
 # 3.0.0 / 10-31-2016
 
 ## .NET Core support, end of .NET Framework 3.5 compatibility
@@ -61,12 +81,22 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#34]: https://github.com/DataDog/dogstatsd-csharp-client/issues/34
 [#39]: https://github.com/DataDog/dogstatsd-csharp-client/issues/39
 [#40]: https://github.com/DataDog/dogstatsd-csharp-client/issues/40
+[#43]: https://github.com/DataDog/dogstatsd-csharp-client/issues/43
+[#44]: https://github.com/DataDog/dogstatsd-csharp-client/issues/44
+[#48]: https://github.com/DataDog/dogstatsd-csharp-client/issues/48
+[#50]: https://github.com/DataDog/dogstatsd-csharp-client/issues/50
+[#52]: https://github.com/DataDog/dogstatsd-csharp-client/issues/52
+[#54]: https://github.com/DataDog/dogstatsd-csharp-client/issues/54
+[#55]: https://github.com/DataDog/dogstatsd-csharp-client/issues/55
+[@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@anthonychu]: https://github.com/anthonychu
+[@bcuff]: https://github.com/bcuff
 [@daniel-chambers]: https://github.com/daniel-chambers
 [@michaellockwood]: https://github.com/michaellockwood
 [@nathanrobb]: https://github.com/nathanrobb
 [@nrjohnstone]: https://github.com/nrjohnstone
+[@pdpurcell]: https://github.com/pdpurcell
 [@windsnow98]: https://github.com/windsnow98
 [@wjdavis5]: https://github.com/wjdavis5
 [@yori-s]: https://github.com/yori-s
