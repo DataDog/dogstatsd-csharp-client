@@ -625,6 +625,22 @@ namespace StatsdClient.Tests
             Mock.Get(_udp).Verify(x => x.Send(expected));
         }
 
+        [Test]
+        public void send_event_with_statsd_truncation()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            // Enable truncation at Statsd level
+            s.TruncateIfTooLong = true;
+
+            var length = 8 * 1024 - 17; //17 is the number of characters in the final message that is not the text
+            var builder = BuildLongString(length);
+            var text = builder;
+
+            s.Send("title", text + "x");
+            var expected = string.Format("_e{{5,{0}}}:title|{1}", length, text);
+            Mock.Get(_udp).Verify(x => x.Send(expected));
+        }
+
         private static string BuildLongString(int length)
         {
             var builder = new StringBuilder();

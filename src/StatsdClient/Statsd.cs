@@ -12,6 +12,7 @@ namespace StatsdClient
         private IRandomGenerator RandomGenerator { get; set; }
 
         private readonly string _prefix;
+        public bool TruncateIfTooLong {get; set; }
 
         public List<string> Commands
         {
@@ -115,7 +116,7 @@ namespace StatsdClient
                 string processedMessage = EscapeMessage(serviceCheckMessage);
 
                 string result = string.Format(CultureInfo.InvariantCulture, "_sc|{0}|{1}", processedName, status);
-               
+
                 if (timestamp != null)
                 {
                     result += string.Format(CultureInfo.InvariantCulture, "|d:{0}", timestamp);
@@ -211,22 +212,25 @@ namespace StatsdClient
             _commands.Add(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, tags));
         }
 
-        public void Add(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
+        public void Add(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
-            _commands.Add(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags));
+            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
+            _commands.Add(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
         }
 
         public void Send(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
+            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             Send(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
         }
 
         /// <summary>
         /// Add a Service check
         /// </summary>
-        public void Add(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null)
+        public void Add(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
-            _commands.Add(ServiceCheck.GetCommand(name, status, timestamp, hostname, tags, serviceCheckMessage));
+            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
+            _commands.Add(ServiceCheck.GetCommand(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
         }
 
         /// <summary>
@@ -234,6 +238,7 @@ namespace StatsdClient
         /// </summary>
         public void Send(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
+            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             Send(ServiceCheck.GetCommand(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
         }
 
