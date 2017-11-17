@@ -13,7 +13,7 @@ namespace StatsdClient
     public static class DogStatsd
     {
         private static readonly DogStatsdService _dogStatsdService = new DogStatsdService();
-        
+
         public static void Configure(StatsdConfig config) => _dogStatsdService.Configure(config);
 
         public static void Event(string title, string text, string alertType = null, string aggregationKey = null,

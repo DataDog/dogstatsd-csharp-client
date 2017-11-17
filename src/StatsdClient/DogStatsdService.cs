@@ -2,7 +2,7 @@ using System;
 
 namespace StatsdClient
 {
-    public class DogStatsdService : IDisposable
+    public class DogStatsdService : IDogStatsd, IDisposable
     {
         private IDisposable _disposable;
         private Statsd _statsD;
@@ -22,6 +22,7 @@ namespace StatsdClient
             {
                 var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
                 _statsD = new Statsd(statsdUdp);
+                _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
                 _disposable = statsdUdp;
             }
         }
