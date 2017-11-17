@@ -7,6 +7,7 @@
         public int StatsdMaxUDPPacketSize { get; set; }
         public bool StatsdTruncateIfTooLong { get; set; } = true;
         public string Prefix { get; set; }
+        public int? SendBufferSize { get; set; }
 
         public const int DefaultStatsdPort = 8125;
         public const int DefaultStatsdMaxUDPPacketSize = 512;
