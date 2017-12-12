@@ -13,7 +13,7 @@ namespace StatsdClient
     public static class DogStatsd
     {
         private static readonly DogStatsdService _dogStatsdService = new DogStatsdService();
-        
+
         public static void Configure(StatsdConfig config) => _dogStatsdService.Configure(config);
 
         public static void Event(string title, string text, string alertType = null, string aggregationKey = null,
@@ -29,7 +29,7 @@ namespace StatsdClient
         public static void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Increment(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 
-        public static void Decrement(string statName, int value = 1, double sampleRate = 1.0, params string[] tags) =>
+        public static void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Decrement(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 
         public static void Gauge<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null) =>
