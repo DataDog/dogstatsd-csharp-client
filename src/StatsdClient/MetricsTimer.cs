@@ -8,7 +8,7 @@ namespace StatsdClient
         private readonly Stopwatch _stopWatch;
         private bool _disposed;
         private readonly double _sampleRate;
-        private readonly ConcurrentQueue<string> _tags;
+        private readonly ConcurrentBag<string> _tags;
 
         public MetricsTimer(string name, double sampleRate = 1.0, string[] tags = null)
         {
@@ -16,7 +16,7 @@ namespace StatsdClient
             _stopWatch = new Stopwatch();
             _stopWatch.Start();
             _sampleRate = sampleRate;
-            _tags = tags == null ? new ConcurrentQueue<string>() : new ConcurrentQueue<string>(tags);
+            _tags = tags == null ? new ConcurrentBag<string>() : new ConcurrentBag<string>(tags);
         }
 
         public void AddTag(params string[] additionalTags)
@@ -26,7 +26,7 @@ namespace StatsdClient
 
             foreach (var additionalTag in additionalTags)
             {
-                _tags.Enqueue(additionalTag);
+                _tags.Add(additionalTag);
             }
         }
 

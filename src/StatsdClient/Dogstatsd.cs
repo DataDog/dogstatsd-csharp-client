@@ -29,7 +29,7 @@ namespace StatsdClient
         public static void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Increment(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 
-        public static void Decrement(string statName, int value = 1, double sampleRate = 1.0, params string[] tags) =>
+        public static void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Decrement(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 
         public static void Gauge<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null) =>
