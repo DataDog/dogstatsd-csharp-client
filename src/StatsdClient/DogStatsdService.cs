@@ -104,7 +104,7 @@ namespace StatsdClient
 
         public IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null)
         {
-            return new MetricsTimer(name, sampleRate, tags);
+            return new MetricsTimer(this, name, sampleRate, tags);
         }
 
         public void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null)
