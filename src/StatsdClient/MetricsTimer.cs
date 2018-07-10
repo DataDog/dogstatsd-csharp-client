@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace StatsdClient
 {
@@ -9,7 +10,6 @@ namespace StatsdClient
         private readonly Stopwatch _stopWatch;
         private bool _disposed;
         private readonly double _sampleRate;
-        private readonly string[] _tags;
 
         public MetricsTimer(string name, double sampleRate = 1.0, string[] tags = null) : this(null, name, sampleRate,
             tags)
@@ -23,7 +23,9 @@ namespace StatsdClient
             _stopWatch = new Stopwatch();
             _stopWatch.Start();
             _sampleRate = sampleRate;
-            _tags = tags;
+            Tags = new List<string>();
+            if(tags != null)
+                Tags.AddRange(tags);
         }
 
         public void Dispose()
@@ -34,10 +36,12 @@ namespace StatsdClient
                 _stopWatch.Stop();
 
                 if(_dogStatsd == null)
-                    DogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, _tags);
+                    DogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, Tags.ToArray());
                 else                
-                    _dogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, _tags);                
+                    _dogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, Tags.ToArray());                
             }
         }
+
+        public List<string> Tags { get; set; }
     }
 }
