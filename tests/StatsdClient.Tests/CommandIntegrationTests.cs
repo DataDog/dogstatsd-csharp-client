@@ -286,6 +286,61 @@ namespace Tests
         }
 
         [Test]
+        public void distribution()
+        {
+            DogStatsd.Distribution("distribution", 42);
+            AssertWasReceived("distribution:42|d");
+        }
+
+        [Test]
+        public void distribution_tags()
+        {
+            DogStatsd.Distribution("distribution", 42, tags: new[] { "tag1:true", "tag2" });
+            AssertWasReceived("distribution:42|d|#tag1:true,tag2");
+        }
+
+        [Test]
+        public void distribution_sample_rate()
+        {
+            DogStatsd.Distribution("distribution", 42, sampleRate: 1.1);
+            AssertWasReceived("distribution:42|d|@1.1");
+        }
+
+        [Test]
+        public void distribution_sample_rate_tags()
+        {
+            DogStatsd.Distribution("distribution", 42, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
+            AssertWasReceived("distribution:42|d|@1.1|#tag1:true,tag2");
+        }
+
+        [Test]
+        public void distribution_double()
+        {
+            DogStatsd.Distribution("distribution", 42.1);
+            AssertWasReceived("distribution:42.1|d");
+        }
+
+        [Test]
+        public void distribution_double_tags()
+        {
+            DogStatsd.Distribution("distribution", 42.1, tags: new[] { "tag1:true,tag2" });
+            AssertWasReceived("distribution:42.1|d|#tag1:true,tag2");
+        }
+
+        [Test]
+        public void distribution_double_sample_rate()
+        {
+            DogStatsd.Distribution("distribution", 42.1, 1.1);
+            AssertWasReceived("distribution:42.1|d|@1.1");
+        }
+
+        [Test]
+        public void distribution_double_sample_rate_tags()
+        {
+            DogStatsd.Distribution("distribution", 42.1, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
+            AssertWasReceived("distribution:42.1|d|@1.1|#tag1:true,tag2");
+        }
+        [Test]
         public void set()
         {
             DogStatsd.Set("set", 42);

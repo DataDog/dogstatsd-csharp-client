@@ -82,6 +82,15 @@ namespace StatsdClient
             _statsD.Send<Statsd.Histogram, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
+        public void Distribution<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        {
+            if (_statsD == null)
+            {
+                return;
+            }
+            _statsD.Send<Statsd.Distribution, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+        }
+
         public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
             if (_statsD == null)
