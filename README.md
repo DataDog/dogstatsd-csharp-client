@@ -66,6 +66,9 @@ DogStatsd.Gauge("gas_tank.level", 0.75);
 // Sample a histogram
 DogStatsd.Histogram("file.size", file.size);
 
+// Measure distribution
+DogStatsd.Distribution("request.latency", request.latency);
+
 // Add elements to a set
 DogStatsd.Set("users.unique", user.id);
 DogStatsd.Set("users.unique", "email@string.com");
@@ -138,6 +141,9 @@ using (udp)
 
   // Sampling a histogram
   s.Send<Statsd.Histogram,int>("stat-name", 1);
+
+  // Measure a distribution of values 
+  s.Send<Statsd.Distribution,int>("stat-name", 1);
 
   // Send elements to a set
   s.Send<Statsd.Set,int>("stat-name", 1);
