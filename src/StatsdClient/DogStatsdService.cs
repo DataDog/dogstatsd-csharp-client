@@ -7,6 +7,7 @@ namespace StatsdClient
         private IDisposable _disposable;
         private Statsd _statsD;
         private string _prefix;
+        private StatsdConfig _config;
 
         public void Configure(StatsdConfig config)
         {
@@ -16,8 +17,12 @@ namespace StatsdClient
             if (string.IsNullOrEmpty(config.StatsdServerName))
                 throw new ArgumentNullException("config.StatsdServername");
 
+            if (_config != null)
+                throw new InvalidOperationException("Configuration for DogStatsdService already performed");
+
+            _config = config;
             _prefix = config.Prefix;
-            Dispose();
+
             if (!string.IsNullOrEmpty(config.StatsdServerName))
             {
                 var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);

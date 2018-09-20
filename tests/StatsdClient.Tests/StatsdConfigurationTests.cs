@@ -81,5 +81,21 @@ namespace Tests
             sut.Configure(metricsConfig);
             testReceive("127.0.0.1", 8129, "test", "prefix.test:1|c", sut);
         }
+
+        [Test]
+        public void ServiceCannotBeConfiguredMoreThanOnce()
+        {
+            var sut = CreateSut();
+            StatsdConfig metricsConfig = new StatsdConfig()
+            {
+                StatsdServerName = "127.0.0.1",
+                StatsdPort = 8129,
+                Prefix = "prefix"
+            };
+
+            sut.Configure(metricsConfig);
+
+            Assert.Throws<InvalidOperationException>(() => sut.Configure(metricsConfig));
+        }
     }
 }
