@@ -110,10 +110,9 @@ namespace StatsdClient
             _statsD.Send<Statsd.Timing, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
-
         public IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null)
         {
-            return new MetricsTimer(this, name, sampleRate, tags);
+            return new MetricsTimerInternal(this, name, sampleRate, tags);
         }
 
         public void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null)
