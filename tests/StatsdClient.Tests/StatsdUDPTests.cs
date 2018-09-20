@@ -20,13 +20,15 @@ namespace Tests
         private StatsdUDP udp;
         private Statsd statsd;
         private List<string> lastPulledMessages;
+        private DogStatsdService _dogStatsdService;
 
         [OneTimeSetUp]
         public void SetUpUdpListenerAndStatsd()
         {
             udpListener = new UdpListener(serverName, serverPort);
             var metricsConfig = new StatsdConfig { StatsdServerName = serverName };
-            StatsdClient.DogStatsd.Configure(metricsConfig);
+            _dogStatsdService = new DogStatsdService();
+            _dogStatsdService.Configure(metricsConfig);
             udp = new StatsdUDP(serverName, serverPort);
             statsd = new Statsd(udp);
         }
