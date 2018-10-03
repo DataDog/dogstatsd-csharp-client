@@ -30,6 +30,7 @@ namespace StatsdClient
                                                                     {typeof (Timing), "ms"},
                                                                     {typeof (Gauge), "g"},
                                                                     {typeof (Histogram), "h"},
+                                                                    {typeof (Distribution), "d"},
                                                                     {typeof (Meter), "m"},
                                                                     {typeof (Set), "s"}
                                                                 };
@@ -187,6 +188,7 @@ namespace StatsdClient
         public class Timing : Metric { }
         public class Gauge : Metric { }
         public class Histogram : Metric { }
+        public class Distribution : Metric { }
         public class Meter : Metric { }
         public class Set : Metric { }
 

@@ -38,6 +38,9 @@ namespace StatsdClient
         public static void Histogram<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Histogram<T>(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 
+        public static void Distribution<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null) =>
+            _dogStatsdService.Distribution<T>(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
+
         public static void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null) =>
             _dogStatsdService.Set<T>(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
 

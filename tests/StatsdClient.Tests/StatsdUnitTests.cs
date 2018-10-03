@@ -772,6 +772,98 @@ namespace StatsdClient.Tests
             Assert.That(s.Commands[0], Is.EqualTo("histogram:5|h|@0.5|#tag1:true,tag2"));
         }
 
+        // =-=-=-=- DISTRIBUTION -=-=-=-=
+        [Test]
+        public void send_distribution()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Send<Statsd.Distribution,int> ("distribution", 5);
+            Mock.Get(_udp).Verify(x => x.Send ("distribution:5|d"));
+        }
+
+        [Test]
+        public void send_distribution_double()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Send<Statsd.Distribution,double> ("distribution", 5.3);
+            Mock.Get(_udp).Verify(x => x.Send ("distribution:5.3|d"));
+        }
+
+        [Test]
+        public void send_distribution_with_tags()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Send<Statsd.Distribution,int>("distribution", 5, tags: new[] {"tag1:true", "tag2"});
+            Mock.Get(_udp).Verify(x => x.Send ("distribution:5|d|#tag1:true,tag2"));
+        }
+
+        [Test]
+        public void send_distribution_with_sample_rate()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Send<Statsd.Distribution,int>("distribution", 5, sampleRate: 0.5);
+            Mock.Get(_udp).Verify(x => x.Send ("distribution:5|d|@0.5"));
+        }
+
+        [Test]
+        public void send_distribution_with_sample_rate_and_tags()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Send<Statsd.Distribution,int>("distribution", 5, sampleRate: 0.5, tags: new[] {"tag1:true", "tag2"});
+            Mock.Get(_udp).Verify(x => x.Send ("distribution:5|d|@0.5|#tag1:true,tag2"));
+        }
+
+        [Test]
+        public void add_distribution()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Add<Statsd.Distribution,int>("distribution", 5);
+
+            Assert.That(s.Commands.Count, Is.EqualTo(1));
+            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d"));
+        }
+
+        [Test]
+        public void add_distribution_double()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Add<Statsd.Distribution,double>("distribution", 5.3);
+
+            Assert.That(s.Commands.Count, Is.EqualTo(1));
+            Assert.That(s.Commands[0], Is.EqualTo("distribution:5.3|d"));
+        }
+
+        [Test]
+        public void add_distribution_with_tags()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Add<Statsd.Distribution,int>("distribution", 5, tags: new[] {"tag1:true", "tag2"});
+
+            Assert.That(s.Commands.Count, Is.EqualTo(1));
+            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d|#tag1:true,tag2"));
+        }
+
+
+        [Test]
+        public void add_distribution_with_sample_rate()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Add<Statsd.Distribution,int>("distribution", 5, 0.5);
+
+            Assert.That(s.Commands.Count, Is.EqualTo(1));
+            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d|@0.5"));
+        }
+
+        [Test]
+        public void add_distribution_with_sample_rate_and_tags()
+        {
+            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
+            s.Add<Statsd.Distribution,int>("distribution", 5, sampleRate: 0.5, tags: new[] {"tag1:true", "tag2"});
+
+            Assert.That(s.Commands.Count, Is.EqualTo(1));
+            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d|@0.5|#tag1:true,tag2"));
+        }
+
         // =-=-=-=- SET -=-=-=-=
         [Test]
         public void send_set()
