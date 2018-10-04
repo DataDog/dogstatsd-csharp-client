@@ -18,14 +18,12 @@ namespace Tests
     {
         private UdpListener _udpListener;
         private Thread _listenThread;
-        private readonly int serverPort = Convert.ToInt32("8126");
-        private string serverName = "127.0.0.1";
-
+        
         [OneTimeSetUp]
         public void SetUpUdpListener()
         {
-            _udpListener = new UdpListener(serverName, serverPort);
-            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = serverPort };
+            _udpListener = new UdpListener(hostname: "127.0.0.1", port: 8126);
+            var metricsConfig = new StatsdConfig { StatsdServerName = "127.0.0.1", StatsdPort = 8126 };
 
             DogStatsd.Configure(metricsConfig);            
         }
