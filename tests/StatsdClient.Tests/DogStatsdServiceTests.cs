@@ -26,22 +26,6 @@ namespace Tests
             }
         }
 
-        
-
-        //[Test]
-        //public void throw_exception_when_no_config_provided()
-        //{
-        //    StatsdConfig metricsConfig = null;
-        //    Assert.Throws<ArgumentNullException>(() => StatsdClient.DogStatsd.Configure(metricsConfig));
-        //}
-
-        //[Test]
-        //public void throw_exception_when_no_hostname_provided()
-        //{
-        //    var metricsConfig = new StatsdConfig { };
-        //    Assert.Throws<ArgumentNullException>(() => StatsdClient.DogStatsd.Configure(metricsConfig));
-        //}
-
         [Test]
         public void default_port_is_8125()
         {
