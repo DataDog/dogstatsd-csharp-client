@@ -31,6 +31,7 @@ namespace Tests
             IPEndPoint localIpEndPoint;
             IPEndPoint senderIpEndPoint;
             UdpClient socket;
+            private bool _shutdown;
 
             public UdpListener(string hostname, int port) 
             {
@@ -66,6 +67,38 @@ namespace Tests
                     else
                     throw;
                 }
+            }
+
+            public void ListenAndWait()
+            {                
+                while (true)
+                {
+                    try
+                    {
+                        byte[] lastReceivedBytes = socket.Receive(ref senderIpEndPoint);
+                        lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
+                            lastReceivedBytes.Length));
+                    }
+                    catch (SocketException ex)
+                    {
+                        // If we timeout, check if we are shutting down and exit or listen again
+                        if (ex.ErrorCode == 10060) // WSAETIMEDOUT; Timeout error      
+                        {
+                            if (_shutdown)
+                                return;
+                        }
+                        else
+                        {
+                            // If we get another error, propagate it upwards.
+                            throw;
+                        }                    
+                    }                
+                }                                                   
+            }
+
+            public void Shutdown()
+            {
+                _shutdown = true;
             }
 
             // Clear and return the message list. Clearing the list allows us to use the 
