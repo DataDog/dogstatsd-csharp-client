@@ -8,15 +8,12 @@ namespace Tests
     [TestFixture]
     public class UDPSmokeTests
     {
-        private static readonly int ServerPort = Convert.ToInt32("8126");
-        private static readonly string ServerName = "127.0.0.1";
-
         [Test]
         public void Sends_a_counter()
         {
             try
             {
-                var client = new StatsdUDP(ServerName, ServerPort);
+                var client = new StatsdUDP(name: "127.0.0.1", port: 8126);
                 client.Send("socket2:1|c");
             }
             catch(SocketException ex)
