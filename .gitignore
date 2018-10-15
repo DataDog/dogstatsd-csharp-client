@@ -11,3 +11,8 @@ test-results/
 src/StatsdClient.userprefs
 src/packages/
 src/.vs/
+*.ncrunchsolution
+.vs/
+*.ncrunchproject
+*.crunchsolution.cache
+_NCrunch_*
