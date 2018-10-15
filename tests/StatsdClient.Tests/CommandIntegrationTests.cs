@@ -12,17 +12,17 @@ namespace Tests
     [TestFixture]
     public class CommandIntegrationTests
     {
-        private UdpListener udpListener;
-        private Thread listenThread;
-        private int serverPort = Convert.ToInt32("8126");
+        private UdpListener _udpListener;
+        private Thread _listenThread;
+        private readonly int _serverPort = Convert.ToInt32("8126");
         private string serverName = "127.0.0.1";
         private DogStatsdService _dogStatsdService;
 
         [OneTimeSetUp]
         public void SetUpUdpListener()
         {
-            udpListener = new UdpListener(serverName, serverPort);
-            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = serverPort};
+            _udpListener = new UdpListener(serverName, _serverPort);
+            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort};
             _dogStatsdService = new DogStatsdService();
             _dogStatsdService.Configure(metricsConfig);
         }
@@ -30,20 +30,20 @@ namespace Tests
         [OneTimeTearDown]
         public void TearDownUdpListener()
         {
-            udpListener.Dispose();
+            _udpListener.Dispose();
         }
 
         [SetUp]
         public void StartUdpListenerThread()
         {
-            listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
-            listenThread.Start();
+            _listenThread = new Thread(new ParameterizedThreadStart(_udpListener.Listen));
+            _listenThread.Start();
         }
 
         [TearDown]
         public void ClearUdpListenerMessages()
         {
-            udpListener.GetAndClearLastMessages(); // just to be sure that nothing is left over
+            _udpListener.GetAndClearLastMessages(); // just to be sure that nothing is left over
         }
 
         // Test helper. Waits until the listener is done receiving a message,
@@ -51,8 +51,8 @@ namespace Tests
         private void AssertWasReceived(string shouldBe, int index = 0)
         {
             // Stall until the the listener receives a message or times out
-            while (listenThread.IsAlive) ;
-            Assert.AreEqual(shouldBe, udpListener.GetAndClearLastMessages()[index]);
+            while (_listenThread.IsAlive) ;
+            Assert.AreEqual(shouldBe, _udpListener.GetAndClearLastMessages()[index]);
         }
 
         // Test helper. Waits until the listener is done receiving a message,
@@ -60,8 +60,8 @@ namespace Tests
         private void AssertWasReceivedMatches(string pattern, int index = 0)
         {
             // Stall until the the listener receives a message or times out
-            while (listenThread.IsAlive) ;
-            StringAssert.IsMatch(pattern, udpListener.GetAndClearLastMessages()[index]);
+            while (_listenThread.IsAlive) ;
+            StringAssert.IsMatch(pattern, _udpListener.GetAndClearLastMessages()[index]);
 
         }
 

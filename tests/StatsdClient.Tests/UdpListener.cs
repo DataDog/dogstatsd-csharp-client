@@ -27,19 +27,19 @@ namespace Tests
         // { make sure that the received messages are what was expected }
         public class UdpListener : IDisposable 
         {
-            List<string> lastReceivedMessages;
-            IPEndPoint localIpEndPoint;
-            IPEndPoint senderIpEndPoint;
-            UdpClient socket;
+            private List<string> _lastReceivedMessages;
+            private IPEndPoint _localIpEndPoint;
+            private IPEndPoint _senderIpEndPoint;
+            private UdpClient _socket;
             private bool _shutdown;
 
             public UdpListener(string hostname, int port) 
             {
-                lastReceivedMessages = new List<string>();
-                localIpEndPoint = new IPEndPoint(IPAddress.Parse(hostname), port);
-                socket = new UdpClient(localIpEndPoint);
-                socket.Client.ReceiveTimeout = 1000;
-                senderIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                _lastReceivedMessages = new List<string>();
+                _localIpEndPoint = new IPEndPoint(IPAddress.Parse(hostname), port);
+                _socket = new UdpClient(_localIpEndPoint);
+                _socket.Client.ReceiveTimeout = 1000;
+                _senderIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
             }
 
             // Receive messages until it receives count of them or times out. 
@@ -53,8 +53,8 @@ namespace Tests
                         count = 1;
                     for (int i = 0; i < (int)count; i++)
                     {
-                        byte[] lastReceivedBytes = socket.Receive(ref senderIpEndPoint);
-                        lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
+                        byte[] lastReceivedBytes = _socket.Receive(ref _senderIpEndPoint);
+                        _lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
                                                                           lastReceivedBytes.Length));
                     }
                 }
@@ -75,8 +75,8 @@ namespace Tests
                 {
                     try
                     {
-                        byte[] lastReceivedBytes = socket.Receive(ref senderIpEndPoint);
-                        lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
+                        byte[] lastReceivedBytes = _socket.Receive(ref _senderIpEndPoint);
+                        _lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
                             lastReceivedBytes.Length));
                     }
                     catch (SocketException ex)
@@ -106,14 +106,14 @@ namespace Tests
             // message received from a previous test giving us a false positive.
             public List<string> GetAndClearLastMessages()
             {
-                List<string> messagesToReturn = lastReceivedMessages;
-                lastReceivedMessages = new List<string>();
+                List<string> messagesToReturn = _lastReceivedMessages;
+                _lastReceivedMessages = new List<string>();
                 return messagesToReturn;
             }
 
             public void Dispose() 
             {
-                socket.Close();
+                _socket.Close();
             }
         }
     }
