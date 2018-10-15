@@ -83,7 +83,7 @@ namespace Tests
         }
 
         [Test]
-        public void ServiceCannotBeConfiguredMoreThanOnce()
+        public void service_cannot_be_configured_more_than_once()
         {
             var sut = CreateSut();
             StatsdConfig metricsConfig = new StatsdConfig()
