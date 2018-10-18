@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+# 3.2.0 / Unreleased
+
+* [BUGFIX] Fix an issue causing the `StartTimer` method to ignore non static `DogStatsdService` instance configurations. See [#62][], [#63][] (Thanks [@jpasichnyk][])
+* [BUGFIX] Prevent the static API from being configured more than once to avoid race conditions. See [#66][] (Thanks [@nrjohnstone][])
+* [BUGFIX] Set a default value for `tags` in the `Decrement` method similar to `Increment`. See [#60][], [#61][] (Thanks [@sqdk][])
+* [FEATURE] Add support for DogStatsD distribution. See [#65][]
+
 # 3.1.0 / 11-16-2017
 
 ## Supported target framework versions
@@ -88,15 +95,23 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#52]: https://github.com/DataDog/dogstatsd-csharp-client/issues/52
 [#54]: https://github.com/DataDog/dogstatsd-csharp-client/issues/54
 [#55]: https://github.com/DataDog/dogstatsd-csharp-client/issues/55
+[#60]: https://github.com/DataDog/dogstatsd-csharp-client/issues/60
+[#61]: https://github.com/DataDog/dogstatsd-csharp-client/issues/61
+[#62]: https://github.com/DataDog/dogstatsd-csharp-client/issues/62
+[#63]: https://github.com/DataDog/dogstatsd-csharp-client/issues/63
+[#65]: https://github.com/DataDog/dogstatsd-csharp-client/issues/65
+[#66]: https://github.com/DataDog/dogstatsd-csharp-client/issues/66
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@anthonychu]: https://github.com/anthonychu
 [@bcuff]: https://github.com/bcuff
 [@daniel-chambers]: https://github.com/daniel-chambers
+[@jpasichnyk]: https://github.com/jpasichnyk
 [@michaellockwood]: https://github.com/michaellockwood
 [@nathanrobb]: https://github.com/nathanrobb
 [@nrjohnstone]: https://github.com/nrjohnstone
 [@pdpurcell]: https://github.com/pdpurcell
+[@sqdk]: https://github.com/sqdk
 [@windsnow98]: https://github.com/windsnow98
 [@wjdavis5]: https://github.com/wjdavis5
 [@yori-s]: https://github.com/yori-s
