@@ -12,6 +12,7 @@ namespace Tests
     /// That is, the configuration must only be called once and cannot be called again since in an application
     /// this would almost certainly be an error.
     /// For this fixture to work properly, it must be run single threaded and create a fresh instance each time.
+    /// This means if you are using NCrunch you must ensure this runs in a new process each time
     /// </summary>
     [TestFixture, SingleThreaded, NonParallelizable]
     public class DogstatsdStaticApiTests
