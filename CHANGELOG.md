@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-# 3.2.0 / Unreleased
+# 3.2.0 / 10-18-2018
 
 * [BUGFIX] Fix an issue causing the `StartTimer` method to ignore non static `DogStatsdService` instance configurations. See [#62][], [#63][] (Thanks [@jpasichnyk][])
 * [BUGFIX] Prevent the static API from being configured more than once to avoid race conditions. See [#66][] (Thanks [@nrjohnstone][])
