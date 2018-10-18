@@ -608,6 +608,67 @@ namespace Tests
             _dogStatsdService.ServiceCheck("na\r\nme", Status.CRITICAL, tags: new[] { "t1", "t2:v2" }, message: "m:mess\r\nage");
             AssertWasReceived("_sc|na\\nme|2|#t1,t2:v2|m:m\\:mess\\nage");
         }
+
+        #region Distrubution
+
+        [Test]
+        public void distribution()
+        {
+            _dogStatsdService.Distribution("distribution", 42);
+            AssertWasReceived("distribution:42|d");
+        }
+
+        [Test]
+        public void distribution_tags()
+        {
+            _dogStatsdService.Distribution("distribution", 42, tags: new[] { "tag1:true", "tag2" });
+            AssertWasReceived("distribution:42|d|#tag1:true,tag2");
+        }
+
+
+        [Test]
+        public void distribution_sample_rate()
+        {
+            _dogStatsdService.Distribution("distribution", 42, sampleRate: 1.1);
+            AssertWasReceived("distribution:42|d|@1.1");
+        }
+
+        [Test]
+        public void distribution_sample_rate_tags()
+        {
+            _dogStatsdService.Distribution("distribution", 42, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
+            AssertWasReceived("distribution:42|d|@1.1|#tag1:true,tag2");
+        }
+
+        [Test]
+        public void distribution_double()
+        {
+            _dogStatsdService.Distribution("distribution", 42.1);
+            AssertWasReceived("distribution:42.1|d");
+        }
+
+        [Test]
+        public void distribution_double_tags()
+        {
+            _dogStatsdService.Distribution("distribution", 42.1, tags: new[] { "tag1:true,tag2" });
+            AssertWasReceived("distribution:42.1|d|#tag1:true,tag2");
+        }
+
+        [Test]
+        public void distribution_double_sample_rate()
+        {
+            _dogStatsdService.Distribution("distribution", 42.1, 1.1);
+            AssertWasReceived("distribution:42.1|d|@1.1");
+        }
+
+        [Test]
+        public void distribution_double_sample_rate_tags()
+        {
+            _dogStatsdService.Distribution("distribution", 42.1, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
+            AssertWasReceived("distribution:42.1|d|@1.1|#tag1:true,tag2");
+        }
+
+        #endregion
     }
 }
 
