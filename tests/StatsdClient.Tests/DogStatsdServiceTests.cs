@@ -15,32 +15,17 @@ namespace Tests
         {
             using (var udpListener = new UdpListener(testServerName, testPort))
             {
-                var listenThread = new Thread(udpListener.Listen);
+                var listenThread = new Thread(udpListener.ListenAndWait);
                 listenThread.Start();
 
                 sendData();
 
-                while (listenThread.IsAlive) ;
-
+                udpListener.Shutdown();
+                listenThread.Join();
+                
                 return udpListener.GetAndClearLastMessages();  
             }
         }
-
-        
-
-        //[Test]
-        //public void throw_exception_when_no_config_provided()
-        //{
-        //    StatsdConfig metricsConfig = null;
-        //    Assert.Throws<ArgumentNullException>(() => StatsdClient.DogStatsd.Configure(metricsConfig));
-        //}
-
-        //[Test]
-        //public void throw_exception_when_no_hostname_provided()
-        //{
-        //    var metricsConfig = new StatsdConfig { };
-        //    Assert.Throws<ArgumentNullException>(() => StatsdClient.DogStatsd.Configure(metricsConfig));
-        //}
 
         [Test]
         public void default_port_is_8125()
@@ -133,7 +118,7 @@ namespace Tests
                     () => {
                         using (nonStaticServiceInstance.StartTimer("timer.test"))
                         {
-                            Thread.Sleep(100);
+                            Thread.Sleep(1000);
                         }
                     });
 
@@ -152,8 +137,8 @@ namespace Tests
                 Assert.AreEqual(2, metricTimeInMsSplit.Length);
 
                 var metricTimeInMs = Convert.ToInt32(metricTimeInMsSplit[0]);
-                Assert.IsTrue((metricTimeInMs >= 100), "Processing should have taken at least 100ms");
-                Assert.IsTrue((metricTimeInMs < 110), "Timer reported 10% higher than time taken in action");
+                Assert.IsTrue((metricTimeInMs >= 1000), "Processing should have taken at least 1000ms");
+                Assert.IsTrue((metricTimeInMs < 1100), "Timer reported 10% higher than time taken in action");
             }  
         }
     }
