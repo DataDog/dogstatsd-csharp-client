@@ -137,7 +137,7 @@ using (udp)
   s.Send<Statsd.Counting,int>("stat-name", 1);
 
   // Recording a gauge
-  s.Send<Statsd.Gauge,double>("stat-name", 5,5);
+  s.Send<Statsd.Gauge,double>("stat-name", 5.5);
 
   // Sampling a histogram
   s.Send<Statsd.Histogram,int>("stat-name", 1);
