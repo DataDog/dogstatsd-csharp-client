@@ -9,13 +9,11 @@ namespace StatsdClient
         private string _prefix;
         private StatsdConfig _config;
 
+
         public void Configure(StatsdConfig config)
         {
             if (config == null)
                 throw new ArgumentNullException("config");
-
-            if (string.IsNullOrEmpty(config.StatsdServerName))
-                throw new ArgumentNullException("config.StatsdServername");
 
             if (_config != null)
                 throw new InvalidOperationException("Configuration for DogStatsdService already performed");
@@ -23,12 +21,16 @@ namespace StatsdClient
             _config = config;
             _prefix = config.Prefix;
 
-            if (!string.IsNullOrEmpty(config.StatsdServerName))
+            if (!string.IsNullOrEmpty(config.StatsdServerName) || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR)))
             {
                 var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
-                _statsD = new Statsd(statsdUdp);
+                _statsD = new Statsd(statsdUdp,new RandomGenerator(), new StopWatchFactory(), "", config.ConstantTags);
                 _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
                 _disposable = statsdUdp;
+            }
+            else
+            {
+                throw new ArgumentNullException("config.StatsdServername and DD_AGENT_HOST environment variable not set");
             }
         }
 

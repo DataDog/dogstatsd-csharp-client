@@ -38,13 +38,19 @@ using StatsdClient;
 
 var dogstatsdConfig = new StatsdConfig
 {
-    StatsdServerName = "127.0.0.1",
-    StatsdPort = 8125, // Optional; default is 8125
+    StatsdServerName = "127.0.0.1", // Optional if DD_AGENT_HOST environment variable set
+    StatsdPort = 8125, // Optional; If not present takes the DD_DOGSTATSD_PORT environment variable value, else default is 8125
     Prefix = "myApp" // Optional; by default no prefix will be prepended
+    ConstantTags = ["foo:bar"] // Optional
 };
 
 StatsdClient.DogStatsd.Configure(dogstatsdConfig);
 ```
+
+Supported environment variables:
+
+* The client can use the `DD_AGENT_HOST` and (optionally) the `DD_DOGSTATSD_PORT` environment variables to build the target address if the `addr` parameter is empty.
+* If the `DD_ENTITY_ID` enviroment variable is found, its value will be injected as a global `dd.internal.entity_id` tag. This tag will be used by the Datadog Agent to insert container tags to the metrics.
 
 Where `StatsdServerName` is the hostname or address of the StatsD server, `StatsdPort` is the optional DogStatsD port number, and `Prefix` is an optional string that is prepended to all metrics.
 
