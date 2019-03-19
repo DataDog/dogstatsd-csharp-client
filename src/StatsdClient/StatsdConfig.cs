@@ -18,7 +18,7 @@
 
         public StatsdConfig()
         {
-            StatsdPort = -1;
+            StatsdPort = 0;
             StatsdMaxUDPPacketSize = DefaultStatsdMaxUDPPacketSize;
         }
     }

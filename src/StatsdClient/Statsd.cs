@@ -8,11 +8,13 @@ namespace StatsdClient
     public class Statsd : IStatsd
     {
         private const string ENTITY_ID_INTERNAL_TAG_KEY = "dd.internal.entity_id";
+        private static readonly string[] EmptyArray = new string[0];
+        private static readonly List<string> EmptyList = new List<string>();
         private IStopWatchFactory StopwatchFactory { get; set; }
         private IStatsdUDP Udp { get; set; }
         private IRandomGenerator RandomGenerator { get; set; }
         private readonly string _prefix;
-        private readonly string[] _constantTags;
+        private readonly List<string> _constantTags;
         public bool TruncateIfTooLong {get; set; }
 
         public List<string> Commands
@@ -41,24 +43,16 @@ namespace StatsdClient
                 return GetCommand<TCommandType, T>(prefix,name,value,sampleRate,null,tags);
             }
 
-            public static string GetCommand<TCommandType, T>(string prefix, string name, T value, double sampleRate, string[] constantTags, string[] tags) where TCommandType : Metric
+            public static string GetCommand<TCommandType, T>(string prefix, string name, T value, double sampleRate, List<string> constantTags, string[] tags) where TCommandType : Metric
             {
                 string full_name = prefix + name;
                 string unit = _commandToUnit[typeof(TCommandType)];
                 // It would be cleaner to do this with StringBuilder, but we want sending stats to be as fast as possible
-                if (sampleRate == 1.0 && IsNullOrEmptyT(constantTags) && IsNullOrEmptyT(tags))
+                if (sampleRate == 1.0 && constantTags.Count == 0 && IsNullOrEmptyT(tags))
                     return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}", full_name, value, unit);
-                else if (sampleRate == 1.0 && (!IsNullOrEmptyT(constantTags) || !IsNullOrEmptyT(tags)))
+                else if (sampleRate == 1.0 && ((constantTags.Count > 0) || !IsNullOrEmptyT(tags)))
                 {
-                    if (tags != null && constantTags == null)
-                    {
-                        return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|#{3}", full_name, value, unit, string.Join(",", tags));
-                    }
-                    else if (tags == null && constantTags != null)
-                    {
-                        return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|#{3}", full_name, value, unit, string.Join(",", constantTags));
-                    }
-                    return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|#{3},{4}", full_name, value, unit, string.Join(",", constantTags), string.Join(",", tags));
+                    return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}{3}", full_name, value, unit, ConcatTags(constantTags, tags));
                 }
                 else if (sampleRate != 1.0 && (tags == null || tags.Length == 0))
                     return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|@{3}", full_name, value, unit, sampleRate);
@@ -76,7 +70,7 @@ namespace StatsdClient
             {
                 return GetCommand(title,text,alertType,aggregationKey,sourceType,dateHappened,priority,hostname,null,tags,truncateIfTooLong);
             }
-            public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] constantTags, string[] tags, bool truncateIfTooLong = false)
+            public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, List<string> constantTags, string[] tags, bool truncateIfTooLong = false)
             {
                 string processedTitle = EscapeContent(title);
                 string processedText = EscapeContent(text);
@@ -106,10 +100,7 @@ namespace StatsdClient
                     result += string.Format(CultureInfo.InvariantCulture, "|t:{0}", alertType);
                 }
 
-                if (!IsNullOrEmptyT(tags) || !IsNullOrEmptyT(constantTags))
-                {
-                    result += ConcatTags(ref constantTags, ref tags);
-                }
+                result += ConcatTags(constantTags, tags);
 
                 if (result.Length > MaxSize)
                 {
@@ -137,7 +128,7 @@ namespace StatsdClient
             {
                 return GetCommand(name, status, timestamp, hostname, null, tags,serviceCheckMessage,truncateIfTooLong);
             }
-            public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] constantTags, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+            public static string GetCommand(string name, int status, int? timestamp, string hostname, List<string> constantTags, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
             {
                 string processedName = EscapeName(name);
                 string processedMessage = EscapeMessage(serviceCheckMessage);
@@ -153,10 +144,7 @@ namespace StatsdClient
                     result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
                 }
 
-                if (!IsNullOrEmptyT(tags) || !IsNullOrEmptyT(constantTags))
-                {
-                    result += ConcatTags(ref constantTags, ref tags);
-                }
+                result += ConcatTags(constantTags, tags);
 
                 // Note: this must always be appended to the result last.
                 if (processedMessage != null)
@@ -207,20 +195,17 @@ namespace StatsdClient
                 .Replace("\n", "\\n");
         }
 
-        private static string ConcatTags(ref string[] constantTags,ref string[] tags)
+        private static string ConcatTags(List<string> constantTags, string[] tags)
         {
-            if (IsNullOrEmptyT(tags) && IsNullOrEmptyT(tags)) {
+            constantTags = constantTags ?? EmptyList;
+            tags = tags ?? EmptyArray;
+            if (constantTags.Count == 0 && tags.Length == 0)
+            {
                 return "";
             }
-            else if (!IsNullOrEmptyT(tags) && IsNullOrEmptyT(constantTags))
-            {
-                return string.Format(CultureInfo.InvariantCulture, "|#{0}", string.Join(",", tags));
-            }
-            else if (IsNullOrEmptyT(tags) && !IsNullOrEmptyT(constantTags))
-            {
-                return string.Format(CultureInfo.InvariantCulture, "|#{0}", string.Join(",", constantTags));
-            }
-            return string.Format(CultureInfo.InvariantCulture, "|#{0},{1}", string.Join(",", constantTags), string.Join(",", tags));
+            List<string> allTags = constantTags.GetRange(0, constantTags.Count);
+            allTags.AddRange(tags);
+            return string.Format(CultureInfo.InvariantCulture, "|#{0}", string.Join(",", allTags));
         }
 
         private static string TruncateOverage(string str, int overage)
@@ -247,20 +232,16 @@ namespace StatsdClient
             Udp = udp;
             RandomGenerator = randomGenerator;
             _prefix = prefix;
-            _constantTags = constantTags;
+            if (!IsNullOrEmptyT(constantTags))
+                _constantTags = new List<string>(constantTags);
+            else
+                _constantTags = new List<string>();
+
             string entityID = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
             if (!string.IsNullOrEmpty(entityID))
             {
                 string entityIDTag = string.Format("{0}:{1}", ENTITY_ID_INTERNAL_TAG_KEY, entityID);
-                if (constantTags == null)
-                {
-                    _constantTags = new string[]{entityIDTag};
-                }
-                else
-                {
-                    Array.Resize(ref _constantTags, _constantTags.Length + 1);
-                    _constantTags[_constantTags.Length - 1]= entityIDTag;
-                }
+                _constantTags.Add(entityIDTag);
             }
         }
 

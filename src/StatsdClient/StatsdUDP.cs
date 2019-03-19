@@ -19,10 +19,10 @@ namespace StatsdClient
         : this(GetHostNameFromEnvVar(),GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort),maxUDPPacketSize)
         {
         }
-        public StatsdUDP(string name, int port, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        public StatsdUDP(string name = null, int port = 0, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
         {
             Port = port;
-            if (Port == -1)
+            if (Port == 0)
             {
                 Port = GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort);
             }
