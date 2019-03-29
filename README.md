@@ -201,7 +201,7 @@ Add is being called).
   ```
 2. Run the tests
   ```
-  dotnet test tests/StatsdClient.Tests/`
+  dotnet test tests/StatsdClient.Tests/
   ```
 
 ## Feedback
