@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 
 namespace StatsdClient
 {
     public class Statsd : IStatsd
     {
+        private const string ENTITY_ID_INTERNAL_TAG_KEY = "dd.internal.entity_id";
+        private static readonly string[] EmptyStringArray = new string[0];
+
         private IStopWatchFactory StopwatchFactory { get; set; }
         private IStatsdUDP Udp { get; set; }
         private IRandomGenerator RandomGenerator { get; set; }
-
         private readonly string _prefix;
+        private readonly string[] _constantTags;
         public bool TruncateIfTooLong {get; set; }
 
         public List<string> Commands
@@ -37,18 +41,23 @@ namespace StatsdClient
 
             public static string GetCommand<TCommandType, T>(string prefix, string name, T value, double sampleRate, string[] tags) where TCommandType : Metric
             {
+                return GetCommand<TCommandType, T>(prefix,name,value,sampleRate,null,tags);
+            }
+
+            public static string GetCommand<TCommandType, T>(string prefix, string name, T value, double sampleRate, string[] constantTags, string[] tags) where TCommandType : Metric
+            {
                 string full_name = prefix + name;
                 string unit = _commandToUnit[typeof(TCommandType)];
-                // It would be cleaner to do this with StringBuilder, but we want sending stats to be as fast as possible
-                if (sampleRate == 1.0 && (tags == null || tags.Length == 0))
-                    return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}", full_name, value, unit);
-                else if (sampleRate == 1.0 && (tags == null || tags.Length > 0))
-                    return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|#{3}", full_name, value, unit, string.Join(",", tags));
-                else if (sampleRate != 1.0 && (tags == null || tags.Length == 0))
-                    return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|@{3}", full_name, value, unit, sampleRate);
-                else // { if (sampleRate != 1 && (tags == null || tags.Length > 0)) }
-                    return string.Format(CultureInfo.InvariantCulture, "{0}:{1}|{2}|@{3}|#{4}", full_name, value, unit, sampleRate,
-                                         string.Join(",", tags));
+                var allTags = ConcatTags(constantTags, tags);
+
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0}:{1}|{2}{3}{4}",
+                    full_name,
+                    value,
+                    unit,
+                    sampleRate == 1.0 ? "" : string.Format(CultureInfo.InvariantCulture, "|@{0}", sampleRate),
+                    allTags);
             }
         }
 
@@ -57,6 +66,11 @@ namespace StatsdClient
             private const int MaxSize = 8 * 1024;
 
             public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
+            {
+                return GetCommand(title,text,alertType,aggregationKey,sourceType,dateHappened,priority,hostname,null,tags,truncateIfTooLong);
+            }
+
+            public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] constantTags, string[] tags, bool truncateIfTooLong = false)
             {
                 string processedTitle = EscapeContent(title);
                 string processedText = EscapeContent(text);
@@ -85,10 +99,9 @@ namespace StatsdClient
                 {
                     result += string.Format(CultureInfo.InvariantCulture, "|t:{0}", alertType);
                 }
-                if (tags != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|#{0}", string.Join(",", tags));
-                }
+
+                result += ConcatTags(constantTags, tags);
+
                 if (result.Length > MaxSize)
                 {
                     if (truncateIfTooLong)
@@ -113,6 +126,10 @@ namespace StatsdClient
 
             public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
             {
+                return GetCommand(name, status, timestamp, hostname, null, tags,serviceCheckMessage,truncateIfTooLong);
+            }
+            public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] constantTags, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+            {
                 string processedName = EscapeName(name);
                 string processedMessage = EscapeMessage(serviceCheckMessage);
 
@@ -126,10 +143,9 @@ namespace StatsdClient
                 {
                     result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
                 }
-                if (tags != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|#{0}", string.Join(",", tags));
-                }
+
+                result += ConcatTags(constantTags, tags);
+
                 // Note: this must always be appended to the result last.
                 if (processedMessage != null)
                 {
@@ -179,6 +195,22 @@ namespace StatsdClient
                 .Replace("\n", "\\n");
         }
 
+        private static string ConcatTags(string[] constantTags, string[] tags)
+        {
+            // avoid dealing with null arrays
+            constantTags = constantTags ?? EmptyStringArray;
+            tags = tags ?? EmptyStringArray;
+
+            if (constantTags.Length == 0 && tags.Length == 0)
+            {
+                return "";
+            }
+
+            var allTags = constantTags.Concat(tags);
+            string concatenatedTags = string.Join(",", allTags);
+            return $"|#{concatenatedTags}";
+        }
+
         private static string TruncateOverage(string str, int overage)
         {
             return str.Substring(0, str.Length - overage);
@@ -192,13 +224,29 @@ namespace StatsdClient
         public class Meter : Metric { }
         public class Set : Metric { }
 
-        public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory, string prefix)
+        public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory, string prefix, string[] constantTags)
         {
             StopwatchFactory = stopwatchFactory;
             Udp = udp;
             RandomGenerator = randomGenerator;
             _prefix = prefix;
+
+            string entityId = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
+
+            if (string.IsNullOrEmpty(entityId))
+            {
+                // copy array to prevent changes, coalesce to empty array
+                _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
+            }
+            else
+            {
+                var entityIdTags = new[] { $"{ENTITY_ID_INTERNAL_TAG_KEY}:{entityId}" };
+                _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
+            }
         }
+
+        public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory, string prefix)
+            : this(udp, randomGenerator, stopwatchFactory, prefix, null) { }
 
         public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory)
             : this(udp, randomGenerator, stopwatchFactory, string.Empty) { }
@@ -211,19 +259,19 @@ namespace StatsdClient
 
         public void Add<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null) where TCommandType : Metric
         {
-            _commands.Add(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, tags));
+            _commands.Add(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
         }
 
         public void Add(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            _commands.Add(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
+            _commands.Add(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
         }
 
         public void Send(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            Send(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
+            Send(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
         }
 
         /// <summary>
@@ -232,7 +280,7 @@ namespace StatsdClient
         public void Add(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            _commands.Add(ServiceCheck.GetCommand(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
+            _commands.Add(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
         }
 
         /// <summary>
@@ -241,14 +289,14 @@ namespace StatsdClient
         public void Send(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            Send(ServiceCheck.GetCommand(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
+            Send(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
         }
 
         public void Send<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null) where TCommandType : Metric
         {
             if (RandomGenerator.ShouldSend(sampleRate))
             {
-                Send(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, tags));
+                Send(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
             }
         }
 

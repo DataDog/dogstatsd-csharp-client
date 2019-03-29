@@ -64,6 +64,7 @@ namespace Tests
             }            
         }
 
+
         [Test]
         public void setting_port_listen_on_other_port_should_return_no_data()
         {
@@ -140,6 +141,46 @@ namespace Tests
                 Assert.IsTrue((metricTimeInMs >= 1000), "Processing should have taken at least 1000ms");
                 Assert.IsTrue((metricTimeInMs < 1100), "Timer reported 10% higher than time taken in action");
             }  
+        }
+
+        [Test]
+        public void setting_with_env_arg()
+        {
+            Environment.SetEnvironmentVariable("DD_DOGSTATSD_PORT", "8131");
+            Environment.SetEnvironmentVariable("DD_AGENT_HOST", "127.0.0.1");
+            using (var nonStaticServiceInstance = new DogStatsdService())
+            {
+                var metricsConfig = new StatsdConfig{};
+
+                nonStaticServiceInstance.Configure(metricsConfig);
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8131,
+                    () => { nonStaticServiceInstance.Increment("test"); });
+
+                Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
+            }
+            Environment.SetEnvironmentVariable("DD_DOGSTATSD_PORT", null);
+            Environment.SetEnvironmentVariable("DD_AGENT_HOST", null);            
+        }
+
+        [Test]
+        public void setting_entity_id_with_env_arg()
+        {
+            Environment.SetEnvironmentVariable("DD_ENTITY_ID", "foobar");
+            using (var nonStaticServiceInstance = new DogStatsdService())
+            {
+                var metricsConfig = new StatsdConfig
+                {
+                    StatsdServerName = "127.0.0.1",
+                     StatsdPort = 8132,
+                };
+
+                nonStaticServiceInstance.Configure(metricsConfig);
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8132,
+                    () => { nonStaticServiceInstance.Increment("test"); });
+
+                Assert.AreEqual(new List<string> { "test:1|c|#dd.internal.entity_id:foobar" }, receivedData);
+            }
+            Environment.SetEnvironmentVariable("DD_ENTITY_ID", null);
         }
     }
 }

@@ -15,19 +15,54 @@ namespace StatsdClient
         private string Name { get; set; }
         private int Port { get; set; }
 
-        public StatsdUDP(string name, int port, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        public StatsdUDP(int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        : this(GetHostNameFromEnvVar(),GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort),maxUDPPacketSize)
         {
-            Name = name;
+        }
+        public StatsdUDP(string name = null, int port = 0, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        {
             Port = port;
+            if (Port == 0)
+            {
+                Port = GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort);
+            }
+            Name = name;
+            if (string.IsNullOrEmpty(Name))
+            {
+                Name = GetHostNameFromEnvVar();
+            }
+
             MaxUDPPacketSize = maxUDPPacketSize;
 
             UDPSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-            var ipAddress = GetIpv4Address(name);
+            var ipAddress = GetIpv4Address(Name);
 
             IPEndpoint = new IPEndPoint(ipAddress, Port);
         }
 
+        private static string GetHostNameFromEnvVar()
+        {
+            return Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+        }
+
+        private static int GetPortFromEnvVar(int defaultValue)
+        {
+            int port = defaultValue;
+            string portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
+            if (portString != null)
+            {
+                try
+                {
+                    port = Int32.Parse(portString);
+                }
+                catch (FormatException)
+                {
+                    throw new ArgumentException("Environment Variable 'DD_DOGSTATSD_PORT' bad format");
+                }
+            }
+            return port;
+        }
         private IPAddress GetIpv4Address(string name)
         {
             IPAddress ipAddress;
