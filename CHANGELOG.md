@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-# 3.3.0 / Unreleased
+# 3.3.0 / 04-05-2019
 
 * [FEATURE] Option to set global tags that are added to every statsd call. See [#3][], [#78][] (Thanks [@chriskinsman][])
 * [IMPROVEMENT] Configure the client with environment variables. See [#78][]
