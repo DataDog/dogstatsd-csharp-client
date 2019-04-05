@@ -40,8 +40,8 @@ var dogstatsdConfig = new StatsdConfig
 {
     StatsdServerName = "127.0.0.1", // Optional if DD_AGENT_HOST environment variable set
     StatsdPort = 8125, // Optional; If not present takes the DD_DOGSTATSD_PORT environment variable value, else default is 8125
-    Prefix = "myApp" // Optional; by default no prefix will be prepended
-    ConstantTags = ["foo:bar"] // Optional
+    Prefix = "myApp", // Optional; by default no prefix will be prepended
+    ConstantTags = new [] {"foo:bar"} // Optional
 };
 
 StatsdClient.DogStatsd.Configure(dogstatsdConfig);
