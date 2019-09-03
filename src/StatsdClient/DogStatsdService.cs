@@ -23,7 +23,12 @@ namespace StatsdClient
 
             if (!string.IsNullOrEmpty(config.StatsdServerName) || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR)))
             {
-                var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
+                IStatsdUDP statsdUdp; 
+                if (_config.FireAndForget)
+                    statsdUdp = new StatsdUDPFireAndForget(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
+                else 
+                    statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
+                
                 _statsD = new Statsd(statsdUdp,new RandomGenerator(), new StopWatchFactory(), "", config.ConstantTags);
                 _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
                 _disposable = statsdUdp;

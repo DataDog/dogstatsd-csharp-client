@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace StatsdClient
 {
-    public class StatsdUDP : IStatsdUDP
+    public class StatsdUDPFireAndForget : IStatsdUDP
     {
         private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
         // Set to zero for no limit.
@@ -15,11 +15,11 @@ namespace StatsdClient
         private string Name { get; set; }
         private int Port { get; set; }
 
-        public StatsdUDP(int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        public StatsdUDPFireAndForget(int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
         : this(GetHostNameFromEnvVar(),GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort),maxUDPPacketSize)
         {
         }
-        public StatsdUDP(string name = null, int port = 0, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
+        public StatsdUDPFireAndForget(string name = null, int port = 0, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
         {
             Port = port;
             if (Port == 0)
@@ -132,7 +132,7 @@ namespace StatsdClient
                     // be sent without issue.
                 }
             }
-            UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint);
+            UDPSocket.SendToAsync(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint).Ignore();
         }
 
         public void Dispose()

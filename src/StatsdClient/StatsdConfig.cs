@@ -7,7 +7,12 @@
         public int StatsdMaxUDPPacketSize { get; set; }
         public bool StatsdTruncateIfTooLong { get; set; } = true;
         public string Prefix { get; set; }
-
+ 
+/// <summary>
+/// On each metric there will be no IO wait and there is no guarantee that metric will be send
+/// </summary>
+        public bool FireAndForget { get; set; }
+        
         public string[] ConstantTags { get; set; }
         public const int DefaultStatsdPort = 8125;
         public const int DefaultStatsdMaxUDPPacketSize = 512;
