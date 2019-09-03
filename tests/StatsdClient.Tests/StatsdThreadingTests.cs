@@ -84,6 +84,11 @@ namespace Tests
                 if (empty > 0 || missing > 0 || dupes > 0)
                     Assert.Fail("{0} empty command(s), {1} missing, {2} duplicate(s)", empty, missing, dupes);
             }
+
+            public void Dispose()
+            {
+                
+            }
         }
     }
 }
