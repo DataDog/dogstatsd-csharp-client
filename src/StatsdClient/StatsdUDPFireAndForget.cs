@@ -132,7 +132,7 @@ namespace StatsdClient
                     // be sent without issue.
                 }
             }
-            UDPSocket.SendToAsync(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint).Ignore();
+            UDPSocket.SendToAsync(new ArraySegment<byte>(encodedCommand), SocketFlags.None, IPEndpoint).Ignore();
         }
 
         public void Dispose()
