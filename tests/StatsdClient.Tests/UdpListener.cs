@@ -62,7 +62,7 @@ namespace Tests
                 {
                     // If we timeout, stop listening.
                     // If we get another error, propagate it upwards.
-                    if (ex.ErrorCode == 10060) // WSAETIMEDOUT; Timeout error
+                    if (ex.SocketErrorCode == SocketError.TimedOut)
                         return;
                     else
                     throw;
@@ -82,7 +82,7 @@ namespace Tests
                     catch (SocketException ex)
                     {
                         // If we timeout, check if we are shutting down and exit or listen again
-                        if (ex.ErrorCode == 10060) // WSAETIMEDOUT; Timeout error      
+                        if (ex.SocketErrorCode == SocketError.TimedOut)
                         {
                             if (_shutdown)
                                 return;
