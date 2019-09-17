@@ -20,6 +20,8 @@ namespace Tests
 
                 sendData();
 
+                // Make sure we received the data
+                System.Threading.Thread.Sleep(500);
                 udpListener.Shutdown();
                 listenThread.Join();
                 
