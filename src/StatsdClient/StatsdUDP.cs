@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Collections.Generic;
 
 namespace StatsdClient
 {
@@ -95,31 +94,32 @@ namespace StatsdClient
 
         public void Send(string command)
         {
-            Send(Encoding.UTF8.GetBytes(command));
+            Send(MaxUDPPacketSize, command, 
+                encodedCommand => UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint));
         }
 
-        private void Send(byte[] encodedCommand)
+        private static void Send(int maxPacketSize, byte[] encodedCommand, Action<byte[]> sender)
         {
-            if (MaxUDPPacketSize > 0 && encodedCommand.Length > MaxUDPPacketSize)
+            if (maxPacketSize > 0 && encodedCommand.Length > maxPacketSize)
             {
                 // If the command is too big to send, linear search backwards from the maximum
                 // packet size to see if we can find a newline delimiting two stats. If we can,
                 // split the message across the newline and try sending both componenets individually
                 byte newline = Encoding.UTF8.GetBytes("\n")[0];
-                for (int i = MaxUDPPacketSize; i > 0; i--)
+                for (int i = maxPacketSize; i > 0; i--)
                 {
                     if (encodedCommand[i] == newline)
                     {
                         byte[] encodedCommandFirst = new byte[i];
                         Array.Copy(encodedCommand, encodedCommandFirst, encodedCommandFirst.Length); // encodedCommand[0..i-1]
-                        Send(encodedCommandFirst);
+                        Send(maxPacketSize, encodedCommandFirst, sender);
 
                         int remainingCharacters = encodedCommand.Length - i - 1;
                         if (remainingCharacters > 0)
                         {
                             byte[] encodedCommandSecond = new byte[remainingCharacters];
                             Array.Copy(encodedCommand, i + 1, encodedCommandSecond, 0, encodedCommandSecond.Length); // encodedCommand[i+1..end]
-                            Send(encodedCommandSecond);
+                            Send(maxPacketSize, encodedCommandSecond, sender);
                         }
 
                         return; // We're done here if we were able to split the message.
@@ -132,7 +132,12 @@ namespace StatsdClient
                     // be sent without issue.
                 }
             }
-            UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint);
+            sender(encodedCommand);
+        }
+
+        private static void Send(int maxPacketSize, string command, Action<byte[]> sender)
+        {
+            Send(maxPacketSize, Encoding.UTF8.GetBytes(command), sender);
         }
 
         public void Dispose()
