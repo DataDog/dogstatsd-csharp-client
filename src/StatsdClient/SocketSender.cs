@@ -41,7 +41,7 @@ static class SocketSender
                 // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message
                 // will fail silently if the user is running in release mode or report a SocketException if the user is
                 // running in debug mode.
-                // Since we're conservative with our MAX_UDP_PACKET_SIZE, the oversized message might even
+                // Since we're conservative with our maxPacketSize, the oversized message might even
                 // be sent without issue.
             }
         }
