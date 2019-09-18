@@ -5,6 +5,7 @@ using Mono.Unix;
 using System.Text;
 using System.Net.Sockets;
 
+#if !OS_WINDOWS
 namespace Tests
 {
     [TestFixture]
@@ -92,3 +93,4 @@ namespace Tests
         }                      
     }
 }
+#endif
