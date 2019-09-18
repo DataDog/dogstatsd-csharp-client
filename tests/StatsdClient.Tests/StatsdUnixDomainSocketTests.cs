@@ -67,6 +67,15 @@ namespace Tests
             }            
         }        
 
+        [Test]
+        public void CheckNotBlockWhenServerNotReadMessage()
+        {   
+            var tags = new string[]{ new string('A', 100)};
+
+            for (int i = 0; i < 1000; ++i)       
+                _dogStatsdService.Gauge("metric" + i, 42, 1, tags);
+            // If the code go here that means we do not block.
+        } 
         string ReadFromServer()
         {    
             var builder = new StringBuilder();        
