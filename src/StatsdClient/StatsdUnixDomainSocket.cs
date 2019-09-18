@@ -28,6 +28,9 @@ namespace StatsdClient
             _endPoint = new UnixEndPoint(unixSocket);
             _maxPacketSize = maxPacketSize;
             _socket.Blocking = false;
+
+            // When closing, wait 2 seconds to send data.
+            _socket.LingerState = new LingerOption(true, 2);
             _socketLock = new object();
         }
 
