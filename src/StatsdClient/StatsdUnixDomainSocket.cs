@@ -14,6 +14,7 @@ namespace StatsdClient
         private readonly int _maxPacketSize;
         private readonly Socket _socket;
         private readonly UnixEndPoint _endPoint;
+        private readonly object _socketLock;
 
         public static readonly string UnixDomainSocketPrefix = "unix://";
 
@@ -27,11 +28,20 @@ namespace StatsdClient
             _endPoint = new UnixEndPoint(unixSocket);
             _maxPacketSize = maxPacketSize;
             _socket.Blocking = false;
-            _socket.Connect(_endPoint);
+            _socketLock = new object();
         }
 
         public void Send(string command)
-        {            
+        {
+            if (!_socket.Connected)        
+            {
+                lock (_socketLock)
+                {
+                    if (!_socket.Connected)        
+                        _socket.Connect(_endPoint);
+                }                
+            }
+
             SocketSender.Send(_maxPacketSize, command, 
                 encodedCommand => _socket.Send(encodedCommand));
         }
