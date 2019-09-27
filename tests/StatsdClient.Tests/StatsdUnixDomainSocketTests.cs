@@ -68,7 +68,7 @@ namespace Tests
             }            
         }        
 
-        [Test]
+        [Test, Timeout(30000)]
         public void CheckNotBlockWhenServerNotReadMessage()
         {   
             var tags = new string[]{ new string('A', 100)};
