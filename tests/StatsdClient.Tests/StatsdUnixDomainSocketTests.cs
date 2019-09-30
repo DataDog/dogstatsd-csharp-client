@@ -32,7 +32,8 @@ namespace Tests
             _dogStatsdService.Configure(dogstatsdConfig);
         }
 
-        void TearDown()
+        [TearDown]
+        public void TearDown()
         {
             _server.Dispose();
             _dogStatsdService.Dispose();
@@ -70,7 +71,7 @@ namespace Tests
 
         [Test, Timeout(30000)]
         public void CheckNotBlockWhenServerNotReadMessage()
-        {   
+        {               
             var tags = new string[]{ new string('A', 100)};
 
             for (int i = 0; i < 1000; ++i)       

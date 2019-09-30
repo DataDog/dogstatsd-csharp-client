@@ -6,16 +6,14 @@ namespace Tests.Utils
     sealed class TemporaryPath: IDisposable
     {
         public TemporaryPath() {
-            this.Path = System.IO.Path.Combine(
-                System.IO.Path.GetTempPath(),
-                System.IO.Path.GetRandomFileName());
+            Path = System.IO.Path.GetTempFileName();
         }
 
         public string Path { get; }
 
         public void Dispose()
         {
-            File.Delete(this.Path);
+            File.Delete(Path);
         }
     }
 }
