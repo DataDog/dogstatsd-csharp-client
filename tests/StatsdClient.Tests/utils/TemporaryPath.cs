@@ -3,9 +3,12 @@ using System;
 
 namespace Tests.Utils
 {
-    sealed class TemporaryPath: IDisposable
+    /// TemporaryPath returns a path suitable for a temporary file.
+    /// The file path will be destroyed when calling Dispose.
+    sealed class TemporaryPath : IDisposable
     {
-        public TemporaryPath() {
+        public TemporaryPath()
+        {
             Path = System.IO.Path.Combine(
                 System.IO.Path.GetTempPath(),
                 System.IO.Path.GetRandomFileName());
