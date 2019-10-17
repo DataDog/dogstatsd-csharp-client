@@ -119,7 +119,7 @@ namespace StatsdClient
 
         public IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null)
         {
-            return new MetricsTimer(this, name, sampleRate, tags);
+            return new MetricsTimer(this, BuildNamespacedStatName(name), sampleRate, tags);
         }
 
         public void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null)
@@ -154,7 +154,7 @@ namespace StatsdClient
                 return;
             }
 
-            _statsD.Send(name, (int)status, timestamp, hostname, tags, message);
+            _statsD.Send(BuildNamespacedStatName(name), (int)status, timestamp, hostname, tags, message);
         }
 
         private string BuildNamespacedStatName(string statName)
