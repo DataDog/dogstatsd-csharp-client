@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 using StatsdClient;
@@ -58,6 +58,21 @@ namespace Tests
                         count = 1;
                     _commands[command] = count;
                 }
+            }
+
+            public Task SendAsync(string command)
+            {
+              lock (_commands)
+              {
+                  int count;
+                  if (_commands.TryGetValue(command, out count))
+                      count++;
+                  else
+                      count = 1;
+
+                  _commands[command] = count;
+                  return Task.CompletedTask;
+              }
             }
 
             public void ExpectSequence(int n)
