@@ -26,7 +26,7 @@ namespace Tests
             var dogstatsdConfig = new StatsdConfig
             {
                 StatsdServerName = StatsdUnixDomainSocket.UnixDomainSocketPrefix + _temporaryPath.Path,
-                MaxUnixDomainSocketPacketSize = 1000
+                StatsdMaxUnixDomainSocketPacketSize = 1000
             };
             _dogStatsdService = new DogStatsdService();
             _dogStatsdService.Configure(dogstatsdConfig);

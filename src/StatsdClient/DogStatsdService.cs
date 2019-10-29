@@ -31,7 +31,7 @@ namespace StatsdClient
 
                 if (statsdServerName.StartsWith(StatsdUnixDomainSocket.UnixDomainSocketPrefix))
                 {
-                    var statsdUds = new StatsdUnixDomainSocket(config.StatsdServerName, config.MaxUnixDomainSocketPacketSize);
+                    var statsdUds = new StatsdUnixDomainSocket(config.StatsdServerName, config.StatsdMaxUnixDomainSocketPacketSize);
                     _disposable = statsdUds;
                     statsdSender = statsdUds;
                 }
