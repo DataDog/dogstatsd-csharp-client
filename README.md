@@ -218,7 +218,7 @@ Values higher than 8196 are ignored.
 **The feature is not supported on Windows platform**.
 Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`). 
 
-On MacOS Mojave, `MaxUnixDomainSocketPacketSize` value should not be greater than `2048`, otherwise you will experiment payloads drop.
+On MacOS Mojave, the `MaxUnixDomainSocketPacketSize` configuration option should not be greater than `2048`, otherwise you will experiment payloads drop.
 
 ## Testing
 
