@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -170,7 +171,28 @@ namespace StatsdClient
                     // be sent without issue.
                 }
             }
-            await UDPSocket.SendToAsync(encodedCommand, SocketFlags.None, IPEndpoint).ConfigureAwait(false);
+            var tcs = new TaskCompletionSource<object>();
+
+            var args = new SocketAsyncEventArgs {
+                RemoteEndPoint = IPEndpoint,
+                SocketFlags = SocketFlags.None,
+            };
+            args.SetBuffer(encodedCommand.Array, encodedCommand.Offset, encodedCommand.Count);
+            args.Completed += new EventHandler<SocketAsyncEventArgs>((object sender, SocketAsyncEventArgs eventArgs) => {
+                if (eventArgs.SocketError == SocketError.Success)
+                {
+                    tcs.SetResult(null);
+                } 
+                else 
+                {
+                    tcs.SetException(new SocketException((int)eventArgs.SocketError));
+                }
+            });
+            var completedAsync = UDPSocket.SendToAsync(args);
+            if (!completedAsync)
+                tcs.SetResult(null);
+
+            await tcs.Task;
         }
 
         public void Dispose()
