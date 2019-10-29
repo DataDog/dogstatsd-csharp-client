@@ -142,15 +142,26 @@ namespace Tests
         {
             // Make sure that we can set the max UDP packet size
             _udp = new StatsdUDP(_serverName, _serverPort, 10);
-            _statsd = new Statsd(_udp);
-            var msg = new String('f', 5);
-            _listenThread.Start(2);
-            _statsd.Add<Statsd.Counting, int>(msg, 1);
-            _statsd.Add<Statsd.Gauge, int>(msg, 2);
-            await _statsd.SendAsync();
-            // Since our packet size limit is now 10, this (short) message should still be split
-            AssertWasReceived(String.Format("{0}:1|c", msg), 0);
-            AssertWasReceived(String.Format("{0}:2|g", msg), 1);
+            var oldStatsd = _statsd;
+
+            try
+            {
+                _statsd = new Statsd(_udp);
+                var msg = new String('f', 5);
+                _listenThread.Start(2);
+                _statsd.Add<Statsd.Counting, int>(msg, 1);
+                _statsd.Add<Statsd.Gauge, int>(msg, 2);
+                await _statsd.SendAsync();
+
+                // Since our packet size limit is now 10, this (short) message should still be split
+                AssertWasReceived(String.Format("{0}:1|c", msg), 0);
+                AssertWasReceived(String.Format("{0}:2|g", msg), 1);
+            }
+            finally
+            {
+                // reset statsd, so we don't get stuck with max size of 10 for other tests
+                _statsd = oldStatsd;
+            }
         }
     }
 }

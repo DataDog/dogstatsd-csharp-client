@@ -152,24 +152,5 @@ namespace Tests
             AssertWasReceived(String.Format("{0}:1|c", msg), 0);
             AssertWasReceived(String.Format("{0}:2|g", msg), 1);
         }
-
-        [Test]
-        public async Task send_async()
-        {
-            // (Sanity test)
-            _listenThread.Start();
-            await _udp.SendAsync("test-metric");
-            AssertWasReceived("test-metric");
-        }
-
-        [Test]
-        public async Task send_async_equal_to_udp_packet_limit_is_still_sent()
-        {
-            var msg = new String('f', StatsdConfig.DefaultStatsdMaxUDPPacketSize);
-            _listenThread.Start();
-            await _udp.SendAsync(msg);
-            // As long as we're at or below the limit, the packet should still be sent
-            AssertWasReceived(msg);
-        }
     }
 }
