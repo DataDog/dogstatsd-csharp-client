@@ -64,16 +64,11 @@ namespace Tests
                 _lastPulledMessages = _udpListener.GetAndClearLastMessages();
             }
 
-            string actual;
+            string actual = null;
 
-            try
-            {
+            if (index < _lastPulledMessages.Count)
                 actual = _lastPulledMessages[index];
-            }
-            catch (System.ArgumentOutOfRangeException)
-            {
-                actual = null;
-            }
+                
             Assert.AreEqual(shouldBe, actual);
         }
 

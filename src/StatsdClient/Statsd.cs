@@ -278,7 +278,7 @@ namespace StatsdClient
         public Task SendAsync(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            return SendAsync(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
+            return SendAsync(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
         }
 
         /// <summary>
