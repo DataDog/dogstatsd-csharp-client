@@ -322,7 +322,7 @@ namespace StatsdClient
             {
                 return SendAsync(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, tags));
             }
-            return Task.CompletedTask;
+            return Task.FromResult((object)null);
         }
 
         public void Send(string command)
@@ -367,7 +367,7 @@ namespace StatsdClient
         {
             int count = Commands.Count;
             if (count < 1)
-                return Task.CompletedTask;
+                return Task.FromResult((object)null);
 
             return SendAsync(1 == count ? Commands[0] : string.Join("\n", Commands.ToArray()));
         }
