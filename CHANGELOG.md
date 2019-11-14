@@ -1,5 +1,9 @@
 CHANGELOG
 =========
+# 3.4.0 / 11-14-2019
+
+* [IMPROVEMENT] Use a strong-named assembly. See [#96][] (Thanks [@carlreid][])
+
 
 # 3.3.0 / 04-05-2019
 
@@ -109,10 +113,12 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#65]: https://github.com/DataDog/dogstatsd-csharp-client/issues/65
 [#66]: https://github.com/DataDog/dogstatsd-csharp-client/issues/66
 [#78]: https://github.com/DataDog/dogstatsd-csharp-client/issues/78
+[#96]: https://github.com/DataDog/dogstatsd-csharp-client/issues/96
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@anthonychu]: https://github.com/anthonychu
 [@bcuff]: https://github.com/bcuff
+[@carlreid]: https://github.com/carlreid
 [@chriskinsman]: https://github.com/chriskinsman
 [@daniel-chambers]: https://github.com/daniel-chambers
 [@jpasichnyk]: https://github.com/jpasichnyk
