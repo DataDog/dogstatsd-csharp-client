@@ -305,7 +305,7 @@ namespace StatsdClient
         public Task SendAsync(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            return SendAsync(ServiceCheck.GetCommand(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
+            return SendAsync(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
         }
 
         public void Send<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null) where TCommandType : Metric
@@ -320,7 +320,7 @@ namespace StatsdClient
         {
             if (RandomGenerator.ShouldSend(sampleRate))
             {
-                return SendAsync(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, tags));
+                return SendAsync(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
             }
             return Task.FromResult((object)null);
         }
