@@ -1,6 +1,6 @@
 CHANGELOG
 =========
-# 3.4.0 / 11-14-2019
+# 3.4.0 / 11-15-2019
 
 * [IMPROVEMENT] Use a strong-named assembly. See [#96][] (Thanks [@carlreid][])
 
