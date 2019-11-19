@@ -1,13 +1,8 @@
-DogStatsD for C#
-================
+# DogStatsD for C#
 
 [![Build status](https://ci.appveyor.com/api/projects/status/bg8e39b5f9iiavvj/branch/master?svg=true)](https://ci.appveyor.com/project/Datadog/dogstatsd-csharp-client/branch/master)
 
-A C# [DogStatsD](http://docs.datadoghq.com/guides/dogstatsd/) client. DogStatsD
-is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/)
-metric server for [Datadog](http://datadoghq.com).
-
-## CHANGELOG
+A C# [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?tab=net) client. DogStatsD is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/) metric server for [Datadog](http://datadoghq.com).
 
 See [CHANGELOG](CHANGELOG.md) for details.
 
@@ -15,9 +10,10 @@ See [CHANGELOG](CHANGELOG.md) for details.
 
 Grab the [package from NuGet](https://nuget.org/packages/DogStatsD-CSharp-Client/), or get the source from here and build it yourself.
 
-## Platforms
+### Platforms
 
 DogStatsD-CSharp-Client supports the following platforms:
+
 * .NET Standard 1.3
 * .NET Standard 1.6
 * .NET Core Application 1.1
@@ -25,12 +21,11 @@ DogStatsD-CSharp-Client supports the following platforms:
 * .NET Framework 4.5.1
 * .NET Framework 4.6.1
 
-
-## Usage via the static DogStatsd class:
+## Configuration
 
 At start of your app, configure the `DogStatsd` class like this:
 
-``` C#
+```csharp
 // The code is located under the StatsdClient namespace
 using StatsdClient;
 
@@ -38,14 +33,14 @@ using StatsdClient;
 
 var dogstatsdConfig = new StatsdConfig
 {
-    StatsdServerName = "127.0.0.1", // Optional if DD_AGENT_HOST environment variable set
-    StatsdPort = 8125, // Optional; If not present takes the DD_DOGSTATSD_PORT environment variable value, else default is 8125
-    Prefix = "myApp", // Optional; by default no prefix will be prepended
-    ConstantTags = new string [] {"foo:bar"} // Optional
+    StatsdServerName = "127.0.0.1",
+    StatsdPort = 8125,
 };
 
 StatsdClient.DogStatsd.Configure(dogstatsdConfig);
 ```
+
+See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#client-instantiation-parameters).
 
 Supported environment variables:
 
@@ -54,78 +49,34 @@ Supported environment variables:
 
 Where `StatsdServerName` is the hostname or address of the StatsD server, `StatsdPort` is the optional DogStatsD port number, and `Prefix` is an optional string that is prepended to all metrics.
 
-Then start instrumenting your code:
+## Usage via the static DogStatsd class.
 
-``` C#
-// Increment a counter by 1
-DogStatsd.Increment("eventname");
+For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#setup).
 
-// Decrement a counter by 1
-DogStatsd.Decrement("eventname");
+### Metrics
 
-// Increment a counter by a specific value
-DogStatsd.Counter("page.views", page.views);
+After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net) to see how to submit all supported metric types to Datadog with working code examples:
 
-// Record a gauge
-DogStatsd.Gauge("gas_tank.level", 0.75);
+* [Submit a COUNT metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#count).
+* [Submit a GAUGE metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#gauge).
+* [Submit a SET metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#set)
+* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#histogram)
+* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#distribution)
 
-// Sample a histogram
-DogStatsd.Histogram("file.size", file.size);
+Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#metric-submission-options) or [Tagging your metrics with your custom Tags](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#metric-tagging).
 
-// Measure distribution
-DogStatsd.Distribution("request.latency", request.latency);
+### Events
 
-// Add elements to a set
-DogStatsd.Set("users.unique", user.id);
-DogStatsd.Set("users.unique", "email@string.com");
+After the client is created, you can start sending events to your Datadog Event Stream. See the dedicated [Event Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/events/dogstatsd/?tab=net) to see how to submit an event to Datadog Event Stream.
 
-// Time a block of code
-using (DogStatsd.StartTimer("stat-name"))
-{
-    DoSomethingAmazing();
-    DoSomethingFantastic();
-}
+### Service Checks
 
-// Time an action
-DogStatsd.Time(() => DoMagic(), "stat-name");
-
-// Timing an action preserves its return value
-var result = DogStatsd.Time(() => GetResult(), "stat-name");
-
-// See note below for how exceptions in timed methods or blocks are handled
-
-// Every metric type supports tags and sample rates
-DogStatsd.Set("users.unique", user.id, tags: new[] {"country:canada"});
-DogStatsd.Gauge("gas_tank.level", 0.75, sampleRate: 0.5, tags: new[] {"hybrid", "trial_1"});
-using (DogStatsd.StartTimer("stat-name", sampleRate: 0.1))
-{
-    DoSomethingFrequent();
-}
-```
-
-A note about timing: DogStatsd will not attempt to handle any exceptions that occur in a
-timed block or method. If an unhandled exception is thrown while
-timing, a timer metric containing the time elapsed before the exception
-occurred will be submitted.
-
-
-You can also post events to your stream. You can tag them, set priority and even aggregate them with other events.
-Aggregation in the stream is made on hostname/alertType/sourceType/aggregationKey.
-
-``` C#
-// Post a simple message
-DogStatsd.Event("There might be a storm tomorrow", "A friend warned me earlier.");
-
-// Cry for help
-DogStatsd.Event("SO MUCH SNOW", "Started yesterday and it won't stop !!", alertType: "error", tags: new[] { "urgent", "endoftheworld" });
-```
+After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?tab=net) to see how to submit a Service Check to Datadog.
 
 
 ## Usage via the Statsd class:
 
-In most cases, the static DogStatsd class is probably better to use.
-However, the Statsd is useful when you want to queue up a number of metrics/events to be sent in
-one UDP message (via the `Add` method).
+In most cases, the static DogStatsd class is probably better to use. However, the Statsd is useful when you want to queue up a number of metrics/events to be sent in one UDP message (via the `Add` method).
 
 ``` C#
 // The code is located under the StatsdClient namespace
@@ -148,7 +99,7 @@ using (udp)
   // Sampling a histogram
   s.Send<Statsd.Histogram,int>("stat-name", 1);
 
-  // Measure a distribution of values 
+  // Measure a distribution of values
   s.Send<Statsd.Distribution,int>("stat-name", 1);
 
   // Send elements to a set
@@ -193,11 +144,7 @@ using (udP)
 // To disable the splitting of UDP messages, set this limit to 0
 ```
 
-A note about timing: Statsd will not attempt to handle any exceptions that occur in a
-timed method. If an unhandled exception is thrown while
-timing, a timer metric containing the time elapsed before the exception
-occurred will be sent or added to the send queue (depending on whether Send or
-Add is being called).
+A note about timing: Statsd will not attempt to handle any exceptions that occur in a timed method. If an unhandled exception is thrown while timing, a timer metric containing the time elapsed before the exception occurred will be sent or added to the send queue (depending on whether Send or Add is being called).
 
 ## Testing
 
