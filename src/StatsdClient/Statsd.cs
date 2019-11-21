@@ -51,14 +51,28 @@ namespace StatsdClient
                 string unit = _commandToUnit[typeof(TCommandType)];
                 var allTags = ConcatTags(constantTags, tags);
 
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}:{1}|{2}{3}{4}",
-                    full_name,
-                    value,
-                    unit,
-                    sampleRate == 1.0 ? "" : string.Format(CultureInfo.InvariantCulture, "|@{0}", sampleRate),
-                    allTags);
+                if (value is double)
+                {
+                    return string.Format(
+                            CultureInfo.InvariantCulture,
+                            "{0}:{1:G15}|{2}{3}{4}",
+                            full_name,
+                            value,
+                            unit,
+                            sampleRate == 1.0 ? "" : string.Format(CultureInfo.InvariantCulture, "|@{0}", sampleRate),
+                            allTags);
+                }
+                else
+                {
+                    return string.Format(
+                            CultureInfo.InvariantCulture,
+                            "{0}:{1}|{2}{3}{4}",
+                            full_name,
+                            value,
+                            unit,
+                            sampleRate == 1.0 ? "" : string.Format(CultureInfo.InvariantCulture, "|@{0}", sampleRate),
+                            allTags);
+                }
             }
         }
 
