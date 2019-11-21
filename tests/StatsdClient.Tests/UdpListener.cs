@@ -25,7 +25,7 @@ namespace Tests
         // while(listenThread.IsAlive); // wait for listen thread to receive message or time out
         // List<string> receivedMessage = udpListener.GetAndClearLastMessages()
         // { make sure that the received messages are what was expected }
-        public class UdpListener : IDisposable 
+        public class UdpListener : IDisposable
         {
             private List<string> _lastReceivedMessages;
             private IPEndPoint _localIpEndPoint;
@@ -33,7 +33,7 @@ namespace Tests
             private UdpClient _socket;
             private bool _shutdown;
 
-            public UdpListener(string hostname, int port) 
+            public UdpListener(string hostname, int port)
             {
                 _lastReceivedMessages = new List<string>();
                 _localIpEndPoint = new IPEndPoint(IPAddress.Parse(hostname), port);
@@ -42,7 +42,7 @@ namespace Tests
                 _senderIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
             }
 
-            // Receive messages until it receives count of them or times out. 
+            // Receive messages until it receives count of them or times out.
             // This call is blocking; you may want to run it in a
             // thread while you send the message.
             public void Listen(object count = null)
@@ -70,7 +70,7 @@ namespace Tests
             }
 
             public void ListenAndWait()
-            {                
+            {
                 while (true)
                 {
                     try
@@ -91,9 +91,9 @@ namespace Tests
                         {
                             // If we get another error, propagate it upwards.
                             throw;
-                        }                    
-                    }                
-                }                                                   
+                        }
+                    }
+                }
             }
 
             public void Shutdown()
@@ -101,8 +101,8 @@ namespace Tests
                 _shutdown = true;
             }
 
-            // Clear and return the message list. Clearing the list allows us to use the 
-            // same UdpListener instance for several tests; we never have to worry about a 
+            // Clear and return the message list. Clearing the list allows us to use the
+            // same UdpListener instance for several tests; we never have to worry about a
             // message received from a previous test giving us a false positive.
             public List<string> GetAndClearLastMessages()
             {
@@ -111,7 +111,7 @@ namespace Tests
                 return messagesToReturn;
             }
 
-            public void Dispose() 
+            public void Dispose()
             {
                 _socket.Close();
             }
