@@ -7,23 +7,30 @@ namespace StatsdClient
         private IDisposable _disposable;
         private Statsd _statsD;
         private string _prefix;
+        private StatsdConfig _config;
+
 
         public void Configure(StatsdConfig config)
         {
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            if (string.IsNullOrEmpty(config.StatsdServerName))
-                throw new ArgumentNullException("config.StatsdServername");
+            if (_config != null)
+                throw new InvalidOperationException("Configuration for DogStatsdService already performed");
 
+            _config = config;
             _prefix = config.Prefix;
-            Dispose();
-            if (!string.IsNullOrEmpty(config.StatsdServerName))
+
+            if (!string.IsNullOrEmpty(config.StatsdServerName) || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR)))
             {
                 var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
-                _statsD = new Statsd(statsdUdp);
+                _statsD = new Statsd(statsdUdp,new RandomGenerator(), new StopWatchFactory(), "", config.ConstantTags);
                 _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
                 _disposable = statsdUdp;
+            }
+            else
+            {
+                throw new ArgumentNullException("config.StatsdServername and DD_AGENT_HOST environment variable not set");
             }
         }
 
@@ -55,7 +62,7 @@ namespace StatsdClient
             _statsD.Send<Statsd.Counting, int>(BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
-        public void Decrement(string statName, int value = 1, double sampleRate = 1.0, params string[] tags)
+        public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
             if (_statsD == null)
             {
@@ -82,6 +89,15 @@ namespace StatsdClient
             _statsD.Send<Statsd.Histogram, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
+        public void Distribution<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        {
+            if (_statsD == null)
+            {
+                return;
+            }
+            _statsD.Send<Statsd.Distribution, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+        }
+
         public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
             if (_statsD == null)
@@ -101,10 +117,9 @@ namespace StatsdClient
             _statsD.Send<Statsd.Timing, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
-
         public IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null)
         {
-            return new MetricsTimer(name, sampleRate, tags);
+            return new MetricsTimer(this, name, sampleRate, tags);
         }
 
         public void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null)
