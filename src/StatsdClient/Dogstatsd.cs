@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("StatsdClient.Tests")]
-
 namespace StatsdClient
 {
     public enum Status

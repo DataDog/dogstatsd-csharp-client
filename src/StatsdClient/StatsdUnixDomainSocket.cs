@@ -1,5 +1,6 @@
 using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Mono.Unix;
 
 namespace StatsdClient
@@ -51,6 +52,11 @@ namespace StatsdClient
 
             SocketSender.Send(_maxPacketSize, command, 
                 encodedCommand => _socket.Send(encodedCommand));
+        }
+
+        public Task SendAsync(string command)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()

@@ -98,9 +98,10 @@ namespace StatsdClient
         {
             SocketSender.Send(MaxUDPPacketSize, command, 
                 encodedCommand => UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint));
-        public Task SendAsync(string command) => SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
 
         }
+
+        public Task SendAsync(string command) => SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
 
         private async Task SendAsync(ArraySegment<byte> encodedCommand)
         {
