@@ -2,6 +2,7 @@ using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Mono.Unix;
+using System.Text;
 
 namespace StatsdClient
 {
@@ -56,7 +57,8 @@ namespace StatsdClient
 
         public Task SendAsync(string command)
         {
-            throw new NotImplementedException();
+            return SocketSender.SendAsync(_endPoint, _socket, _maxPacketSize, 
+                new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
         }
 
         public void Dispose()

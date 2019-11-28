@@ -54,7 +54,7 @@ namespace StatsdClient
         }
 
         public static async Task SendAsync(
-            IPEndPoint ipEndpoint,
+            EndPoint endpoint,
             Socket socket,
             int maxPacketSize, 
             ArraySegment<byte> encodedCommand)
@@ -72,12 +72,12 @@ namespace StatsdClient
                     {
                         var encodedCommandFirst = new ArraySegment<byte>(encodedCommand.Array, encodedCommand.Offset, i);
 
-                        await SendAsync(ipEndpoint, socket, maxPacketSize, encodedCommandFirst).ConfigureAwait(false);
+                        await SendAsync(endpoint, socket, maxPacketSize, encodedCommandFirst).ConfigureAwait(false);
 
                         int remainingCharacters = encodedCommand.Count - i - 1;
                         if (remainingCharacters > 0)
                         {
-                            await SendAsync(ipEndpoint, socket, maxPacketSize, new ArraySegment<byte>(encodedCommand.Array, i + 1, remainingCharacters)).ConfigureAwait(false);
+                            await SendAsync(endpoint, socket, maxPacketSize, new ArraySegment<byte>(encodedCommand.Array, i + 1, remainingCharacters)).ConfigureAwait(false);
                         }
 
                         return; // We're done here if we were able to split the message.
@@ -94,7 +94,7 @@ namespace StatsdClient
 
             var args = new SocketAsyncEventArgs
             {
-                RemoteEndPoint = ipEndpoint,
+                RemoteEndPoint = endpoint,
                 SocketFlags = SocketFlags.None,
             };
             args.SetBuffer(encodedCommand.Array, encodedCommand.Offset, encodedCommand.Count);
