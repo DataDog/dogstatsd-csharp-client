@@ -329,10 +329,11 @@ namespace StatsdClient
         {
             try
             {
-                Udp.Send(command);
                 // clear buffer (keep existing behavior)
                 if (Commands.Count > 0)
                     Commands = new List<string>();
+
+                Udp.Send(command);
             }
             catch (Exception e)
             {
@@ -344,10 +345,11 @@ namespace StatsdClient
         {
             try
             {
-                await Udp.SendAsync(command).ConfigureAwait(false);
                 // clear buffer (keep existing behavior)
                 if (Commands.Count > 0)
                     Commands = new List<string>();
+
+                await Udp.SendAsync(command).ConfigureAwait(false);
             }
             catch (Exception e)
             {
