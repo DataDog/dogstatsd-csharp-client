@@ -21,12 +21,28 @@ namespace StatsdClient
             _config = config;
             _prefix = config.Prefix;
 
-            if (!string.IsNullOrEmpty(config.StatsdServerName) || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR)))
+            var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName) 
+                    ? config.StatsdServerName 
+                    : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+
+            if (!string.IsNullOrEmpty(statsdServerName))
             {
-                var statsdUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
-                _statsD = new Statsd(statsdUdp,new RandomGenerator(), new StopWatchFactory(), "", config.ConstantTags);
-                _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
-                _disposable = statsdUdp;
+                IStatsdUDP statsdSender;
+
+                if (statsdServerName.StartsWith(StatsdUnixDomainSocket.UnixDomainSocketPrefix))
+                {
+                    var statsdUds = new StatsdUnixDomainSocket(config.StatsdServerName, config.StatsdMaxUnixDomainSocketPacketSize);
+                    _disposable = statsdUds;
+                    statsdSender = statsdUds;
+                }
+                else
+                {
+                    var statsUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
+                    _disposable = statsUdp;
+                    statsdSender = statsUdp;
+                }
+                _statsD = new Statsd(statsdSender,new RandomGenerator(), new StopWatchFactory(), "", config.ConstantTags);
+                _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;                
             }
             else
             {

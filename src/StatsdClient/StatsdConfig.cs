@@ -5,6 +5,7 @@
         public string StatsdServerName { get; set; }
         public int StatsdPort { get; set; }
         public int StatsdMaxUDPPacketSize { get; set; }
+        public int StatsdMaxUnixDomainSocketPacketSize {get; set;} = 2048;
         public bool StatsdTruncateIfTooLong { get; set; } = true;
         public string Prefix { get; set; }
 

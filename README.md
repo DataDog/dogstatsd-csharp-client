@@ -13,13 +13,9 @@ Grab the [package from NuGet](https://nuget.org/packages/DogStatsD-CSharp-Client
 ### Platforms
 
 DogStatsD-CSharp-Client supports the following platforms:
-
-* .NET Standard 1.3
-* .NET Standard 1.6
-* .NET Core Application 1.1
-* .NET Core Application 2.0
-* .NET Framework 4.5.1
-* .NET Framework 4.6.1
+* .NET Standard 1.3 or greater
+* .NET Core 1.0 or greater
+* .NET Framework 4.5.1 or greater
 
 ## Configuration
 

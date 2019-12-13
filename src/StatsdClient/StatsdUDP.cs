@@ -96,103 +96,18 @@ namespace StatsdClient
 
         public void Send(string command)
         {
-            Send(Encoding.UTF8.GetBytes(command));
+            SocketSender.Send(MaxUDPPacketSize, command, 
+                encodedCommand => UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint));
+
         }
 
-        public Task SendAsync(string command) => SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
-
-        private void Send(byte[] encodedCommand)
+        public Task SendAsync(string command)
         {
-            if (MaxUDPPacketSize > 0 && encodedCommand.Length > MaxUDPPacketSize)
-            {
-                // If the command is too big to send, linear search backwards from the maximum
-                // packet size to see if we can find a newline delimiting two stats. If we can,
-                // split the message across the newline and try sending both componenets individually
-                byte newline = Encoding.UTF8.GetBytes("\n")[0];
-                for (int i = MaxUDPPacketSize; i > 0; i--)
-                {
-                    if (encodedCommand[i] == newline)
-                    {
-                        byte[] encodedCommandFirst = new byte[i];
-                        Array.Copy(encodedCommand, encodedCommandFirst, encodedCommandFirst.Length); // encodedCommand[0..i-1]
-                        Send(encodedCommandFirst);
-
-                        int remainingCharacters = encodedCommand.Length - i - 1;
-                        if (remainingCharacters > 0)
-                        {
-                            byte[] encodedCommandSecond = new byte[remainingCharacters];
-                            Array.Copy(encodedCommand, i + 1, encodedCommandSecond, 0, encodedCommandSecond.Length); // encodedCommand[i+1..end]
-                            Send(encodedCommandSecond);
-                        }
-
-                        return; // We're done here if we were able to split the message.
-                    }
-                    // At this point we found an oversized message but we weren't able to find a
-                    // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message
-                    // will fail silently if the user is running in release mode or report a SocketException if the user is
-                    // running in debug mode.
-                    // Since we're conservative with our MAX_UDP_PACKET_SIZE, the oversized message might even
-                    // be sent without issue.
-                }
-            }
-            UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint);
-        }
-
-        private async Task SendAsync(ArraySegment<byte> encodedCommand)
-        {
-            if (MaxUDPPacketSize > 0 && encodedCommand.Count > MaxUDPPacketSize)
-            {
-                // If the command is too big to send, linear search backwards from the maximum
-                // packet size (taking into account the offset in the array)
-                // to see if we can find a newline delimiting two stats. If we can,
-                // split the message across the newline and try sending both componenets individually
-                byte newline = Encoding.UTF8.GetBytes("\n")[0];
-                for (int i = MaxUDPPacketSize + encodedCommand.Offset; i > encodedCommand.Offset; i--)
-                {
-                    if (encodedCommand.Array[i] == newline)
-                    {
-                        var encodedCommandFirst = new ArraySegment<byte>(encodedCommand.Array, encodedCommand.Offset, i);
-
-                        await SendAsync(encodedCommandFirst).ConfigureAwait(false);
-
-                        int remainingCharacters = encodedCommand.Count - i - 1;
-                        if (remainingCharacters > 0)
-                        {
-                            await SendAsync(new ArraySegment<byte>(encodedCommand.Array, i + 1, remainingCharacters)).ConfigureAwait(false);
-                        }
-
-                        return; // We're done here if we were able to split the message.
-                    }
-                    // At this point we found an oversized message but we weren't able to find a
-                    // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message
-                    // will fail silently if the user is running in release mode or report a SocketException if the user is
-                    // running in debug mode.
-                    // Since we're conservative with our MAX_UDP_PACKET_SIZE, the oversized message might even
-                    // be sent without issue.
-                }
-            }
-            var tcs = new TaskCompletionSource<object>();
-
-            var args = new SocketAsyncEventArgs {
-                RemoteEndPoint = IPEndpoint,
-                SocketFlags = SocketFlags.None,
-            };
-            args.SetBuffer(encodedCommand.Array, encodedCommand.Offset, encodedCommand.Count);
-            args.Completed += new EventHandler<SocketAsyncEventArgs>((object sender, SocketAsyncEventArgs eventArgs) => {
-                if (eventArgs.SocketError == SocketError.Success)
-                {
-                    tcs.SetResult(null);
-                } 
-                else 
-                {
-                    tcs.SetException(new SocketException((int)eventArgs.SocketError));
-                }
-            });
-            var completedAsync = UDPSocket.SendToAsync(args);
-            if (!completedAsync)
-                tcs.SetResult(null);
-
-            await tcs.Task;
+            return SocketSender.SendAsync(
+                IPEndpoint,
+                UDPSocket,
+                MaxUDPPacketSize,
+                new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
         }
 
         public void Dispose()
