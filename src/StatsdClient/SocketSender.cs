@@ -110,7 +110,9 @@ namespace StatsdClient
             });
             var completedAsync = socket.SendToAsync(args);
             if (!completedAsync)
+            {
                 tcs.SetResult(null);
+            }
 
             await tcs.Task;
         }
