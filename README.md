@@ -142,6 +142,27 @@ using (udP)
 
 A note about timing: Statsd will not attempt to handle any exceptions that occur in a timed method. If an unhandled exception is thrown while timing, a timer metric containing the time elapsed before the exception occurred will be sent or added to the send queue (depending on whether Send or Add is being called).
 
+## Unix domain socket support
+
+The version 6 (and above) of the Agent accepts packets through a Unix Socket datagram connection. Details about the advantages of using UDS over UDP are available in our [docs](https://docs.datadoghq.com/developers/dogstatsd/unix_socket/).
+
+You can use unix domain socket protocol by setting `StatsdServerName` property to `unix://YOUR_FULL_PATH`, for example `unix:///tmp/dsd.socket`. Please note there are three `/` as the path of the socket is `/tmp/dsd.socket`.
+
+``` C#
+var dogstatsdConfig = new StatsdConfig
+{    
+    StatsdServerName = "unix:///tmp/dsd.socket"  
+};
+```
+
+The property `StatsdMaxUnixDomainSocketPacketSize` of `StatsdConfig` defines the maximum size of the payload.
+Values higher than 8196 are ignored.
+
+**The feature is not supported on Windows platform**.
+Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`). 
+
+On MacOS Mojave, the `StatsdMaxUnixDomainSocketPacketSize` configuration option should not be greater than `2048`, otherwise you will experiment payloads drop.
+
 ## Testing
 
 1. Restore packages
