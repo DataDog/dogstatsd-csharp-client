@@ -160,7 +160,7 @@ The property `StatsdMaxUnixDomainSocketPacketSize` of `StatsdConfig` defines the
 **The feature is not supported on Windows platform**.
 Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`). 
 
-On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPacketSize` is exeperimental.
+On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPacketSize` is experimental.
 
 ## Testing
 
