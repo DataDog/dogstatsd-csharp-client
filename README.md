@@ -144,7 +144,7 @@ A note about timing: Statsd will not attempt to handle any exceptions that occur
 
 ## Unix domain socket support
 
-The version 6 (and above) of the Agent accepts packets through a Unix Socket datagram connection. Details about the advantages of using UDS over UDP are available in [Datadog DogStatsD Unix Socket documentation](https://docs.datadoghq.com/developers/dogstatsd/unix_socket/).
+The version 6 (and above) of the Agent accepts packets through a Unix Socket datagram connection. Details about the advantages of using UDS over UDP are available in the [Datadog DogStatsD Unix Socket documentation](https://docs.datadoghq.com/developers/dogstatsd/unix_socket/).
 
 You can use unix domain socket protocol by setting `StatsdServerName` property to `unix://YOUR_FULL_PATH`, for example `unix:///tmp/dsd.socket`. Note that there are three `/` as the path of the socket is `/tmp/dsd.socket`.
 
@@ -175,11 +175,11 @@ On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPa
 
 ## Feedback
 
-To suggest a feature, report a bug, or general discussion, head over [creating a new issue](https://github.com/DataDog/statsd-csharp-client/issues).
+To suggest a feature, report a bug, or general discussion, [create a new issue](https://github.com/DataDog/statsd-csharp-client/issues) in the Github repo.
 
 ## Credits
 
-`dogstatsd-csharp-client` is forked from Goncalo Pereira's [original Statsd client](https://github.com/goncalopereira/statsd-csharp-client).
+`dogstatsd-csharp-client` is forked from Goncalo Pereira's [original StatsD client](https://github.com/goncalopereira/statsd-csharp-client).
 
 Copyright (c) 2012 Goncalo Pereira and all contributors. See MIT-LICENCE.md for further details.
 
