@@ -144,9 +144,9 @@ A note about timing: Statsd will not attempt to handle any exceptions that occur
 
 ## Unix domain socket support
 
-The version 6 (and above) of the Agent accepts packets through a Unix Socket datagram connection. Details about the advantages of using UDS over UDP are available in our [docs](https://docs.datadoghq.com/developers/dogstatsd/unix_socket/).
+The version 6 (and above) of the Agent accepts packets through a Unix Socket datagram connection. Details about the advantages of using UDS over UDP are available in the [Datadog DogStatsD Unix Socket documentation](https://docs.datadoghq.com/developers/dogstatsd/unix_socket/).
 
-You can use unix domain socket protocol by setting `StatsdServerName` property to `unix://YOUR_FULL_PATH`, for example `unix:///tmp/dsd.socket`. Please note there are three `/` as the path of the socket is `/tmp/dsd.socket`.
+You can use unix domain socket protocol by setting `StatsdServerName` property to `unix://YOUR_FULL_PATH`, for example `unix:///tmp/dsd.socket`. Note that there are three `/` as the path of the socket is `/tmp/dsd.socket`.
 
 ``` C#
 var dogstatsdConfig = new StatsdConfig
@@ -155,13 +155,12 @@ var dogstatsdConfig = new StatsdConfig
 };
 ```
 
-The property `StatsdMaxUnixDomainSocketPacketSize` of `StatsdConfig` defines the maximum size of the payload.
-Values higher than 8196 are ignored.
+The property `StatsdMaxUnixDomainSocketPacketSize` of `StatsdConfig` defines the maximum size of the payload. Values higher than 8196 bytes are ignored.
 
 **The feature is not supported on Windows platform**.
 Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`). 
 
-On MacOS Mojave, the `StatsdMaxUnixDomainSocketPacketSize` configuration option should not be greater than `2048`, otherwise you will experiment payloads drop.
+On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPacketSize` is experimental.
 
 ## Testing
 
@@ -176,15 +175,12 @@ On MacOS Mojave, the `StatsdMaxUnixDomainSocketPacketSize` configuration option 
 
 ## Feedback
 
-To suggest a feature, report a bug, or general discussion, head over
-[here](https://github.com/DataDog/statsd-csharp-client/issues).
+To suggest a feature, report a bug, or general discussion, [create a new issue](https://github.com/DataDog/statsd-csharp-client/issues) in the Github repo.
 
 ## Credits
 
-dogstatsd-csharp-client is forked from Goncalo Pereira's [original Statsd
-client](https://github.com/goncalopereira/statsd-csharp-client).
+`dogstatsd-csharp-client` is forked from Goncalo Pereira's [original StatsD client](https://github.com/goncalopereira/statsd-csharp-client).
 
-Copyright (c) 2012 Goncalo Pereira and all contributors. See MIT-LICENCE.md for
-further details.
+Copyright (c) 2012 Goncalo Pereira and all contributors. See MIT-LICENCE.md for further details.
 
 Thanks to Goncalo Pereira, Anthony Steele, Darrell Mozingo, Antony Denyer, and Tim Skauge for their contributions to the original client.
