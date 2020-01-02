@@ -22,15 +22,18 @@ namespace StatsdClient
 
         public StatsdUnixDomainSocket(string unixSocket, int maxPacketSize)
         {
-#if OS_WINDOWS
-#pragma warning disable CS0162 // Unreachable code detected
-            throw new NotSupportedException("Unix domain socket is not supported on Windows.");
-#endif
             if (unixSocket == null || !unixSocket.StartsWith(StatsdUnixDomainSocket.UnixDomainSocketPrefix))
                 throw new ArgumentException($"{nameof(unixSocket)} must start with {StatsdUnixDomainSocket.UnixDomainSocketPrefix}");
             unixSocket = unixSocket.Substring(StatsdUnixDomainSocket.UnixDomainSocketPrefix.Length);
 
-            _socket = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
+            try
+            {
+                _socket = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
+            }
+            catch (SocketException e)
+            {
+                throw new NotSupportedException("Unix domain socket is not supported on your operating system.", e);
+            }
             _endPoint = new UnixEndPoint(unixSocket);
             _maxPacketSize = maxPacketSize;
             _socket.Blocking = false;
