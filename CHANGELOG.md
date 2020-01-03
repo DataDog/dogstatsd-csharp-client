@@ -1,7 +1,11 @@
 CHANGELOG
 =========
 # 4.0.0 / 03-01-2020
+## Breaking changes
+Version `3.4.0` uses a strong-named assembly that may introduce a [breaking change](https://github.com/DataDog/dogstatsd-csharp-client/pull/96#issuecomment-561379859).
+This major version change makes this breaking change explicit. No other breaking changes are expected.
 
+## Changes 
 * [IMPROVEMENT] Add Async methods to Statsd. See [#59][] (Thanks [@alistair][])
 * [IMPROVEMENT] Add Unix domain socket support. See [#92][]
 
