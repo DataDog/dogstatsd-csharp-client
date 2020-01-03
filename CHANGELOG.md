@@ -1,5 +1,10 @@
 CHANGELOG
 =========
+# 4.0.0 / 03-01-2020
+
+* [IMPROVEMENT] Add Async methods to Statsd. See [#59][] (Thanks [@alistair][])
+* [IMPROVEMENT] Add Unix domain socket support. See [#92][]
+
 # 3.4.0 / 11-15-2019
 
 * [IMPROVEMENT] Use a strong-named assembly. See [#96][] (Thanks [@carlreid][])
@@ -106,6 +111,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#52]: https://github.com/DataDog/dogstatsd-csharp-client/issues/52
 [#54]: https://github.com/DataDog/dogstatsd-csharp-client/issues/54
 [#55]: https://github.com/DataDog/dogstatsd-csharp-client/issues/55
+[#59]: https://github.com/DataDog/dogstatsd-csharp-client/issues/59
 [#60]: https://github.com/DataDog/dogstatsd-csharp-client/issues/60
 [#61]: https://github.com/DataDog/dogstatsd-csharp-client/issues/61
 [#62]: https://github.com/DataDog/dogstatsd-csharp-client/issues/62
@@ -113,9 +119,11 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#65]: https://github.com/DataDog/dogstatsd-csharp-client/issues/65
 [#66]: https://github.com/DataDog/dogstatsd-csharp-client/issues/66
 [#78]: https://github.com/DataDog/dogstatsd-csharp-client/issues/78
+[#92]: https://github.com/DataDog/dogstatsd-csharp-client/issues/92
 [#96]: https://github.com/DataDog/dogstatsd-csharp-client/issues/96
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
+[@alistair]: https://github.com/alistair
 [@anthonychu]: https://github.com/anthonychu
 [@bcuff]: https://github.com/bcuff
 [@carlreid]: https://github.com/carlreid
