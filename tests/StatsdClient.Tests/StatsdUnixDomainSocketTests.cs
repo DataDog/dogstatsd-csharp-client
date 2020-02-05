@@ -4,6 +4,7 @@ using Tests.Utils;
 using Mono.Unix;
 using System.Text;
 using System.Net.Sockets;
+using System;
 
 #if !OS_WINDOWS
 namespace Tests
@@ -12,41 +13,39 @@ namespace Tests
     public class StatsdUnixDomainSocketTest
     {
         private TemporaryPath _temporaryPath;
-        private Socket _server;
-        private DogStatsdService _dogStatsdService;
 
         [SetUp]
         public void Setup()
         {
             _temporaryPath = new TemporaryPath();
-            var endPoint = new UnixEndPoint(_temporaryPath.Path);
-            _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
-            _server.Bind(endPoint);
-
-            var dogstatsdConfig = new StatsdConfig
-            {
-                StatsdServerName = StatsdUnixDomainSocket.UnixDomainSocketPrefix + _temporaryPath.Path,
-                StatsdMaxUnixDomainSocketPacketSize = 1000
-            };
-            _dogStatsdService = new DogStatsdService();
-            _dogStatsdService.Configure(dogstatsdConfig);
         }
 
         [TearDown]
         public void TearDown()
         {
-            _server.Dispose();
-            _dogStatsdService.Dispose();
             _temporaryPath.Dispose();
         }
 
-        [Test]
-        public void SendSingleMetric()
+        public enum HostnameProvider
         {
-            var metric = "gas_tank.level";
-            var value = 0.75;
-            _dogStatsdService.Gauge(metric, value);
-            Assert.AreEqual($"{metric}:{value}|g", ReadFromServer());
+            Environment,
+            Property
+        }
+
+        [TestCase(HostnameProvider.Property)]
+        [TestCase(HostnameProvider.Environment)]
+        public void SendSingleMetric(HostnameProvider hostnameProvider)
+        {
+            using (var service = CreateService(_temporaryPath, hostnameProvider))
+            {
+                using (var socket = CreateSocketServer(_temporaryPath))
+                {
+                    var metric = "gas_tank.level";
+                    var value = 0.75;
+                    service.Gauge(metric, value);
+                    Assert.AreEqual($"{metric}:{value}|g", ReadFromServer(socket));
+                }
+            }
         }
 
         [Test]
@@ -54,18 +53,21 @@ namespace Tests
         {
             using (var statdUds = new StatsdUnixDomainSocket(StatsdUnixDomainSocket.UnixDomainSocketPrefix + _temporaryPath.Path, 25))
             {
-                var statd = new Statsd(statdUds);
-                var messageCount = 7;
+                using (var socket = CreateSocketServer(_temporaryPath))
+                {
+                    var statd = new Statsd(statdUds);
+                    var messageCount = 7;
 
-                for (int i = 0; i < messageCount; ++i)
-                    statd.Add("title" + i, "text");
-                Assert.AreEqual(messageCount, statd.Commands.Count);
+                    for (int i = 0; i < messageCount; ++i)
+                        statd.Add("title" + i, "text");
+                    Assert.AreEqual(messageCount, statd.Commands.Count);
 
-                statd.Send();
+                    statd.Send();
 
-                var response = ReadFromServer();
-                for (int i = 0; i < messageCount; ++i)
-                    Assert.True(response.Contains("title" + i));
+                    var response = ReadFromServer(socket);
+                    for (int i = 0; i < messageCount; ++i)
+                        Assert.True(response.Contains("title" + i));
+                }
             }
         }
 
@@ -75,20 +77,56 @@ namespace Tests
         {
             var tags = new string[] { new string('A', 100) };
 
-            // We are sending several Gauge to make sure there is no buffer
-            // that can make _dogStatsdService.Gauge blocks after several calls.
-            for (int i = 0; i < 1000; ++i)
-                _dogStatsdService.Gauge("metric" + i, 42, 1, tags);
-            // If the code go here that means we do not block.
+            using (var service = CreateService(_temporaryPath))
+            {
+                // We are sending several Gauge to make sure there is no buffer
+                // that can make service.Gauge blocks after several calls.
+                for (int i = 0; i < 1000; ++i)
+                    service.Gauge("metric" + i, 42, 1, tags);
+                // If the code go here that means we do not block.
+            }
         }
-        string ReadFromServer()
+
+        static DogStatsdService CreateService(
+                    TemporaryPath temporaryPath,
+                    HostnameProvider hostnameProvider = HostnameProvider.Property)
+        {
+            var serverName = StatsdUnixDomainSocket.UnixDomainSocketPrefix + temporaryPath.Path;
+            var dogstatsdConfig = new StatsdConfig{ StatsdMaxUnixDomainSocketPacketSize = 1000 };
+
+            switch (hostnameProvider)
+            {
+                case HostnameProvider.Property: dogstatsdConfig.StatsdServerName = serverName; break;
+                case HostnameProvider.Environment: 
+                {
+                    Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, serverName); 
+                    break;
+                }
+            }
+
+            var dogStatsdService = new DogStatsdService();
+            dogStatsdService.Configure(dogstatsdConfig);
+
+            return dogStatsdService;
+        }
+
+        static Socket CreateSocketServer(TemporaryPath temporaryPath)
+        {
+            var endPoint = new UnixEndPoint(temporaryPath.Path);
+            var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
+            server.Bind(endPoint);
+
+            return server;
+        }
+
+        static string ReadFromServer(Socket socket)
         {
             var builder = new StringBuilder();
             var buffer = new byte[8096];
 
-            while (_server.Available > 0)
+            while (socket.Available > 0)
             {
-                var count = _server.Receive(buffer);
+                var count = socket.Receive(buffer);
                 var chars = System.Text.Encoding.UTF8.GetChars(buffer, 0, count);
                 builder.Append(chars);
             }
