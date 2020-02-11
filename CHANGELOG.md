@@ -1,6 +1,9 @@
 CHANGELOG
 =========
-# 4.0.0 / 03-01-2020
+# 4.0.1 / 02-11-2020
+* [BUGFIX] Fix `System.ArgumentException: unixSocket must start with unix://` when using the `DD_AGENT_HOST` environment variable with UDS support. See [this comment](https://github.com/DataDog/dogstatsd-csharp-client/issues/85#issuecomment-581371860) (Thanks [@danopia][])
+
+# 4.0.0 / 01-03-2020
 ## Breaking changes
 Version `3.4.0` uses a strong-named assembly that may introduce a [breaking change](https://github.com/DataDog/dogstatsd-csharp-client/pull/96#issuecomment-561379859).
 This major version change makes this breaking change explicit. No other breaking changes are expected.
@@ -133,6 +136,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [@carlreid]: https://github.com/carlreid
 [@chriskinsman]: https://github.com/chriskinsman
 [@daniel-chambers]: https://github.com/daniel-chambers
+[@danopia]: https://github.com/danopia
 [@jpasichnyk]: https://github.com/jpasichnyk
 [@michaellockwood]: https://github.com/michaellockwood
 [@nathanrobb]: https://github.com/nathanrobb
