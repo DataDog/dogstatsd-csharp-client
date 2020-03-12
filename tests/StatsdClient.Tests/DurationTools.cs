@@ -20,5 +20,17 @@ namespace Tests
                 millisecondsDuration,
                 duration.Multiply(1 - InaccuracyTimeFactor).TotalMilliseconds);
         }
+
+        public static void AssertClose(long millisecondsDuration, TimeSpan duration)
+        {
+            Assert.That(millisecondsDuration,
+                Is.EqualTo(duration.TotalMilliseconds).Within(InaccuracyTimeFactor * 100).Percent);
+        }
+
+        public static bool AreClose(long millisecondsDuration, TimeSpan duration)
+        {
+            return millisecondsDuration > duration.Multiply(1 - InaccuracyTimeFactor).TotalMilliseconds
+                && millisecondsDuration < duration.Multiply(1 + InaccuracyTimeFactor).TotalMilliseconds;
+        }
     }
 }
