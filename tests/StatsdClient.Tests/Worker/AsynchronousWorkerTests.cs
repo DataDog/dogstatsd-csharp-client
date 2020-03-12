@@ -59,10 +59,10 @@ namespace Tests
                 }
             });
 
-            var maxWaitDuration = TimeSpan.FromMilliseconds(200);
+            var maxWaitDuration = TimeSpan.FromSeconds(1);
             var worker = CreateWorker(
                 workerThreadCount: 1,
-                minWaitDuration: TimeSpan.FromMilliseconds(10),
+                minWaitDuration: TimeSpan.FromMilliseconds(100),
                 maxWaitDuration: maxWaitDuration);
 
             // Wait to call OnIdle.
