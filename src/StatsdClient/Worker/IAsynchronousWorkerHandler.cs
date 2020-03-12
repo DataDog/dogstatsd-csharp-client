@@ -1,6 +1,6 @@
 namespace StatsdClient.Worker
 {
-    public interface IAsynchronousWorkerHandler<T>
+    interface IAsynchronousWorkerHandler<T>
     {
         /// <summary>
         /// Called when a new value is ready to be handled by the worker.

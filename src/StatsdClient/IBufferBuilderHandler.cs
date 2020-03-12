@@ -1,6 +1,6 @@
 namespace StatsdClient
 {
-    public interface IBufferBuilderHandler
+    interface IBufferBuilderHandler
     {
         void Handle(byte[] buffer, int length);
     }
