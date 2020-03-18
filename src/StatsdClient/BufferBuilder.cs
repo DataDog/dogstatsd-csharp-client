@@ -22,13 +22,13 @@ namespace StatsdClient
         public bool Add(string value)
         {
             var byteCount = Encoding.UTF8.GetByteCount(value);
-            if (byteCount > _buffer.Length)
+            if (byteCount > Capacity)
                 return false;
 
-            if (Length + byteCount > _buffer.Length)
+            if (Length + byteCount > Capacity)
                 this.HandleBufferAndReset();
 
-            // GetBytes requires the buffer to be big enough, that is why we use GetByteCount.
+            // GetBytes requires the buffer to be big enough otherwise it throws, that is why we use GetByteCount.
             Length += Encoding.UTF8.GetBytes(value, 0, value.Length, _buffer, Length);
             return true;
         }
