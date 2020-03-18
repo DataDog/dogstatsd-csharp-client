@@ -41,7 +41,9 @@ namespace StatsdClient.Worker
             TimeSpan maxWaitDuration)
         {
             if (blockingQueueTimeout.HasValue)
-                _queue = new ConcurrentBoundedBlockingQueue<T>(maxItemCount, blockingQueueTimeout.Value);
+                _queue = new ConcurrentBoundedBlockingQueue<T>(new ManualResetEventWrapper(),
+                                                               blockingQueueTimeout.Value,
+                                                               maxItemCount);
             else
                 _queue = new ConcurrentBoundedQueue<T>(maxItemCount);
 

@@ -10,19 +10,18 @@ namespace StatsdClient.Worker
     class ConcurrentBoundedQueue<T>
     {
         readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
-        readonly int _maxItemCount;
 
         // Queue size. It is much faster than calling ConcurrentQueue<T>.Count
         int _queueCurrentSize = 0;
 
         public ConcurrentBoundedQueue(int maxItemCount)
         {
-            _maxItemCount = maxItemCount;
+            MaxItemCount = maxItemCount;
         }
 
         public virtual bool TryEnqueue(T value)
         {
-            if (_queueCurrentSize >= _maxItemCount)
+            if (_queueCurrentSize >= MaxItemCount)
             {
                 value = default(T);
                 return false;
@@ -42,5 +41,7 @@ namespace StatsdClient.Worker
             }
             return false;
         }
+
+        public int MaxItemCount { get; }
     }
 }

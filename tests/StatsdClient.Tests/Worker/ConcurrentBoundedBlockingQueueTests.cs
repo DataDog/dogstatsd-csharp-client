@@ -1,5 +1,5 @@
 using System;
-using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using StatsdClient.Worker;
 
@@ -8,44 +8,43 @@ namespace Tests
     [TestFixture]
     public class ConcurrentBoundedBlockingQueueTests
     {
+        Mock<IManualResetEvent> _mock;
+        ConcurrentBoundedBlockingQueue<int> _queue;
+
+        [SetUp]
+        public void Init()
+        {
+            _mock = new Mock<IManualResetEvent>();
+            _queue = new ConcurrentBoundedBlockingQueue<int>(
+                _mock.Object,
+                TimeSpan.FromSeconds(5),
+                maxItemCount: 1);
+        }
         [Test]
         public void NoWaitWhenQueueIsNotFull()
         {
-            var timeout = TimeSpan.FromSeconds(5);
-            var queue = new ConcurrentBoundedBlockingQueue<int>(1, timeout);
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            Assert.AreEqual(1, _queue.MaxItemCount);
 
-            Assert.True(queue.TryEnqueue(0));
-            var task = Task.Run(() =>
-            {
-                Task.Delay(TimeSpan.FromMilliseconds(100)).Wait();
-                Assert.True(queue.TryDequeue(out var v));
-            });
+            Assert.True(_queue.TryEnqueue(0));
+            _mock.Verify(m => m.Reset(), Times.Once);
 
-            // This line should block for a short period, waiting task completion.
-            Assert.True(queue.TryEnqueue(1));
+            Assert.True(_queue.TryDequeue(out var v));
+            _mock.Verify(m => m.Set(), Times.Once);
 
-            // Check we have no timeout.
-            DurationTools.AssertLess(stopwatch.ElapsedMilliseconds, timeout);
-            task.Wait();
+            Assert.True(_queue.TryEnqueue(1));
+            // Check TryEnqueue not block
+            _mock.Verify(m => m.Wait(It.IsAny<TimeSpan>()), Times.Never);
         }
 
         [Test]
         public void WaitWhenQueueIsFull()
         {
-            var timeout = TimeSpan.FromMilliseconds(100);
-            var queue = new ConcurrentBoundedBlockingQueue<int>(1, timeout);
+            Assert.AreEqual(1, _queue.MaxItemCount);
 
-            Assert.True(queue.TryEnqueue(1));
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            int expectedTimeoutCount = 3;
-            for (int i = 0; i < expectedTimeoutCount; ++i)
-                Assert.False(queue.TryEnqueue(1));
-
-            // Timeout should occurs
-            DurationTools.AssertGreater(
-                stopwatch.ElapsedMilliseconds,
-                timeout.Multiply(expectedTimeoutCount));
+            Assert.True(_queue.TryEnqueue(1));
+            for (int i = 0; i < 3; ++i)
+                Assert.False(_queue.TryEnqueue(1));
+            _mock.Verify(m => m.Wait(It.IsAny<TimeSpan>()), Times.Exactly(3));
         }
     }
 }

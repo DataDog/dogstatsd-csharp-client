@@ -9,22 +9,24 @@ namespace StatsdClient.Worker
     /// </summary>
     class ConcurrentBoundedBlockingQueue<T> : ConcurrentBoundedQueue<T>
     {
-        readonly ManualResetEventSlim _queueIsFull = new ManualResetEventSlim(false);
+        readonly IManualResetEvent _queueIsFullEvent;
         readonly TimeSpan _waitTimeout;
 
-        public ConcurrentBoundedBlockingQueue(int maxItemCount, TimeSpan waitTimeout)
+        public ConcurrentBoundedBlockingQueue(IManualResetEvent queueIsFullEvent, TimeSpan waitTimeout, int maxItemCount)
                 : base(maxItemCount)
         {
+            _queueIsFullEvent = queueIsFullEvent;
             _waitTimeout = waitTimeout;
+            _queueIsFullEvent.Reset();
         }
 
         public override bool TryEnqueue(T value)
         {
             while (!base.TryEnqueue(value))
             {
-                if (!_queueIsFull.Wait(_waitTimeout))
+                if (!_queueIsFullEvent.Wait(_waitTimeout))
                     return false;
-                _queueIsFull.Reset();
+                _queueIsFullEvent.Reset();
             }
             return true;
         }
@@ -33,7 +35,7 @@ namespace StatsdClient.Worker
         {
             if (base.TryDequeue(out value))
             {
-                _queueIsFull.Set();
+                _queueIsFullEvent.Set();
                 return true;
             }
             value = default(T);
