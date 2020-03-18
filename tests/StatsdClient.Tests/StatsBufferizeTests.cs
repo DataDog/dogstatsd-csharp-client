@@ -13,7 +13,7 @@ namespace Tests
         public async Task StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
-            var bufferBuilder = new BufferBuilder(handler, 3);
+            var bufferBuilder = new BufferBuilder(handler, 3, "\n");
             var timeout = TimeSpan.FromMilliseconds(300);
             var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, timeout);
 
