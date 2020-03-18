@@ -6,6 +6,7 @@ using Moq;
 using System.Threading.Tasks;
 using StatsdClient.Worker;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Tests
 {
@@ -13,12 +14,15 @@ namespace Tests
     public class AsynchronousWorkerTests
     {
         Mock<IAsynchronousWorkerHandler<int>> _handler;
+
+        Mock<IWaiter> _waiter;
         readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
 
         [SetUp]
         public void Init()
         {
             _handler = new Mock<IAsynchronousWorkerHandler<int>>();
+            _waiter = new Mock<IWaiter>();
         }
 
         [TearDown]
@@ -40,63 +44,26 @@ namespace Tests
             Assert.IsTrue(valueReceived.WaitOne(TimeSpan.FromSeconds(3)));
         }
 
-        [Test]
+        [Test, Timeout(30000)]
         public async Task OnIdle()
         {
-            var idleDurations = new List<long>();
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            _handler.Setup(h => h.OnIdle()).Returns(true).Callback(() =>
+            var waitDurationQueue = new ConcurrentQueue<TimeSpan>();
+
+            _handler.Setup(h => h.OnIdle()).Returns(true);
+            _waiter.Setup(w => w.Wait(It.IsAny<TimeSpan>()))
+                   .Callback<TimeSpan>(t => waitDurationQueue.Enqueue(t));
+
+            using (var worker = CreateWorker(workerThreadCount: 1))
             {
-                lock (stopwatch)
-                {
-                    if (!stopwatch.IsRunning)
-                        stopwatch.Start();
-                    else
-                    {
-                        idleDurations.Add(stopwatch.ElapsedMilliseconds);
-                        stopwatch.Restart();
-                    }
-                }
-            });
+                while (waitDurationQueue.Count() < 100)
+                    await Task.Delay(TimeSpan.FromMilliseconds(1));
+            }
 
-            var maxWaitDuration = TimeSpan.FromSeconds(1);
-            var worker = CreateWorker(
-                workerThreadCount: 1,
-                minWaitDuration: TimeSpan.FromMilliseconds(200),
-                maxWaitDuration: maxWaitDuration);
+            var waitDurations = new List<TimeSpan>(waitDurationQueue);
 
-            // Wait to call OnIdle.
-            await Task.Delay(maxWaitDuration.Multiply(3));
-            worker.Dispose();
-
-            // Check none duration is greater than maxWaitDuration
-            DurationTools.AssertLess(idleDurations.Max(), maxWaitDuration);
-
-            // Remove all durations closed to maxWaitDuration
-            Assert.NotZero(idleDurations.RemoveAll(v => DurationTools.AreClose(v, maxWaitDuration)));
-
-            // Drop the first value, as it is too big on the CI. 
-            idleDurations.RemoveAt(0);
-
-            Assert.That(idleDurations, Is.Ordered);
-        }
-
-        [Test]
-        public void BlockingQueue()
-        {
-            var nonBlockingWorker = CreateWorker(maxItemCount: 0);
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Assert.False(nonBlockingWorker.TryEnqueue(0));
-            var nonBlockinDuration = stopwatch.ElapsedMilliseconds;
-
-            var timeout = TimeSpan.FromMilliseconds(250);
-            var blockingWorker = CreateWorker(maxItemCount: 0, nonBlockingQueueTimeout: timeout);
-            stopwatch.Restart();
-            Assert.False(blockingWorker.TryEnqueue(0));
-            var blockingDuration = stopwatch.ElapsedMilliseconds;
-
-            DurationTools.AssertClose(blockingDuration, timeout);
-            DurationTools.AssertLess(nonBlockinDuration, TimeSpan.FromMilliseconds(blockingDuration));
+            Assert.GreaterOrEqual(waitDurations.Min(), AsynchronousWorker<int>.MinWaitDuration);
+            Assert.LessOrEqual(waitDurations.Max(), AsynchronousWorker<int>.MaxWaitDuration);
+            Assert.That(waitDurations, Is.Ordered);
         }
 
         [Test, Timeout(2000)]
@@ -106,20 +73,14 @@ namespace Tests
             // Check we do not block
             worker.Dispose();
         }
-        AsynchronousWorker<int> CreateWorker(
-            int maxItemCount = 10,
-            int workerThreadCount = 2,
-            TimeSpan? nonBlockingQueueTimeout = null,
-            TimeSpan? minWaitDuration = null,
-            TimeSpan? maxWaitDuration = null)
+        AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
         {
             var worker = new AsynchronousWorker<int>(
                 _handler.Object,
+                _waiter.Object,
                 workerThreadCount,
-                maxItemCount,
-                nonBlockingQueueTimeout,
-                minWaitDuration.HasValue ? minWaitDuration.Value : TimeSpan.FromMilliseconds(1),
-                maxWaitDuration.HasValue ? maxWaitDuration.Value : TimeSpan.FromMilliseconds(100));
+                10,
+                null);
             _workers.Add(worker);
             return worker;
         }

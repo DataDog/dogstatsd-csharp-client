@@ -10,35 +10,21 @@ namespace StatsdClient.Worker
     /// </summary>    
     class AsynchronousWorker<T> : IDisposable
     {
+        public static TimeSpan MinWaitDuration { get; } = TimeSpan.FromMilliseconds(1);
+        public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
+
         readonly ConcurrentBoundedQueue<T> _queue;
         readonly List<Task> _workers = new List<Task>();
         readonly IAsynchronousWorkerHandler<T> _handler;
-        readonly TimeSpan _minWaitDuration;
-        readonly TimeSpan _maxWaitDuration;
+        readonly IWaiter _waiter;
         volatile bool _terminate = false;
 
         public AsynchronousWorker(
             IAsynchronousWorkerHandler<T> handler,
+            IWaiter waiter,
             int workerThreadCount,
             int maxItemCount,
             TimeSpan? blockingQueueTimeout)
-            : this(
-                handler,
-                workerThreadCount,
-                maxItemCount,
-                blockingQueueTimeout,
-                TimeSpan.FromMilliseconds(1),
-                TimeSpan.FromMilliseconds(100))
-        {
-        }
-
-        public AsynchronousWorker(
-            IAsynchronousWorkerHandler<T> handler,
-            int workerThreadCount,
-            int maxItemCount,
-            TimeSpan? blockingQueueTimeout,
-            TimeSpan minWaitDuration,
-            TimeSpan maxWaitDuration)
         {
             if (blockingQueueTimeout.HasValue)
                 _queue = new ConcurrentBoundedBlockingQueue<T>(new ManualResetEventWrapper(),
@@ -48,8 +34,7 @@ namespace StatsdClient.Worker
                 _queue = new ConcurrentBoundedQueue<T>(maxItemCount);
 
             _handler = handler;
-            _minWaitDuration = minWaitDuration;
-            _maxWaitDuration = maxWaitDuration;
+            _waiter = waiter;
             for (int i = 0; i < workerThreadCount; ++i)
                 _workers.Add(Task.Run(() => Dequeue()));
         }
@@ -61,14 +46,14 @@ namespace StatsdClient.Worker
 
         void Dequeue()
         {
-            var waitDuration = _minWaitDuration;
+            var waitDuration = MinWaitDuration;
 
             while (true)
             {
                 if (_queue.TryDequeue(out var v))
                 {
                     _handler.OnNewValue(v);
-                    waitDuration = _minWaitDuration;
+                    waitDuration = MinWaitDuration;
                 }
                 else
                 {
@@ -77,10 +62,10 @@ namespace StatsdClient.Worker
 
                     if (_handler.OnIdle())
                     {
-                        Task.Delay(waitDuration).Wait();
+                        _waiter.Wait(waitDuration);
                         waitDuration = waitDuration + waitDuration;
-                        if (waitDuration > _maxWaitDuration)
-                            waitDuration = _maxWaitDuration;
+                        if (waitDuration > MaxWaitDuration)
+                            waitDuration = MaxWaitDuration;
                     }
                 }
             }

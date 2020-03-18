@@ -20,7 +20,11 @@ namespace StatsdClient
             var handler = new WorkerHandler(bufferBuilder, maxIdleWaitBeforeSending);
 
             // `handler` (and also `bufferBuilder`) do not need to be thread safe as long as workerMaxItemCount is 1.
-            this._worker = new AsynchronousWorker<string>(handler, 1, workerMaxItemCount, blockingQueueTimeout);
+            this._worker = new AsynchronousWorker<string>(handler,
+                                                          new Waiter(),
+                                                          1,
+                                                          workerMaxItemCount,
+                                                          blockingQueueTimeout);
         }
 
         public void Send(string command)
