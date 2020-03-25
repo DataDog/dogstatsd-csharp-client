@@ -1,4 +1,6 @@
-﻿namespace StatsdClient
+﻿using StatsdClient.Bufferize;
+
+namespace StatsdClient
 {
     public class StatsdConfig
     {

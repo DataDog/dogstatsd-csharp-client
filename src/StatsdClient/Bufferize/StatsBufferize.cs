@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using System;
 using StatsdClient.Worker;
 
-namespace StatsdClient
+namespace StatsdClient.Bufferize
 {
     /// <summary>
     /// StatsBufferize bufferizes metrics before sending them.

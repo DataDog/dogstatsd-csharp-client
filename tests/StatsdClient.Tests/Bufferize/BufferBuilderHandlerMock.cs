@@ -1,5 +1,5 @@
 using System;
-using StatsdClient;
+using StatsdClient.Bufferize;
 
 namespace Tests
 {

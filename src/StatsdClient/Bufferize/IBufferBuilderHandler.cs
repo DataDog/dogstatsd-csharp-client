@@ -1,4 +1,4 @@
-namespace StatsdClient
+namespace StatsdClient.Bufferize
 {
     interface IBufferBuilderHandler
     {
