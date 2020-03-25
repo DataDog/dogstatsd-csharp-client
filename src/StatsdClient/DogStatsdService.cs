@@ -4,7 +4,7 @@ namespace StatsdClient
 {
     public class DogStatsdService : IDogStatsd, IDisposable
     {
-        private IDisposable _disposable;
+        private StatsdBuilder _statsdBuilder = new StatsdBuilder();
         private Statsd _statsD;
         private string _prefix;
         private StatsdConfig _config;
@@ -12,6 +12,9 @@ namespace StatsdClient
 
         public void Configure(StatsdConfig config)
         {
+            if (_statsdBuilder == null)
+                throw new ObjectDisposedException(nameof(DogStatsdService));
+
             if (config == null)
                 throw new ArgumentNullException("config");
 
@@ -21,33 +24,7 @@ namespace StatsdClient
             _config = config;
             _prefix = config.Prefix;
 
-            var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName) 
-                    ? config.StatsdServerName 
-                    : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
-
-            if (!string.IsNullOrEmpty(statsdServerName))
-            {
-                IStatsdUDP statsdSender;
-
-                if (statsdServerName.StartsWith(StatsdUnixDomainSocket.UnixDomainSocketPrefix))
-                {
-                    var statsdUds = new StatsdUnixDomainSocket(statsdServerName, config.StatsdMaxUnixDomainSocketPacketSize);
-                    _disposable = statsdUds;
-                    statsdSender = statsdUds;
-                }
-                else
-                {
-                    var statsUdp = new StatsdUDP(config.StatsdServerName, config.StatsdPort, config.StatsdMaxUDPPacketSize);
-                    _disposable = statsUdp;
-                    statsdSender = statsUdp;
-                }
-                _statsD = new Statsd(statsdSender,new RandomGenerator(), new StopWatchFactory(), "", config.ConstantTags);
-                _statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;                
-            }
-            else
-            {
-                throw new ArgumentNullException("config.StatsdServername and DD_AGENT_HOST environment variable not set");
-            }
+            _statsD = _statsdBuilder.BuildStats(config);
         }
 
         public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
@@ -143,10 +120,8 @@ namespace StatsdClient
 
         public void Dispose()
         {
-            var disposable = _disposable;
-            _disposable = null;
-            _statsD = null;
-            disposable?.Dispose();
+            _statsdBuilder?.Dispose();
+            _statsdBuilder = null;
         }
     }
 }
