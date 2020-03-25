@@ -2,6 +2,7 @@
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This class will become private in a future release.")]
     public class ThreadSafeRandom
     {
         private static readonly Random _global = new Random();

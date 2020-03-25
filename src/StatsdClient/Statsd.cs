@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This class will become private in a future release.\n" + 
+        "You can use instead `DogStatsdService` or `DogStatsd` which provides automatic metrics" + 
+        " buffering with asynchronous calls (metrics are added to a queue and another thread send them).")]
     public class Statsd : IStatsd
     {
         private const string ENTITY_ID_INTERNAL_TAG_KEY = "dd.internal.entity_id";

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This class will become private in a future release.")]
     public class MetricsTimer : IDisposable
     {
         private readonly string _name;

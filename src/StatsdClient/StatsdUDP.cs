@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This class will become private in a future release.")]
     public class StatsdUDP : IDisposable, IStatsdUDP
     {
         private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
