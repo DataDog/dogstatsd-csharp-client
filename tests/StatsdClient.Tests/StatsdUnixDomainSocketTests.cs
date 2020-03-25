@@ -49,29 +49,6 @@ namespace Tests
             }
         }
 
-        [Test]
-        public void SendSplitMetrics()
-        {
-            using (var statdUds = new StatsdUnixDomainSocket(StatsdUnixDomainSocket.UnixDomainSocketPrefix + _temporaryPath.Path, 25))
-            {
-                using (var socket = CreateSocketServer(_temporaryPath))
-                {
-                    var statd = new Statsd(statdUds);
-                    var messageCount = 7;
-
-                    for (int i = 0; i < messageCount; ++i)
-                        statd.Add("title" + i, "text");
-                    Assert.AreEqual(messageCount, statd.Commands.Count);
-
-                    statd.Send();
-
-                    var response = ReadFromServer(socket);
-                    for (int i = 0; i < messageCount; ++i)
-                        Assert.True(response.Contains("title" + i));
-                }
-            }
-        }
-
         // Use a timeout in case Gauge become blocking
         [Test, Timeout(30000)]
         public void CheckNotBlockWhenServerNotReadMessage()
@@ -95,7 +72,7 @@ namespace Tests
                     TemporaryPath temporaryPath,
                     HostnameProvider hostnameProvider = HostnameProvider.Property)
         {
-            var serverName = StatsdUnixDomainSocket.UnixDomainSocketPrefix + temporaryPath.Path;
+            var serverName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path;
             var dogstatsdConfig = new StatsdConfig { StatsdMaxUnixDomainSocketPacketSize = 1000 };
 
             switch (hostnameProvider)

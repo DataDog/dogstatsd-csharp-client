@@ -6,7 +6,7 @@ namespace StatsdClient
 {
     class StatsdBuilder : IDisposable
     {
-        static readonly string UnixDomainSocketPrefix = "unix://";
+        public static readonly string UnixDomainSocketPrefix = "unix://";
 
         StatsSender _statsSender;
         StatsBufferize _statsBufferize;
