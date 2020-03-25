@@ -128,7 +128,7 @@ namespace Tests
             var builder = new StringBuilder();
             var buffer = new byte[8096];
 
-            while (socket.Available > 0)
+            while (socket.Available > 0 || builder.Length == 0)
             {
                 var count = socket.Receive(buffer);
                 var chars = System.Text.Encoding.UTF8.GetChars(buffer, 0, count);

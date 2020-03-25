@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using Mono.Unix;
 
@@ -9,8 +8,8 @@ namespace StatsdClient
     {
         static readonly string UnixDomainSocketPrefix = "unix://";
 
-        // This field can be removed when Statsd can dispose Statsd.Udp.
-        readonly List<IDisposable> _disposables = new List<IDisposable>();
+        StatsSender _statsSender;
+        StatsBufferize _statsBufferize;
 
         public Statsd BuildStats(StatsdConfig config)
         {
@@ -37,30 +36,27 @@ namespace StatsdClient
 
         IStatsdUDP CreateMetricsSender(StatsdConfig config, string statsdServerName)
         {
-            StatsSender statsSender;
             int bufferCapacity;
             if (statsdServerName.StartsWith(UnixDomainSocketPrefix))
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                statsSender = StatsSender.CreateUnixDomainSocketStatsSender(endPoint);
+                _statsSender = StatsSender.CreateUnixDomainSocketStatsSender(endPoint);
                 bufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
             {
-                statsSender = CreateUDPStatsSender(config, statsdServerName);
+                _statsSender = CreateUDPStatsSender(config, statsdServerName);
                 bufferCapacity = config.StatsdMaxUDPPacketSize;
             }
 
-            _disposables.Add(statsSender);
-
-            return CreateStatsBufferize(
-                statsSender,
-                bufferCapacity,
-                config.Advanced);
+            _statsBufferize = CreateStatsBufferize(_statsSender,
+                                                   bufferCapacity,
+                                                   config.Advanced);
+            return _statsBufferize;
         }
 
-        StatsBufferize CreateStatsBufferize(
+        static StatsBufferize CreateStatsBufferize(
             StatsSender statsSender,
             int bufferCapacity,
             AdvancedStatsConfig config)
@@ -73,7 +69,6 @@ namespace StatsdClient
                 config.MaxBlockDuration,
                 config.DurationBeforeSendingNotFullBuffer);
 
-            _disposables.Add(statsBufferize);
             return statsBufferize;
         }
 
@@ -104,9 +99,12 @@ namespace StatsdClient
 
         public void Dispose()
         {
-            foreach (var d in _disposables)
-                d.Dispose();
-            _disposables.Clear();
+            // _statsBufferize must be disposed before _statsSender to make
+            // sure _statsBufferize does not send data to a disposed object.
+            _statsBufferize?.Dispose();
+            _statsSender?.Dispose();
+            _statsBufferize = null;
+            _statsSender = null;
         }
     }
 }
