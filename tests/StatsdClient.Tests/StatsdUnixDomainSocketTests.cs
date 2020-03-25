@@ -5,6 +5,7 @@ using Mono.Unix;
 using System.Text;
 using System.Net.Sockets;
 using System;
+using System.Threading.Tasks;
 
 #if !OS_WINDOWS
 namespace Tests
@@ -36,9 +37,9 @@ namespace Tests
         [TestCase(HostnameProvider.Environment)]
         public void SendSingleMetric(HostnameProvider hostnameProvider)
         {
-            using (var service = CreateService(_temporaryPath, hostnameProvider))
+            using (var socket = CreateSocketServer(_temporaryPath))
             {
-                using (var socket = CreateSocketServer(_temporaryPath))
+                using (var service = CreateService(_temporaryPath, hostnameProvider))
                 {
                     var metric = "gas_tank.level";
                     var value = 0.75;
@@ -77,13 +78,16 @@ namespace Tests
         {
             var tags = new string[] { new string('A', 100) };
 
-            using (var service = CreateService(_temporaryPath))
+            using (var socket = CreateSocketServer(_temporaryPath))
             {
-                // We are sending several Gauge to make sure there is no buffer
-                // that can make service.Gauge blocks after several calls.
-                for (int i = 0; i < 1000; ++i)
-                    service.Gauge("metric" + i, 42, 1, tags);
-                // If the code go here that means we do not block.
+                using (var service = CreateService(_temporaryPath))
+                {
+                    // We are sending several Gauge to make sure there is no buffer
+                    // that can make service.Gauge blocks after several calls.
+                    for (int i = 0; i < 10; ++i)
+                        service.Gauge("metric" + i, 42, 1, tags);
+                    // If the code go here that means we do not block.
+                }
             }
         }
 
@@ -92,16 +96,16 @@ namespace Tests
                     HostnameProvider hostnameProvider = HostnameProvider.Property)
         {
             var serverName = StatsdUnixDomainSocket.UnixDomainSocketPrefix + temporaryPath.Path;
-            var dogstatsdConfig = new StatsdConfig{ StatsdMaxUnixDomainSocketPacketSize = 1000 };
+            var dogstatsdConfig = new StatsdConfig { StatsdMaxUnixDomainSocketPacketSize = 1000 };
 
             switch (hostnameProvider)
             {
                 case HostnameProvider.Property: dogstatsdConfig.StatsdServerName = serverName; break;
-                case HostnameProvider.Environment: 
-                {
-                    Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, serverName); 
-                    break;
-                }
+                case HostnameProvider.Environment:
+                    {
+                        Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, serverName);
+                        break;
+                    }
             }
 
             var dogStatsdService = new DogStatsdService();

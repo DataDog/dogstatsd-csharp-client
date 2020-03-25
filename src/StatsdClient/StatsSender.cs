@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Mono.Unix;
 
 namespace StatsdClient
 {
@@ -8,9 +9,30 @@ namespace StatsdClient
     {
         readonly Socket _socket;
 
-        public StatsSender(IPEndPoint endPoint)
+        public static StatsSender CreateUDPStatsSender(IPEndPoint endPoint)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            return new StatsSender("UDP", endPoint, AddressFamily.InterNetwork, ProtocolType.Udp);
+        }
+
+        public static StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint)
+        {
+            return new StatsSender("Unix domain socket", endPoint, AddressFamily.Unix, ProtocolType.IP);
+        }
+
+        StatsSender(
+            string kind,
+            EndPoint endPoint,
+            AddressFamily addressFamily,
+            ProtocolType protocolType)
+        {
+            try
+            {
+                _socket = new Socket(addressFamily, SocketType.Dgram, protocolType);
+            }
+            catch (SocketException e)
+            {
+                throw new NotSupportedException($"{kind} is not supported on your operating system.", e);
+            }
 
             // When closing, wait 2 seconds to send data.
             _socket.LingerState = new LingerOption(true, 2);

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using Mono.Unix;
 
 namespace StatsdClient
 {
     class StatsdBuilder : IDisposable
     {
+        static readonly string UnixDomainSocketPrefix = "unix://";
+
         // This field can be removed when Statsd can dispose Statsd.Udp.
         readonly List<IDisposable> _disposables = new List<IDisposable>();
 
@@ -34,23 +37,41 @@ namespace StatsdClient
 
         IStatsdUDP CreateMetricsSender(StatsdConfig config, string statsdServerName)
         {
-            if (statsdServerName.StartsWith(StatsdUnixDomainSocket.UnixDomainSocketPrefix))
+            StatsSender statsSender;
+            int bufferCapacity;
+            if (statsdServerName.StartsWith(UnixDomainSocketPrefix))
             {
-                var statsdUds = new StatsdUnixDomainSocket(statsdServerName, config.StatsdMaxUnixDomainSocketPacketSize);
-                _disposables.Add(statsdUds);
-                return statsdUds;
+                statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
+                var endPoint = new UnixEndPoint(statsdServerName);
+                statsSender = StatsSender.CreateUnixDomainSocketStatsSender(endPoint);
+                bufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
+            }
+            else
+            {
+                statsSender = CreateUDPStatsSender(config, statsdServerName);
+                bufferCapacity = config.StatsdMaxUDPPacketSize;
             }
 
-            var udpStatsSender = CreateUDPStatsSender(config, statsdServerName);
-            _disposables.Add(udpStatsSender);
+            _disposables.Add(statsSender);
 
-            var bufferBuilder = new BufferBuilder(udpStatsSender, config.StatsdMaxUDPPacketSize, "\n");
+            return CreateStatsBufferize(
+                statsSender,
+                bufferCapacity,
+                config.Advanced);
+        }
+
+        StatsBufferize CreateStatsBufferize(
+            StatsSender statsSender,
+            int bufferCapacity,
+            AdvancedStatsConfig config)
+        {
+            var bufferBuilder = new BufferBuilder(statsSender, bufferCapacity, "\n");
 
             var statsBufferize = new StatsBufferize(
                 bufferBuilder,
-                config.Advanced.MaxMetricsInAsyncQueue,
-                config.Advanced.MaxBlockDuration,
-                config.Advanced.DurationBeforeSendingNotFullBuffer);
+                config.MaxMetricsInAsyncQueue,
+                config.MaxBlockDuration,
+                config.DurationBeforeSendingNotFullBuffer);
 
             _disposables.Add(statsBufferize);
             return statsBufferize;
@@ -62,7 +83,7 @@ namespace StatsdClient
             var port = GetPort(config);
 
             var endPoint = new IPEndPoint(address, port);
-            return new StatsSender(endPoint);
+            return StatsSender.CreateUDPStatsSender(endPoint);
         }
 
         static int GetPort(StatsdConfig config)
