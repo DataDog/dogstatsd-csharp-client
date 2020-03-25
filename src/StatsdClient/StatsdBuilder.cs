@@ -5,12 +5,23 @@ using StatsdClient.Bufferize;
 
 namespace StatsdClient
 {
+    /// <summary>
+    /// StatsdBuilder builds an instance of `Statsd` from StatsdConfig.
+    /// </summary>
     class StatsdBuilder : IDisposable
     {
         public static readonly string UnixDomainSocketPrefix = "unix://";
 
+        readonly IStatsBufferizeFactory _factory;
+
         StatsSender _statsSender;
         StatsBufferize _statsBufferize;
+
+
+        public StatsdBuilder(IStatsBufferizeFactory factory)
+        {
+            _factory = factory;
+        }
 
         public Statsd BuildStats(StatsdConfig config)
         {
@@ -42,7 +53,7 @@ namespace StatsdClient
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                _statsSender = StatsSender.CreateUnixDomainSocketStatsSender(endPoint);
+                _statsSender = _factory.CreateUnixDomainSocketStatsSender(endPoint);
                 bufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
@@ -57,14 +68,14 @@ namespace StatsdClient
             return _statsBufferize;
         }
 
-        static StatsBufferize CreateStatsBufferize(
+        StatsBufferize CreateStatsBufferize(
             StatsSender statsSender,
             int bufferCapacity,
             AdvancedStatsConfig config)
         {
             var bufferBuilder = new BufferBuilder(statsSender, bufferCapacity, "\n");
 
-            var statsBufferize = new StatsBufferize(
+            var statsBufferize = _factory.CreateStatsBufferize(
                 bufferBuilder,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,
@@ -73,13 +84,13 @@ namespace StatsdClient
             return statsBufferize;
         }
 
-        static StatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
+        StatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
         {
             var address = StatsdUDP.GetIpv4Address(statsdServerName);
             var port = GetPort(config);
 
             var endPoint = new IPEndPoint(address, port);
-            return StatsSender.CreateUDPStatsSender(endPoint);
+            return _factory.CreateUDPStatsSender(endPoint);
         }
 
         static int GetPort(StatsdConfig config)

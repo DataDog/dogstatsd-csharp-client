@@ -1,10 +1,11 @@
 using System;
+using StatsdClient.Bufferize;
 
 namespace StatsdClient
 {
     public class DogStatsdService : IDogStatsd, IDisposable
     {
-        private StatsdBuilder _statsdBuilder = new StatsdBuilder();
+        private StatsdBuilder _statsdBuilder = new StatsdBuilder(new StatsBufferizeFactory());
         private Statsd _statsD;
         private string _prefix;
         private StatsdConfig _config;

@@ -2,7 +2,7 @@ using System;
 
 namespace StatsdClient
 {
-    public class AdvancedStatsConfig 
+    public class AdvancedStatsConfig
     {
         /// <summary>
         /// Metrics are sent asynchronously using a queue. 
@@ -11,7 +11,7 @@ namespace StatsdClient
         /// latency (When `MaxBlockDuration` is null) or the number of messages 
         /// dropped (When `MaxBlockDuration` is not null).
         /// </summary>
-        public int MaxMetricsInAsyncQueue { get; } = 100 * 1000;
+        public int MaxMetricsInAsyncQueue { get; set; } = 100 * 1000;
 
         /// <summary>
         /// If there are more metrics than `MaxMetricsInAsyncQueue` waiting to be sent:
@@ -21,13 +21,13 @@ namespace StatsdClient
         ///       `DogStatsd` or `DogStatsdService` method will block for at most
         ///       `MaxBlockDuration` duration.
         /// </summary>
-        public TimeSpan? MaxBlockDuration { get; } = null;
+        public TimeSpan? MaxBlockDuration { get; set; } = null;
 
         /// <summary>
         /// Metrics are buffered before sent. This value defined how long
         /// DogStatsD waits before sending a not full buffer.
         /// </summary>
-        public TimeSpan DurationBeforeSendingNotFullBuffer { get; }
+        public TimeSpan DurationBeforeSendingNotFullBuffer { get; set; }
 
         public AdvancedStatsConfig()
         {
