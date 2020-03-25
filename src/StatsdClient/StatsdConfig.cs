@@ -9,6 +9,8 @@
         public bool StatsdTruncateIfTooLong { get; set; } = true;
         public string Prefix { get; set; }
 
+        public AdvancedStatsConfig Advanced { get; }
+
         public string[] ConstantTags { get; set; }
         public const int DefaultStatsdPort = 8125;
         public const int DefaultStatsdMaxUDPPacketSize = 512;
@@ -21,6 +23,7 @@
         {
             StatsdPort = 0;
             StatsdMaxUDPPacketSize = DefaultStatsdMaxUDPPacketSize;
+            Advanced = new AdvancedStatsConfig();
         }
     }
 }

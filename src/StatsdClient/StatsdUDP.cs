@@ -64,7 +64,7 @@ namespace StatsdClient
             }
             return port;
         }
-        private IPAddress GetIpv4Address(string name)
+        internal static IPAddress GetIpv4Address(string name)
         {
             IPAddress ipAddress;
             bool isValidIPAddress = IPAddress.TryParse(name, out ipAddress);
