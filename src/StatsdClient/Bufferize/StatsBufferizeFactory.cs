@@ -22,9 +22,10 @@ namespace StatsdClient.Bufferize
             return StatsSender.CreateUDPStatsSender(endPoint);
         }
 
-        public StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint)
+        public StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint,
+                                                             TimeSpan? udsBufferFullBlockDuration)
         {
-            return StatsSender.CreateUnixDomainSocketStatsSender(endPoint);
+            return StatsSender.CreateUnixDomainSocketStatsSender(endPoint, udsBufferFullBlockDuration);
         }
     }
 }

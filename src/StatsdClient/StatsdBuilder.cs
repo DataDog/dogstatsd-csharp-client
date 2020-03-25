@@ -53,7 +53,8 @@ namespace StatsdClient
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                _statsSender = _factory.CreateUnixDomainSocketStatsSender(endPoint);
+                _statsSender = _factory.CreateUnixDomainSocketStatsSender(endPoint,
+                                                                          config.Advanced.UDSBufferFullBlockDuration);
                 bufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else

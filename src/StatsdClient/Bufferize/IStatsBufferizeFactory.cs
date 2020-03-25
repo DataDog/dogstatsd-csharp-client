@@ -18,6 +18,7 @@ namespace StatsdClient.Bufferize
 
         StatsSender CreateUDPStatsSender(IPEndPoint endPoint);
 
-        StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint);
+        StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint,
+                                                      TimeSpan? udsBufferFullBlockDuration);
     }
 }

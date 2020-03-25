@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Net;
 using Mono.Unix;
 using Moq;
@@ -133,24 +132,22 @@ namespace StatsdClient.Tests
 
         string GetUDSStatsdServerName(StatsdConfig config)
         {
-            var endPoint = GetEndPoint<UnixEndPoint>(
-                config, m => m.CreateUnixDomainSocketStatsSender(It.IsAny<UnixEndPoint>()));
+            UnixEndPoint endPoint = null;
+
+            _mock.Setup(m => m.CreateUnixDomainSocketStatsSender(It.IsAny<UnixEndPoint>(), It.IsAny<TimeSpan?>()))
+                .Callback<UnixEndPoint, TimeSpan?>((e, d) => endPoint = e);
+            _statsdBuilder.BuildStats(config);
+            Assert.NotNull(endPoint);
+
             return endPoint.Filename;
         }
 
         IPEndPoint GetUDPIPEndPoint(StatsdConfig config)
         {
-            return GetEndPoint<IPEndPoint>(
-                config, m => m.CreateUDPStatsSender(It.IsAny<IPEndPoint>()));
-        }
+            IPEndPoint endPoint = null;
 
-        T GetEndPoint<T>(
-            StatsdConfig config,
-            Expression<Action<IStatsBufferizeFactory>> expression)
-        {
-            T endPoint = default(T);
-            _mock.Setup(expression)
-                .Callback<T>(e => endPoint = e);
+            _mock.Setup(m => m.CreateUDPStatsSender(It.IsAny<IPEndPoint>()))
+                .Callback<IPEndPoint>(e => endPoint = e);
             _statsdBuilder.BuildStats(config);
             Assert.NotNull(endPoint);
             return endPoint;

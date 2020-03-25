@@ -29,6 +29,13 @@ namespace StatsdClient
         /// </summary>
         public TimeSpan DurationBeforeSendingNotFullBuffer { get; set; }
 
+        /// <summary>
+        /// This value defines how long to wait when the UDS buffer is full
+        /// (SocketError.NoBufferSpaceAvailable). A null value results in
+        /// dropping the metric.
+        /// </summary>
+        public TimeSpan? UDSBufferFullBlockDuration { get; set; } = null;
+
         public AdvancedStatsConfig()
         {
             DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(100);
