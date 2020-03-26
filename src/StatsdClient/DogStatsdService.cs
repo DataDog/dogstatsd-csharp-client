@@ -170,7 +170,7 @@ namespace StatsdClient
                 return;
             }
 
-            _statsD.Send(name, (int)status, timestamp, hostname, tags, message);
+            _statsD.Send(BuildNamespacedStatName(name), (int)status, timestamp, hostname, tags, message);
         }
 
         private string BuildNamespacedStatName(string statName)

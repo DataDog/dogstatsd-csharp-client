@@ -142,7 +142,26 @@ namespace Tests
                 var metricTimeInMs = Convert.ToInt32(metricTimeInMsSplit[0]);
                 Assert.IsTrue((metricTimeInMs >= 1000), "Processing should have taken at least 1000ms");
                 Assert.IsTrue((metricTimeInMs < 1100), "Timer reported 10% higher than time taken in action");
-            }  
+            }
+        }
+
+        [Test]
+        public void setting_prefix_servicecheck()
+        {
+            using (var nonStaticServiceInstance = new DogStatsdService())
+            {
+                var metricsConfig = new StatsdConfig
+                {
+                    StatsdServerName = "127.0.0.1",
+                    StatsdPort = 8129,
+                    Prefix = "prefix"
+                };
+                nonStaticServiceInstance.Configure(metricsConfig);
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8129,
+                    () => { nonStaticServiceInstance.ServiceCheck("test", Status.OK); });
+
+                Assert.AreEqual(new List<string> { "_sc|prefix.test|0" }, receivedData);
+            }
         }
 
         [Test]
