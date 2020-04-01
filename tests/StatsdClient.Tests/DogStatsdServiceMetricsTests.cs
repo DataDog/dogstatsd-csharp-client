@@ -25,6 +25,7 @@ namespace Tests
             SendAndCheckMetricsAreReceived(config);
         }
 
+#if !OS_WINDOWS
         [Test]
         public void UnixDomainSocketBlockingQueue()
         {
@@ -41,6 +42,7 @@ namespace Tests
                 SendAndCheckMetricsAreReceived(config);
             }
         }
+#endif
 
         static void SendAndCheckMetricsAreReceived(StatsdConfig config)
         {
