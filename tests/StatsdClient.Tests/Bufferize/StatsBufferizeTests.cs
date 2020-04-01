@@ -14,18 +14,22 @@ namespace Tests
         {
             var handler = new BufferBuilderHandlerMock();
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
-            var timeout = TimeSpan.FromMilliseconds(300);
-            var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, timeout);
+            var timeout = TimeSpan.FromMilliseconds(10);
+            using (var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, timeout))
+            {
+                statsBufferize.Send("123");
+                while (handler.Buffer == null)
+                    await Task.Delay(1);
+                // Sent because buffer is full.
+                Assert.AreEqual("123", Encoding.UTF8.GetString(handler.Buffer));
+                handler.Buffer = null;
 
-            statsBufferize.Send("123");
-            statsBufferize.Send("4");
-            await Task.Delay(timeout.Multiply(0.5));
-            // Sent because buffer is full.
-            Assert.AreEqual(Encoding.UTF8.GetBytes("123"), handler.Buffer);
-
-            // Sent because we wait more than the timeout.
-            await Task.Delay(timeout.Multiply(2));
-            Assert.AreEqual(Encoding.UTF8.GetBytes("4"), handler.Buffer);
+                statsBufferize.Send("4");
+                while (handler.Buffer == null)
+                    await Task.Delay(1);
+                // Sent because we wait more than the timeout.
+                Assert.AreEqual("4", Encoding.UTF8.GetString(handler.Buffer));
+            }
         }
     }
 }
