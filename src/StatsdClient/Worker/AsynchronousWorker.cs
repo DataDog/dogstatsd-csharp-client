@@ -58,7 +58,10 @@ namespace StatsdClient.Worker
                 else
                 {
                     if (_terminate)
+                    {
+                        _handler.OnShutdown();
                         return;
+                    }
 
                     if (_handler.OnIdle())
                     {

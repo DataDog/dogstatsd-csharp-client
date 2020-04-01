@@ -75,6 +75,11 @@ namespace StatsdClient.Bufferize
                 }
                 return true;
             }
+
+            public void OnShutdown()
+            {
+                this._bufferBuilder.HandleBufferAndReset();
+            }
         }
     }
 }

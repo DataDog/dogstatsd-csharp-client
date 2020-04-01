@@ -12,5 +12,10 @@ namespace StatsdClient.Worker
         /// </summary>
         /// <returns>Return true to make the worker in a sleep state, false otherwise.</returns>
         bool OnIdle();
+
+        /// <summary>
+        /// Called when AsynchronousWorker is shutdown.
+        /// </summary>
+        void OnShutdown();
     }
 }
