@@ -11,7 +11,7 @@ namespace Tests
     [TestFixture]
     public class DogStatsdServiceConfigurationTest
     {
-        private List<string> ReceiveData(string testServerName, int testPort, Action sendData)
+        private List<string> ReceiveData(DogStatsdService dogstasdService, string testServerName, int testPort, Action sendData)
         {
             using (var udpListener = new UdpListener(testServerName, testPort))
             {
@@ -20,8 +20,7 @@ namespace Tests
 
                 sendData();
 
-                // Make sure we received the data
-                System.Threading.Thread.Sleep(500);
+                dogstasdService.Dispose();
                 udpListener.Shutdown();
                 listenThread.Join();
                 
@@ -40,7 +39,7 @@ namespace Tests
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8125,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8125,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> {"test:1|c"}, receivedData);
@@ -59,7 +58,7 @@ namespace Tests
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8126,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8126,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
@@ -78,7 +77,7 @@ namespace Tests
                     StatsdPort = 8126
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8125,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8125,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(0, receivedData.Count);
@@ -98,7 +97,7 @@ namespace Tests
                     Prefix = "prefix"
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8129,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8129,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "prefix.test:1|c" }, receivedData);
@@ -117,7 +116,7 @@ namespace Tests
                     Prefix = "prefix"
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8130,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8130,
                     () => {
                         using (nonStaticServiceInstance.StartTimer("timer.test"))
                         {
@@ -155,7 +154,7 @@ namespace Tests
                 var metricsConfig = new StatsdConfig{};
 
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8131,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8131,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
@@ -177,7 +176,7 @@ namespace Tests
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData("127.0.0.1", 8132,
+                var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8132,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "test:1|c|#dd.internal.entity_id:foobar" }, receivedData);
