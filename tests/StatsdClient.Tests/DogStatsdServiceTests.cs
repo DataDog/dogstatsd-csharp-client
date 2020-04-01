@@ -140,7 +140,7 @@ namespace Tests
 
                 var metricTimeInMs = Convert.ToInt32(metricTimeInMsSplit[0]);
                 Assert.IsTrue((metricTimeInMs >= 1000), "Processing should have taken at least 1000ms");
-                Assert.IsTrue((metricTimeInMs < 1100), "Timer reported 10% higher than time taken in action");
+                Assert.IsTrue((metricTimeInMs < 1300), $"Timer reported 30% higher than time taken in action: {metricTimeInMs} VS 1300");
             }  
         }
 
