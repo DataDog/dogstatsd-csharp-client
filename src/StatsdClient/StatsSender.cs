@@ -58,8 +58,15 @@ namespace StatsdClient
                 throw new NotSupportedException($"{kind} is not supported on your operating system.", e);
             }
 
-            // When closing, wait 2 seconds to send data.
-            _socket.LingerState = new LingerOption(true, 2);
+            try
+            {
+                // When closing, wait 2 seconds to send data.
+                _socket.LingerState = new LingerOption(true, 2);
+            }
+            catch (SocketException e) when (e.SocketErrorCode == SocketError.ProtocolOption)
+            {
+                // It is not supported on Windows for Dgram with UDP.
+            }
             _socket.Connect(endPoint);
         }
 
