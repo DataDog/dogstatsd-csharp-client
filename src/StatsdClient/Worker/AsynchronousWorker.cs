@@ -12,6 +12,7 @@ namespace StatsdClient.Worker
     {
         public static TimeSpan MinWaitDuration { get; } = TimeSpan.FromMilliseconds(1);
         public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
+        static TimeSpan maxWaitDurationInDispose = TimeSpan.FromSeconds(3);
 
         readonly ConcurrentBoundedQueue<T> _queue;
         readonly List<Task> _workers = new List<Task>();
@@ -76,6 +77,12 @@ namespace StatsdClient.Worker
 
         public void Dispose()
         {
+            var remainingWaitCount = maxWaitDurationInDispose.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
+            while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
+            {
+                _waiter.Wait(MinWaitDuration);
+                --remainingWaitCount;
+            }
             _terminate = true;
             foreach (var worker in _workers)
                 worker.Wait();

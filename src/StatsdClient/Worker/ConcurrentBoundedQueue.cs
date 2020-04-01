@@ -42,6 +42,7 @@ namespace StatsdClient.Worker
             return false;
         }
 
+        public int QueueCurrentSize { get { return _queueCurrentSize; } }
         public int MaxItemCount { get; }
     }
 }
