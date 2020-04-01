@@ -9,26 +9,28 @@ namespace Tests
     [TestFixture]
     public class DogStatsdServiceMetricsTests
     {
-        static int MetricToSendCount = 100 * 1000;
-
         [Test]
         public void UDPBlockingQueue()
         {
+            // Send only 5 000 metrics because of UDP drops.
+            var metricToSendCount = 5 * 1000;
             var config = new StatsdConfig
             {
                 StatsdServerName = "127.0.0.1",
                 StatsdPort = 8132
             };
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
-            config.Advanced.MaxMetricsInAsyncQueue = MetricToSendCount / 10;
+            config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
 
-            SendAndCheckMetricsAreReceived(config);
+            SendAndCheckMetricsAreReceived(config, metricToSendCount);
         }
 
 #if !OS_WINDOWS
         [Test]
         public void UnixDomainSocketBlockingQueue()
         {
+            var metricToSendCount = 100 * 1000;
+
             using (var temporaryPath = new TemporaryPath())
             {
                 var config = new StatsdConfig
@@ -37,26 +39,26 @@ namespace Tests
                 };
                 config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.UDSBufferFullBlockDuration = TimeSpan.FromSeconds(3);
-                config.Advanced.MaxMetricsInAsyncQueue = MetricToSendCount / 10;
+                config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
 
-                SendAndCheckMetricsAreReceived(config);
+                SendAndCheckMetricsAreReceived(config, metricToSendCount);
             }
         }
 #endif
 
-        static void SendAndCheckMetricsAreReceived(StatsdConfig config)
+        static void SendAndCheckMetricsAreReceived(StatsdConfig config, int metricToSendCount)
         {
             using (var service = new DogStatsdService())
             {
                 using (var server = new SocketServer(config))
                 {
                     service.Configure(config);
-                    for (int i = 0; i < MetricToSendCount; ++i)
+                    for (int i = 0; i < metricToSendCount; ++i)
                         service.Increment($"test{i}", tags: new[] { "KEY:VALUE" });
-
+                    service.Dispose();
                     var metricsReceived = server.Stop();
-                    Assert.AreEqual(MetricToSendCount, metricsReceived.Count);
-                    for (int i = 0; i < MetricToSendCount; ++i)
+                    Assert.AreEqual(metricToSendCount, metricsReceived.Count);
+                    for (int i = 0; i < metricToSendCount; ++i)
                         Assert.AreEqual($"test{i}:1|c|#KEY:VALUE", metricsReceived[i]);
                 }
             }
