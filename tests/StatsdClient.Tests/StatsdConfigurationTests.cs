@@ -18,6 +18,7 @@ namespace Tests
             Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
             listenThread.Start();
             dogStatsdService.Increment(testCounterName);
+            dogStatsdService.Dispose();
             while (listenThread.IsAlive) ;
             Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
             udpListener.Dispose();
