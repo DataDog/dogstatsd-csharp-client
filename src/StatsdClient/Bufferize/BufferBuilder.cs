@@ -28,6 +28,11 @@ namespace StatsdClient.Bufferize
         public int Length { get; private set; }
         public int Capacity { get { return _buffer.Length; } }
 
+        public static byte[] GetBytes(string message)
+        {
+            return _encoding.GetBytes(message);
+        }
+
         public bool Add(string value)
         {
             var byteCount = _encoding.GetByteCount(value);
