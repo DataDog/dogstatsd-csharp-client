@@ -11,6 +11,7 @@ namespace StatsdClient.Bufferize
     interface IStatsBufferizeFactory
     {
         StatsBufferize CreateStatsBufferize(
+          Telemetry telemetry,
           BufferBuilder bufferBuilder,
           int workerMaxItemCount,
           TimeSpan? blockingQueueTimeout,
