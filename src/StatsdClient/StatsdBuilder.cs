@@ -74,7 +74,8 @@ namespace StatsdClient
             int bufferCapacity,
             AdvancedStatsConfig config)
         {
-            var bufferBuilder = new BufferBuilder(statsSender, bufferCapacity, "\n");
+            var bufferHandler = new BufferBuilderHandler(new Telemetry(), statsSender);
+            var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
             var statsBufferize = _factory.CreateStatsBufferize(
                 bufferBuilder,
