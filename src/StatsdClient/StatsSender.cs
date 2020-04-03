@@ -76,6 +76,10 @@ namespace StatsdClient
 
         public StatsSenderTransportType TransportType { get; }
 
+        /// <summary>
+        /// Send the buffer.
+        /// Must be thread safe. 
+        /// </summary>
         public bool Send(byte[] buffer, int length)
         {
             for (int i = 0; i < 1 + _noBufferSpaceAvailableRetryCount; ++i)

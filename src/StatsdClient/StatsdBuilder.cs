@@ -16,7 +16,6 @@ namespace StatsdClient
         readonly IStatsBufferizeFactory _factory;
 
         StatsSender _statsSender;
-        StatsSender _statsSenderTelemetry;
         StatsBufferize _statsBufferize;
         Telemetry _telemetry;
 
@@ -39,10 +38,14 @@ namespace StatsdClient
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            _telemetry = CreateTelemetry(config, statsdServerName);
-
-            var metricsSender = CreateMetricsSender(_telemetry, config, statsdServerName);
-            var statsD = new Statsd(metricsSender,
+            var statsSenderData = CreateStatsSender(config, statsdServerName);
+            _statsSender = statsSenderData.Sender;
+            _telemetry = CreateTelemetry(config, statsSenderData.Sender);
+            _statsBufferize = CreateStatsBufferize(_telemetry,
+                                                   statsSenderData.Sender,
+                                                   statsSenderData.BufferCapacity,
+                                                   config.Advanced);
+            var statsD = new Statsd(_statsBufferize,
                                     new RandomGenerator(),
                                     new StopWatchFactory(),
                                     "",
@@ -52,7 +55,7 @@ namespace StatsdClient
             return statsD;
         }
 
-        Telemetry CreateTelemetry(StatsdConfig config, string statsdServerName)
+        Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
 
@@ -61,26 +64,11 @@ namespace StatsdClient
                 var assembly = typeof(StatsdBuilder).GetTypeInfo().Assembly;
                 var version = assembly.GetName().Version.ToString();
 
-                var statsSenderData = CreateStatsSender(config, statsdServerName);
-                _statsSenderTelemetry = statsSenderData.Sender;
-                return new Telemetry(version, telemetryFlush.Value, statsSenderData.Sender);
+                return new Telemetry(version, telemetryFlush.Value, statsSender);
             }
 
             // Telemetry is not enabled
             return new Telemetry();
-        }
-
-        IStatsdUDP CreateMetricsSender(Telemetry telemetry,
-                                       StatsdConfig config,
-                                       string statsdServerName)
-        {
-            var statsSenderData = CreateStatsSender(config, statsdServerName);
-            _statsSender = statsSenderData.Sender;
-            _statsBufferize = CreateStatsBufferize(telemetry,
-                                                   _statsSender,
-                                                   statsSenderData.BufferCapacity,
-                                                   config.Advanced);
-            return _statsBufferize;
         }
 
         class StatsSenderData
@@ -158,9 +146,6 @@ namespace StatsdClient
         {
             _telemetry?.Dispose();
             _telemetry = null;
-
-            _statsSenderTelemetry?.Dispose();
-            _statsSenderTelemetry = null;
 
             // _statsBufferize must be disposed before _statsSender to make
             // sure _statsBufferize does not send data to a disposed object.
