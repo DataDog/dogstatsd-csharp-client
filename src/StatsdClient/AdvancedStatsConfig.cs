@@ -4,18 +4,23 @@ namespace StatsdClient
 {
     public class AdvancedStatsConfig
     {
+        public AdvancedStatsConfig()
+        {
+            DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(100);
+        }
+
         /// <summary>
-        /// Metrics are sent asynchronously using a queue. 
+        /// Metrics are sent asynchronously using a queue.
         /// This value is the maximum number of metrics in the queue.
-        /// A small value reduces memory usage whereas an higher value reduces 
-        /// latency (When `MaxBlockDuration` is null) or the number of messages 
+        /// A small value reduces memory usage whereas an higher value reduces
+        /// latency (When `MaxBlockDuration` is null) or the number of messages
         /// dropped (When `MaxBlockDuration` is not null).
         /// </summary>
         public int MaxMetricsInAsyncQueue { get; set; } = 100 * 1000;
 
         /// <summary>
         /// If there are more metrics than `MaxMetricsInAsyncQueue` waiting to be sent:
-        ///     - if `MaxBlockDuration` is null, the metric send by a call to a 
+        ///     - if `MaxBlockDuration` is null, the metric send by a call to a
         ///       `DogStatsd` or `DogStatsdService` method will be dropped.
         ///     - If `MaxBlockDuration` is not null, the metric send by a call to a
         ///       `DogStatsd` or `DogStatsdService` method will block for at most
@@ -41,10 +46,5 @@ namespace StatsdClient
         /// When this value is set at null, telemetry is disabled.
         /// </summary>
         public TimeSpan? TelemetryFlushInterval { get; set; } = TimeSpan.FromSeconds(30);
-
-        public AdvancedStatsConfig()
-        {
-            DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(100);
-        }
     }
 }
