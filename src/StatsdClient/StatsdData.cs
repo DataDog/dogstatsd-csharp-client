@@ -7,7 +7,6 @@ namespace StatsdClient
     {
         private StatsSender _statsSender;
         private StatsBufferize _statsBufferize;
-        private Telemetry _telemetry;
 
         public StatsdData(Statsd statsd,
                           StatsBufferize statsBufferize,
@@ -15,26 +14,29 @@ namespace StatsdClient
                           Telemetry telemetry)
         {
             Statsd = statsd;
+            Telemetry = telemetry;
             _statsBufferize = statsBufferize;
             _statsSender = statsSender;
-            _telemetry = telemetry;
         }
 
-        public Statsd Statsd { get; }
+        public Statsd Statsd { get; private set; }
+        public Telemetry Telemetry { get; private set; }
 
         public void Dispose()
         {
             // _statsBufferize and _telemetry must be disposed before _statsSender to make
             // sure _statsSender does not received data when it is already disposed.
 
-            _telemetry?.Dispose();
-            _telemetry = null;
+            Telemetry?.Dispose();
+            Telemetry = null;
 
             _statsBufferize?.Dispose();
             _statsBufferize = null;
 
             _statsSender?.Dispose();
             _statsSender = null;
+
+            Statsd = null;
         }
     }
 }

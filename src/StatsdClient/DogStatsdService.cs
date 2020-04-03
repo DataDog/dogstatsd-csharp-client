@@ -27,7 +27,7 @@ namespace StatsdClient
             _prefix = config.Prefix;
 
             _statsdData = _statsdBuilder.BuildStatsData(config);
-            _statsD  = _statsdData.Statsd;
+            _statsD = _statsdData.Statsd;
         }
 
         public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
@@ -120,6 +120,8 @@ namespace StatsdClient
 
             return _prefix + "." + statName;
         }
+
+        public ITelemetryCounters TelemetryCounters => _statsdData?.Telemetry;
 
         public void Dispose()
         {

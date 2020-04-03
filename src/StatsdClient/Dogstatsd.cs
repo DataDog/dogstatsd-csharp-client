@@ -63,5 +63,7 @@ namespace StatsdClient
         public static void ServiceCheck(string name, Status status, int? timestamp = null, string hostname = null,
             string[] tags = null, string message = null) =>
                 _dogStatsdService.ServiceCheck(name, status, timestamp, hostname, tags, message);
+
+        public static ITelemetryCounters TelemetryCounters => _dogStatsdService.TelemetryCounters;
     }
 }

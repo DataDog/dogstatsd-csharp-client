@@ -7,7 +7,7 @@ namespace StatsdClient
     /// <summary>
     /// Telemetry sends telemetry metrics.
     /// </summary>
-    internal class Telemetry : IDisposable
+    internal class Telemetry : IDisposable, ITelemetryCounters
     {
         private int _metricsSent;
         private int _eventsSent;
@@ -32,6 +32,15 @@ namespace StatsdClient
         public static string PacketsSentMetricName = _telemetryPrefix + "packets_sent";
         public static string PacketsDroppedMetricName = _telemetryPrefix + "packets_dropped";
         public static string PacketsDroppedQueueMetricName = _telemetryPrefix + "packets_dropped_queue";
+
+        public int MetricsSent => _metricsSent;
+        public int EventsSent => _eventsSent;
+        public int ServiceChecksSent => _serviceChecksSent;
+        public int BytesSent => _bytesSent;
+        public int BytesDropped => _bytesDropped;
+        public int PacketsSent => _packetsSent;
+        public int PacketsDropped => _packetsDropped;
+        public int PacketsDroppedQueue => _packetsDroppedQueue;
 
         /// <summary>
         /// This constructor does not send telemetry.
