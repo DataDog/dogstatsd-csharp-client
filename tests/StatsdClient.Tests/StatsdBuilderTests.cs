@@ -36,8 +36,6 @@ namespace StatsdClient.Tests
         {
             foreach (var env in _envVarsToRestore)
                 Environment.SetEnvironmentVariable(env.Key, env.Value);
-
-            _statsdBuilder.Dispose();
         }
 
         [Test]
@@ -92,7 +90,7 @@ namespace StatsdClient.Tests
             conf.MaxBlockDuration = TimeSpan.FromMilliseconds(3);
             conf.DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(4);
 
-            _statsdBuilder.BuildStats(config);
+            BuildStatsData(config);
             _mock.Verify(m => m.CreateStatsBufferize(It.IsAny<Telemetry>(),
                                                      It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
                                                      conf.MaxMetricsInAsyncQueue,
@@ -106,7 +104,7 @@ namespace StatsdClient.Tests
             var config = CreateUDSConfig("server1");
             config.StatsdMaxUnixDomainSocketPacketSize = 20;
 
-            _statsdBuilder.BuildStats(config);
+            BuildStatsData(config);
             _mock.Verify(m => m.CreateStatsBufferize(It.IsAny<Telemetry>(),
                                                      It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize),
                                                      It.IsAny<int>(),
@@ -142,7 +140,7 @@ namespace StatsdClient.Tests
             _mock.Setup(m => m.CreateUnixDomainSocketStatsSender(It.IsAny<UnixEndPoint>(),
                                                                  It.IsAny<TimeSpan?>()))
                 .Callback<UnixEndPoint, TimeSpan?>((e, d) => endPoint = e);
-            _statsdBuilder.BuildStats(config);
+            BuildStatsData(config);
             Assert.NotNull(endPoint);
 
             return endPoint.Filename;
@@ -154,9 +152,16 @@ namespace StatsdClient.Tests
 
             _mock.Setup(m => m.CreateUDPStatsSender(It.IsAny<IPEndPoint>()))
                 .Callback<IPEndPoint>(e => endPoint = e);
-            _statsdBuilder.BuildStats(config);
+            BuildStatsData(config);
+
             Assert.NotNull(endPoint);
             return endPoint;
+        }
+
+        void BuildStatsData(StatsdConfig config)
+        {
+            var buildStatsData = _statsdBuilder.BuildStatsData(config);
+            buildStatsData.Dispose();
         }
 
         static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)

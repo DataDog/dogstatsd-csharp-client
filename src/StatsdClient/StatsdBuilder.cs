@@ -9,23 +9,18 @@ namespace StatsdClient
     /// <summary>
     /// StatsdBuilder builds an instance of `Statsd` from StatsdConfig.
     /// </summary>
-    class StatsdBuilder : IDisposable
+    class StatsdBuilder
     {
         public static readonly string UnixDomainSocketPrefix = "unix://";
 
         readonly IStatsBufferizeFactory _factory;
-
-        StatsSender _statsSender;
-        StatsBufferize _statsBufferize;
-        Telemetry _telemetry;
-
 
         public StatsdBuilder(IStatsBufferizeFactory factory)
         {
             _factory = factory;
         }
 
-        public Statsd BuildStats(StatsdConfig config)
+        public StatsdData BuildStatsData(StatsdConfig config)
         {
             var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
                     ? config.StatsdServerName
@@ -39,20 +34,20 @@ namespace StatsdClient
             }
 
             var statsSenderData = CreateStatsSender(config, statsdServerName);
-            _statsSender = statsSenderData.Sender;
-            _telemetry = CreateTelemetry(config, statsSenderData.Sender);
-            _statsBufferize = CreateStatsBufferize(_telemetry,
+            var statsSender = statsSenderData.Sender;
+            var telemetry = CreateTelemetry(config, statsSenderData.Sender);
+            var statsBufferize = CreateStatsBufferize(telemetry,
                                                    statsSenderData.Sender,
                                                    statsSenderData.BufferCapacity,
                                                    config.Advanced);
-            var statsD = new Statsd(_statsBufferize,
+            var statsD = new Statsd(statsBufferize,
                                     new RandomGenerator(),
                                     new StopWatchFactory(),
                                     "",
                                     config.ConstantTags,
-                                    _telemetry);
+                                    telemetry);
             statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
-            return statsD;
+            return new StatsdData(statsD, statsBufferize, statsSender, telemetry);
         }
 
         Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
@@ -140,19 +135,6 @@ namespace StatsdClient
             }
 
             return StatsdConfig.DefaultStatsdPort;
-        }
-
-        public void Dispose()
-        {
-            _telemetry?.Dispose();
-            _telemetry = null;
-
-            // _statsBufferize must be disposed before _statsSender to make
-            // sure _statsBufferize does not send data to a disposed object.
-            _statsBufferize?.Dispose();
-            _statsSender?.Dispose();
-            _statsBufferize = null;
-            _statsSender = null;
         }
     }
 }

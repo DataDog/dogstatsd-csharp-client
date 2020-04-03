@@ -104,6 +104,7 @@ namespace StatsdClient
 
         public void Dispose()
         {
+            _optionalTimer?.Change(Timeout.Infinite, Timeout.Infinite);
             _optionalTimer?.Dispose();
         }
     }
