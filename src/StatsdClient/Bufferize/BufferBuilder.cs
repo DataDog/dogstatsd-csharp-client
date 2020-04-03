@@ -6,12 +6,12 @@ namespace StatsdClient.Bufferize
     /// <summary>
     /// Append string values to a fixed size bytes buffer.
     /// </summary>
-    class BufferBuilder
+    internal class BufferBuilder
     {
-        readonly IBufferBuilderHandler _handler;
-        readonly byte[] _buffer;
-        readonly byte[] _separator;
-        readonly static Encoding _encoding = Encoding.UTF8;
+        private static readonly Encoding _encoding = Encoding.UTF8;
+        private readonly IBufferBuilderHandler _handler;
+        private readonly byte[] _buffer;
+        private readonly byte[] _separator;
 
         public BufferBuilder(
             IBufferBuilderHandler handler,
@@ -22,11 +22,14 @@ namespace StatsdClient.Bufferize
             _handler = handler;
             _separator = _encoding.GetBytes(separator);
             if (_separator.Length >= _buffer.Length)
+            {
                 throw new ArgumentException("separator is greater or equal to the bufferCapacity");
+            }
         }
 
         public int Length { get; private set; }
-        public int Capacity { get { return _buffer.Length; } }
+
+        public int Capacity => _buffer.Length;
 
         public static byte[] GetBytes(string message)
         {
@@ -38,13 +41,19 @@ namespace StatsdClient.Bufferize
             var byteCount = _encoding.GetByteCount(value);
 
             if (byteCount > Capacity)
+            {
                 return false;
+            }
 
             if (Length != 0)
+            {
                 byteCount += _separator.Length;
+            }
 
             if (Length + byteCount > Capacity)
+            {
                 this.HandleBufferAndReset();
+            }
 
             if (Length != 0)
             {
