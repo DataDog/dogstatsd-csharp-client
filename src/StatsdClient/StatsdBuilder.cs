@@ -46,7 +46,8 @@ namespace StatsdClient
                                     new RandomGenerator(),
                                     new StopWatchFactory(),
                                     "",
-                                    config.ConstantTags);
+                                    config.ConstantTags,
+                                    _telemetry);
             statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
             return statsD;
         }
