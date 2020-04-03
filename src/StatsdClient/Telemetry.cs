@@ -18,9 +18,9 @@ namespace StatsdClient
         private int _packetsDropped;
         private int _packetsDroppedQueue;
 
-        private readonly Timer _timer;
-        private readonly string[] _tags;
-        private readonly IStatsSender _statsSender;
+        private readonly Timer _optionalTimer;
+        private readonly string[] _optionalTags;
+        private readonly IStatsSender _optionalStatsSender;
 
         private static string _telemetryPrefix = "datadog.dogstatsd.client.";
 
@@ -40,7 +40,7 @@ namespace StatsdClient
 
         public Telemetry(string assemblyVersion, TimeSpan flushInterval, IStatsSender statsSender)
         {
-            _statsSender = statsSender;
+            _optionalStatsSender = statsSender;
 
             string transport;
             switch (statsSender.TransportType)
@@ -50,9 +50,9 @@ namespace StatsdClient
                 default: transport = statsSender.TransportType.ToString(); break;
             };
 
-            _tags = new[] { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
+            _optionalTags = new[] { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
 
-            _timer = new Timer(_ => Flush(),
+            _optionalTimer = new Timer(_ => Flush(),
                                null,
                                flushInterval,
                                flushInterval);
@@ -72,13 +72,16 @@ namespace StatsdClient
 
         void SendMetric(string metricName, int value)
         {
-            var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(string.Empty,
-                                                                         metricName,
-                                                                         value,
-                                                                         1.0,
-                                                                         _tags);
-            var bytes = BufferBuilder.GetBytes(message);
-            _statsSender.Send(bytes, bytes.Length);
+            if (_optionalStatsSender != null)
+            {
+                var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(string.Empty,
+                                                                             metricName,
+                                                                             value,
+                                                                             1.0,
+                                                                             _optionalTags);
+                var bytes = BufferBuilder.GetBytes(message);
+                _optionalStatsSender.Send(bytes, bytes.Length);
+            }
         }
 
         public void OnMetricSent() { Interlocked.Increment(ref _metricsSent); }
@@ -101,7 +104,7 @@ namespace StatsdClient
 
         public void Dispose()
         {
-            _timer.Dispose();
+            _optionalTimer?.Dispose();
         }
     }
 }

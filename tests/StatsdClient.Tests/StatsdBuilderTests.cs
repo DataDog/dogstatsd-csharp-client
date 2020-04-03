@@ -44,27 +44,27 @@ namespace StatsdClient.Tests
         public void StatsdServerName()
         {
             Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, null);
-            Assert.Throws<ArgumentNullException>(() => GetStatsdServerName(new StatsdConfig { }));
+            Assert.Throws<ArgumentNullException>(() => GetStatsdServerName(CreateConfig()));
 
-            Assert.AreEqual("0.0.0.1", GetStatsdServerName(new StatsdConfig { StatsdServerName = "0.0.0.1" }));
+            Assert.AreEqual("0.0.0.1", GetStatsdServerName(CreateConfig(statsdServerName: "0.0.0.1")));
 
             Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, "0.0.0.2");
-            Assert.AreEqual("0.0.0.2", GetStatsdServerName(new StatsdConfig { }));
+            Assert.AreEqual("0.0.0.2", GetStatsdServerName(CreateConfig()));
 
-            Assert.AreEqual("0.0.0.3", GetStatsdServerName(new StatsdConfig { StatsdServerName = "0.0.0.3" }));
+            Assert.AreEqual("0.0.0.3", GetStatsdServerName(CreateConfig(statsdServerName: "0.0.0.3")));
         }
 
         [Test]
         public void UDPPort()
         {
-            Assert.AreEqual(StatsdConfig.DefaultStatsdPort, GetUDPPort(new StatsdConfig { }));
+            Assert.AreEqual(StatsdConfig.DefaultStatsdPort, GetUDPPort(CreateConfig()));
 
-            Assert.AreEqual(1, GetUDPPort(new StatsdConfig { StatsdPort = 1 }));
+            Assert.AreEqual(1, GetUDPPort(CreateConfig(statsdPort: 1)));
 
             Environment.SetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR, "2");
-            Assert.AreEqual(2, GetUDPPort(new StatsdConfig { }));
+            Assert.AreEqual(2, GetUDPPort(CreateConfig()));
 
-            Assert.AreEqual(3, GetUDPPort(new StatsdConfig { StatsdPort = 3 }));
+            Assert.AreEqual(3, GetUDPPort(CreateConfig(statsdPort: 3)));
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace StatsdClient.Tests
 
             Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR,
                 StatsdBuilder.UnixDomainSocketPrefix + "server2");
-            Assert.AreEqual("server2", GetUDSStatsdServerName(new StatsdConfig { }));
+            Assert.AreEqual("server2", GetUDSStatsdServerName(CreateUDSConfig()));
 
             Assert.AreEqual("server3", GetUDSStatsdServerName(CreateUDSConfig("server3")));
         }
@@ -86,6 +86,7 @@ namespace StatsdClient.Tests
             var config = new StatsdConfig { };
             var conf = config.Advanced;
 
+            conf.TelemetryFlushInterval = null;
             config.StatsdMaxUDPPacketSize = 10;
             conf.MaxMetricsInAsyncQueue = 2;
             conf.MaxBlockDuration = TimeSpan.FromMilliseconds(3);
@@ -113,9 +114,13 @@ namespace StatsdClient.Tests
                                                      It.IsAny<TimeSpan>()));
         }
 
-        static StatsdConfig CreateUDSConfig(string server)
+        static StatsdConfig CreateUDSConfig(string server = null)
         {
-            return new StatsdConfig { StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + server };
+            var config = new StatsdConfig();
+            if (server != null)
+                config.StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + server;
+            config.Advanced.TelemetryFlushInterval = null;
+            return config;
         }
 
         int GetUDPPort(StatsdConfig config)
@@ -152,6 +157,15 @@ namespace StatsdClient.Tests
             _statsdBuilder.BuildStats(config);
             Assert.NotNull(endPoint);
             return endPoint;
+        }
+
+        static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
+        {
+            var config = new StatsdConfig { StatsdServerName = statsdServerName };
+            if (statsdPort.HasValue)
+                config.StatsdPort = statsdPort.Value;
+            config.Advanced.TelemetryFlushInterval = null;
+            return config;
         }
     }
 }
