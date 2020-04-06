@@ -19,48 +19,6 @@ namespace StatsdClient
         private readonly Telemetry _optionalTelemetry;
         private List<string> _commands = new List<string>();
 
-        public bool TruncateIfTooLong { get; set; }
-
-        public List<string> Commands
-        {
-            get { return _commands; }
-            private set { _commands = value; }
-        }
-
-        private IStopWatchFactory StopwatchFactory { get; set; }
-
-        private IStatsdUDP Udp { get; set; }
-
-        private IRandomGenerator RandomGenerator { get; set; }
-
-        private static string EscapeContent(string content)
-        {
-            return content
-                .Replace("\r", string.Empty)
-                .Replace("\n", "\\n");
-        }
-
-        private static string ConcatTags(string[] constantTags, string[] tags)
-        {
-            // avoid dealing with null arrays
-            constantTags = constantTags ?? EmptyStringArray;
-            tags = tags ?? EmptyStringArray;
-
-            if (constantTags.Length == 0 && tags.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            var allTags = constantTags.Concat(tags);
-            string concatenatedTags = string.Join(",", allTags);
-            return $"|#{concatenatedTags}";
-        }
-
-        private static string TruncateOverage(string str, int overage)
-        {
-            return str.Substring(0, str.Length - overage);
-        }
-
         internal Statsd(
             IStatsdUDP udp,
             IRandomGenerator randomGenerator,
@@ -117,6 +75,48 @@ namespace StatsdClient
         public Statsd(IStatsdUDP udp)
             : this(udp, string.Empty)
         {
+        }
+
+        public bool TruncateIfTooLong { get; set; }
+
+        public List<string> Commands
+        {
+            get { return _commands; }
+            private set { _commands = value; }
+        }
+
+        private IStopWatchFactory StopwatchFactory { get; set; }
+
+        private IStatsdUDP Udp { get; set; }
+
+        private IRandomGenerator RandomGenerator { get; set; }
+
+        private static string EscapeContent(string content)
+        {
+            return content
+                .Replace("\r", string.Empty)
+                .Replace("\n", "\\n");
+        }
+
+        private static string ConcatTags(string[] constantTags, string[] tags)
+        {
+            // avoid dealing with null arrays
+            constantTags = constantTags ?? EmptyStringArray;
+            tags = tags ?? EmptyStringArray;
+
+            if (constantTags.Length == 0 && tags.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var allTags = constantTags.Concat(tags);
+            string concatenatedTags = string.Join(",", allTags);
+            return $"|#{concatenatedTags}";
+        }
+
+        private static string TruncateOverage(string str, int overage)
+        {
+            return str.Substring(0, str.Length - overage);
         }
 
         public void Add<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null)

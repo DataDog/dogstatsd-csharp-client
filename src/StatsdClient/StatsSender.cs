@@ -13,28 +13,6 @@ namespace StatsdClient
 
         private static readonly TimeSpan NoBufferSpaceAvailableWait = TimeSpan.FromMilliseconds(10);
 
-        public static StatsSender CreateUDPStatsSender(IPEndPoint endPoint)
-        {
-            return new StatsSender(
-                StatsSenderTransportType.UDP,
-                endPoint,
-                AddressFamily.InterNetwork,
-                ProtocolType.Udp,
-                null);
-        }
-
-        public static StatsSender CreateUnixDomainSocketStatsSender(
-            UnixEndPoint endPoint,
-            TimeSpan? udsBufferFullBlockDuration)
-        {
-            return new StatsSender(
-                StatsSenderTransportType.UDS,
-                endPoint,
-                AddressFamily.Unix,
-                ProtocolType.IP,
-                udsBufferFullBlockDuration);
-        }
-
         private StatsSender(
             StatsSenderTransportType transport,
             EndPoint endPoint,
@@ -80,6 +58,28 @@ namespace StatsdClient
         }
 
         public StatsSenderTransportType TransportType { get; }
+
+        public static StatsSender CreateUDPStatsSender(IPEndPoint endPoint)
+        {
+            return new StatsSender(
+                StatsSenderTransportType.UDP,
+                endPoint,
+                AddressFamily.InterNetwork,
+                ProtocolType.Udp,
+                null);
+        }
+
+        public static StatsSender CreateUnixDomainSocketStatsSender(
+            UnixEndPoint endPoint,
+            TimeSpan? udsBufferFullBlockDuration)
+        {
+            return new StatsSender(
+                StatsSenderTransportType.UDS,
+                endPoint,
+                AddressFamily.Unix,
+                ProtocolType.IP,
+                udsBufferFullBlockDuration);
+        }
 
         /// <summary>
         /// Send the buffer.

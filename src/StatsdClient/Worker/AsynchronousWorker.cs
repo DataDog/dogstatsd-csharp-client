@@ -17,10 +17,6 @@ namespace StatsdClient.Worker
         private volatile bool _terminate = false;
         private static TimeSpan maxWaitDurationInDispose = TimeSpan.FromSeconds(3);
 
-        public static TimeSpan MinWaitDuration { get; } = TimeSpan.FromMilliseconds(1);
-
-        public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
-
         public AsynchronousWorker(
             IAsynchronousWorkerHandler<T> handler,
             IWaiter waiter,
@@ -47,6 +43,10 @@ namespace StatsdClient.Worker
                 _workers.Add(Task.Run(() => Dequeue()));
             }
         }
+
+        public static TimeSpan MinWaitDuration { get; } = TimeSpan.FromMilliseconds(1);
+
+        public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
 
         public bool TryEnqueue(T value)
         {

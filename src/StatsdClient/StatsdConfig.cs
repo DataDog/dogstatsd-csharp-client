@@ -10,6 +10,13 @@ namespace StatsdClient
         public const string DD_DOGSTATSD_PORT_ENV_VAR = "DD_DOGSTATSD_PORT";
         public const string DD_AGENT_HOST_ENV_VAR = "DD_AGENT_HOST";
 
+        public StatsdConfig()
+        {
+            StatsdPort = 0;
+            StatsdMaxUDPPacketSize = DefaultStatsdMaxUDPPacketSize;
+            Advanced = new AdvancedStatsConfig();
+        }
+
         public string StatsdServerName { get; set; }
 
         public int StatsdPort { get; set; }
@@ -25,12 +32,5 @@ namespace StatsdClient
         public AdvancedStatsConfig Advanced { get; }
 
         public string[] ConstantTags { get; set; }
-
-        public StatsdConfig()
-        {
-            StatsdPort = 0;
-            StatsdMaxUDPPacketSize = DefaultStatsdMaxUDPPacketSize;
-            Advanced = new AdvancedStatsConfig();
-        }
     }
 }

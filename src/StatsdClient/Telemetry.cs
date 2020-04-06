@@ -24,6 +24,34 @@ namespace StatsdClient
 
         private static string _telemetryPrefix = "datadog.dogstatsd.client.";
 
+        /// <summary>
+        /// This constructor does not send telemetry.
+        /// </summary>
+        public Telemetry()
+        {
+        }
+
+        public Telemetry(string assemblyVersion, TimeSpan flushInterval, IStatsSender statsSender)
+        {
+            _optionalStatsSender = statsSender;
+
+            string transport;
+            switch (statsSender.TransportType)
+            {
+                case StatsSenderTransportType.UDP: transport = "udp"; break;
+                case StatsSenderTransportType.UDS: transport = "uds"; break;
+                default: transport = statsSender.TransportType.ToString(); break;
+            }
+
+            _optionalTags = new[] { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
+
+            _optionalTimer = new Timer(
+                _ => Flush(),
+                null,
+                flushInterval,
+                flushInterval);
+        }
+
         public static string MetricsMetricName => _telemetryPrefix + "metrics";
 
         public static string EventsMetricName => _telemetryPrefix + "events";
@@ -55,34 +83,6 @@ namespace StatsdClient
         public int PacketsDropped => _packetsDropped;
 
         public int PacketsDroppedQueue => _packetsDroppedQueue;
-
-        /// <summary>
-        /// This constructor does not send telemetry.
-        /// </summary>
-        public Telemetry()
-        {
-        }
-
-        public Telemetry(string assemblyVersion, TimeSpan flushInterval, IStatsSender statsSender)
-        {
-            _optionalStatsSender = statsSender;
-
-            string transport;
-            switch (statsSender.TransportType)
-            {
-                case StatsSenderTransportType.UDP: transport = "udp"; break;
-                case StatsSenderTransportType.UDS: transport = "uds"; break;
-                default: transport = statsSender.TransportType.ToString(); break;
-            }
-
-            _optionalTags = new[] { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
-
-            _optionalTimer = new Timer(
-                _ => Flush(),
-                null,
-                flushInterval,
-                flushInterval);
-        }
 
         public void Flush()
         {

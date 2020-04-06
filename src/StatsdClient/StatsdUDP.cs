@@ -10,17 +10,6 @@ namespace StatsdClient
     [ObsoleteAttribute("This class will become private in a future release.")]
     public class StatsdUDP : IDisposable, IStatsdUDP
     {
-        public IPEndPoint IPEndpoint { get; private set; }
-
-        private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
-                                                   // Set to zero for no limit.
-
-        private Socket UDPSocket { get; set; }
-
-        private string Name { get; set; }
-
-        private int Port { get; set; }
-
         public StatsdUDP(int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
         : this(GetHostNameFromEnvVar(), GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort), maxUDPPacketSize)
         {
@@ -48,6 +37,17 @@ namespace StatsdClient
 
             IPEndpoint = new IPEndPoint(ipAddress, Port);
         }
+
+        public IPEndPoint IPEndpoint { get; private set; }
+
+        private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
+                                                   // Set to zero for no limit.
+
+        private Socket UDPSocket { get; set; }
+
+        private string Name { get; set; }
+
+        private int Port { get; set; }
 
         private static string GetHostNameFromEnvVar()
         {
