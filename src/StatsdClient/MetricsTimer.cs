@@ -31,6 +31,8 @@ namespace StatsdClient
             }
         }
 
+        public List<string> Tags { get; set; }
+
         public void Dispose()
         {
             if (!_disposed)
@@ -48,7 +50,5 @@ namespace StatsdClient
                 }
             }
         }
-
-        public List<string> Tags { get; set; }
     }
 }

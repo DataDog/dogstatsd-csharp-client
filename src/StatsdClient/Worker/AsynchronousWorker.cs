@@ -54,6 +54,24 @@ namespace StatsdClient.Worker
             return _queue.TryEnqueue(value);
         }
 
+        public void Dispose()
+        {
+            var remainingWaitCount = maxWaitDurationInDispose.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
+            while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
+            {
+                _waiter.Wait(MinWaitDuration);
+                --remainingWaitCount;
+            }
+
+            _terminate = true;
+            foreach (var worker in _workers)
+            {
+                worker.Wait();
+            }
+
+            _workers.Clear();
+        }
+
         private void Dequeue()
         {
             var waitDuration = MinWaitDuration;
@@ -84,24 +102,6 @@ namespace StatsdClient.Worker
                     }
                 }
             }
-        }
-
-        public void Dispose()
-        {
-            var remainingWaitCount = maxWaitDurationInDispose.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
-            while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
-            {
-                _waiter.Wait(MinWaitDuration);
-                --remainingWaitCount;
-            }
-
-            _terminate = true;
-            foreach (var worker in _workers)
-            {
-                worker.Wait();
-            }
-
-            _workers.Clear();
         }
     }
 }

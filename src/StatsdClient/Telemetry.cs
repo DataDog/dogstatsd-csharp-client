@@ -96,21 +96,6 @@ namespace StatsdClient
             SendMetric(PacketsDroppedQueueMetricName, Interlocked.Exchange(ref _packetsDroppedQueue, 0));
         }
 
-        private void SendMetric(string metricName, int value)
-        {
-            if (_optionalStatsSender != null)
-            {
-                var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(
-                    string.Empty,
-                    metricName,
-                    value,
-                    1.0,
-                    _optionalTags);
-                var bytes = BufferBuilder.GetBytes(message);
-                _optionalStatsSender.Send(bytes, bytes.Length);
-            }
-        }
-
         public void OnMetricSent()
         {
             Interlocked.Increment(ref _metricsSent);
@@ -147,6 +132,21 @@ namespace StatsdClient
         {
             _optionalTimer?.Change(Timeout.Infinite, Timeout.Infinite);
             _optionalTimer?.Dispose();
+        }
+
+        private void SendMetric(string metricName, int value)
+        {
+            if (_optionalStatsSender != null)
+            {
+                var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(
+                    string.Empty,
+                    metricName,
+                    value,
+                    1.0,
+                    _optionalTags);
+                var bytes = BufferBuilder.GetBytes(message);
+                _optionalStatsSender.Send(bytes, bytes.Length);
+            }
         }
     }
 }

@@ -8,7 +8,8 @@ namespace StatsdClient
 
     internal interface IStatsSender
     {
-        bool Send(byte[] buffer, int length);
         StatsSenderTransportType TransportType { get; }
+
+        bool Send(byte[] buffer, int length);
     }
 }
