@@ -1,9 +1,9 @@
 namespace StatsdClient
 {
-    enum StatsSenderTransportType
+    internal enum StatsSenderTransportType
     {
         UDS,
-        UDP
+        UDP,
     }
 
     internal interface IStatsSender
