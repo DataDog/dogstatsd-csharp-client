@@ -14,14 +14,18 @@ namespace StatsdClient
     {
         private const string ENTITY_ID_INTERNAL_TAG_KEY = "dd.internal.entity_id";
         private static readonly string[] EmptyStringArray = new string[0];
-
-        private IStopWatchFactory StopwatchFactory { get; set; }
-        private IStatsdUDP Udp { get; set; }
-        private IRandomGenerator RandomGenerator { get; set; }
         private readonly string _prefix;
         private readonly string[] _constantTags;
-        public bool TruncateIfTooLong { get; set; }
         private readonly Telemetry _optionalTelemetry;
+        private List<string> _commands = new List<string>();
+
+        private IStopWatchFactory StopwatchFactory { get; set; }
+
+        private IStatsdUDP Udp { get; set; }
+
+        private IRandomGenerator RandomGenerator { get; set; }
+
+        public bool TruncateIfTooLong { get; set; }
 
         public List<string> Commands
         {
@@ -29,7 +33,6 @@ namespace StatsdClient
             private set { _commands = value; }
         }
 
-        private List<string> _commands = new List<string>();
 
         public abstract class Metric : ICommandType
         {

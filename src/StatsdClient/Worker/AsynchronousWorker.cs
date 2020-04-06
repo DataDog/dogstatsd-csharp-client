@@ -10,17 +10,16 @@ namespace StatsdClient.Worker
     /// </summary>
     internal class AsynchronousWorker<T> : IDisposable
     {
-        public static TimeSpan MinWaitDuration { get; } = TimeSpan.FromMilliseconds(1);
-
-        public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
-
-        private static TimeSpan maxWaitDurationInDispose = TimeSpan.FromSeconds(3);
-
         private readonly ConcurrentBoundedQueue<T> _queue;
         private readonly List<Task> _workers = new List<Task>();
         private readonly IAsynchronousWorkerHandler<T> _handler;
         private readonly IWaiter _waiter;
         private volatile bool _terminate = false;
+        private static TimeSpan maxWaitDurationInDispose = TimeSpan.FromSeconds(3);
+
+        public static TimeSpan MinWaitDuration { get; } = TimeSpan.FromMilliseconds(1);
+
+        public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
 
         public AsynchronousWorker(
             IAsynchronousWorkerHandler<T> handler,
