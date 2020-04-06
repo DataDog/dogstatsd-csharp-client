@@ -9,8 +9,8 @@ namespace StatsdClient
         private readonly string _name;
         private readonly DogStatsdService _dogStatsd;
         private readonly Stopwatch _stopWatch;
-        private bool _disposed;
         private readonly double _sampleRate;
+        private bool _disposed;
 
         public MetricsTimer(string name, double sampleRate = 1.0, string[] tags = null)
             : this(null, name, sampleRate, tags)
