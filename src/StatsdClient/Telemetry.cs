@@ -24,28 +24,44 @@ namespace StatsdClient
 
         private static string _telemetryPrefix = "datadog.dogstatsd.client.";
 
-        public static string MetricsMetricName = _telemetryPrefix + "metrics";
-        public static string EventsMetricName = _telemetryPrefix + "events";
-        public static string ServiceCheckMetricName = _telemetryPrefix + "service_checks";
-        public static string BytesSentMetricName = _telemetryPrefix + "bytes_sent";
-        public static string BytesDroppedMetricName = _telemetryPrefix + "bytes_dropped";
-        public static string PacketsSentMetricName = _telemetryPrefix + "packets_sent";
-        public static string PacketsDroppedMetricName = _telemetryPrefix + "packets_dropped";
-        public static string PacketsDroppedQueueMetricName = _telemetryPrefix + "packets_dropped_queue";
+        public static string MetricsMetricName => _telemetryPrefix + "metrics";
+
+        public static string EventsMetricName => _telemetryPrefix + "events";
+
+        public static string ServiceCheckMetricName => _telemetryPrefix + "service_checks";
+
+        public static string BytesSentMetricName => _telemetryPrefix + "bytes_sent";
+
+        public static string BytesDroppedMetricName => _telemetryPrefix + "bytes_dropped";
+
+        public static string PacketsSentMetricName => _telemetryPrefix + "packets_sent";
+
+        public static string PacketsDroppedMetricName => _telemetryPrefix + "packets_dropped";
+
+        public static string PacketsDroppedQueueMetricName => _telemetryPrefix + "packets_dropped_queue";
 
         public int MetricsSent => _metricsSent;
+
         public int EventsSent => _eventsSent;
+
         public int ServiceChecksSent => _serviceChecksSent;
+
         public int BytesSent => _bytesSent;
+
         public int BytesDropped => _bytesDropped;
+
         public int PacketsSent => _packetsSent;
+
         public int PacketsDropped => _packetsDropped;
+
         public int PacketsDroppedQueue => _packetsDroppedQueue;
 
         /// <summary>
         /// This constructor does not send telemetry.
         /// </summary>
-        public Telemetry() { }
+        public Telemetry()
+        {
+        }
 
         public Telemetry(string assemblyVersion, TimeSpan flushInterval, IStatsSender statsSender)
         {
@@ -57,14 +73,15 @@ namespace StatsdClient
                 case StatsSenderTransportType.UDP: transport = "udp"; break;
                 case StatsSenderTransportType.UDS: transport = "uds"; break;
                 default: transport = statsSender.TransportType.ToString(); break;
-            };
+            }
 
             _optionalTags = new[] { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
 
-            _optionalTimer = new Timer(_ => Flush(),
-                               null,
-                               flushInterval,
-                               flushInterval);
+            _optionalTimer = new Timer(
+                _ => Flush(),
+                null,
+                flushInterval,
+                flushInterval);
         }
 
         public void Flush()
@@ -79,23 +96,35 @@ namespace StatsdClient
             SendMetric(PacketsDroppedQueueMetricName, Interlocked.Exchange(ref _packetsDroppedQueue, 0));
         }
 
-        void SendMetric(string metricName, int value)
+        private void SendMetric(string metricName, int value)
         {
             if (_optionalStatsSender != null)
             {
-                var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(string.Empty,
-                                                                             metricName,
-                                                                             value,
-                                                                             1.0,
-                                                                             _optionalTags);
+                var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(
+                    string.Empty,
+                    metricName,
+                    value,
+                    1.0,
+                    _optionalTags);
                 var bytes = BufferBuilder.GetBytes(message);
                 _optionalStatsSender.Send(bytes, bytes.Length);
             }
         }
 
-        public void OnMetricSent() { Interlocked.Increment(ref _metricsSent); }
-        public void OnEventSent() { Interlocked.Increment(ref _eventsSent); }
-        public void OnServiceCheckSent() { Interlocked.Increment(ref _serviceChecksSent); }
+        public void OnMetricSent()
+        {
+            Interlocked.Increment(ref _metricsSent);
+        }
+
+        public void OnEventSent()
+        {
+            Interlocked.Increment(ref _eventsSent);
+        }
+
+        public void OnServiceCheckSent()
+        {
+            Interlocked.Increment(ref _serviceChecksSent);
+        }
 
         public void OnPacketSent(int packetSize)
         {
@@ -109,7 +138,10 @@ namespace StatsdClient
             Interlocked.Add(ref _bytesDropped, packetSize);
         }
 
-        public void OnPacketsDroppedQueue() { Interlocked.Increment(ref _packetsDroppedQueue); }
+        public void OnPacketsDroppedQueue()
+        {
+            Interlocked.Increment(ref _packetsDroppedQueue);
+        }
 
         public void Dispose()
         {
