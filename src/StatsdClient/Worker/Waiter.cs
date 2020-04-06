@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace StatsdClient.Worker
 {
-    class Waiter : IWaiter
+    internal class Waiter : IWaiter
     {
         public void Wait(TimeSpan duration)
         {

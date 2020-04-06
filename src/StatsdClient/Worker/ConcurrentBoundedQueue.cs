@@ -7,12 +7,12 @@ namespace StatsdClient.Worker
     /// ConcurrentBoundedQueue is a ConcurrentQueue with a bounded number of items.
     /// Note: Value is not enqueued when the queue is full.
     /// </summary>
-    class ConcurrentBoundedQueue<T>
+    internal class ConcurrentBoundedQueue<T>
     {
-        readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+        private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 
         // Queue size. It is much faster than calling ConcurrentQueue<T>.Count
-        int _queueCurrentSize = 0;
+        private int _queueCurrentSize = 0;
 
         public ConcurrentBoundedQueue(int maxItemCount)
         {
@@ -39,10 +39,12 @@ namespace StatsdClient.Worker
                 Interlocked.Decrement(ref _queueCurrentSize);
                 return true;
             }
+
             return false;
         }
 
-        public int QueueCurrentSize { get { return _queueCurrentSize; } }
+        public int QueueCurrentSize => _queueCurrentSize;
+
         public int MaxItemCount { get; }
     }
 }
