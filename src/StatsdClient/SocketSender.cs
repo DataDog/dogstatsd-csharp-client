@@ -9,7 +9,7 @@ namespace StatsdClient
     ///----------------------------------------------------------------------------
     /// SocketSender splits a message before sending them.
     ///----------------------------------------------------------------------------
-    static class SocketSender
+    internal static class SocketSender
     {
         public static void Send(int maxPacketSize, string command, Action<byte[]> sender)
         {
@@ -42,6 +42,7 @@ namespace StatsdClient
 
                         return; // We're done here if we were able to split the message.
                     }
+
                     // At this point we found an oversized message but we weren't able to find a
                     // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message
                     // will fail silently if the user is running in release mode or report a SocketException if the user is
@@ -50,13 +51,14 @@ namespace StatsdClient
                     // be sent without issue.
                 }
             }
+
             sender(encodedCommand);
         }
 
         public static async Task SendAsync(
             EndPoint endpoint,
             Socket socket,
-            int maxPacketSize, 
+            int maxPacketSize,
             ArraySegment<byte> encodedCommand)
         {
             if (maxPacketSize > 0 && encodedCommand.Count > maxPacketSize)
@@ -82,6 +84,7 @@ namespace StatsdClient
 
                         return; // We're done here if we were able to split the message.
                     }
+
                     // At this point we found an oversized message but we weren't able to find a
                     // newline to split upon. We'll still send it to the UDP socket, which upon sending an oversized message
                     // will fail silently if the user is running in release mode or report a SocketException if the user is
@@ -90,6 +93,7 @@ namespace StatsdClient
                     // be sent without issue.
                 }
             }
+
             var tcs = new TaskCompletionSource<object>();
 
             var args = new SocketAsyncEventArgs
@@ -98,7 +102,8 @@ namespace StatsdClient
                 SocketFlags = SocketFlags.None,
             };
             args.SetBuffer(encodedCommand.Array, encodedCommand.Offset, encodedCommand.Count);
-            args.Completed += new EventHandler<SocketAsyncEventArgs>((object sender, SocketAsyncEventArgs eventArgs) => {
+            args.Completed += new EventHandler<SocketAsyncEventArgs>((object sender, SocketAsyncEventArgs eventArgs) =>
+            {
                 if (eventArgs.SocketError == SocketError.Success)
                 {
                     tcs.SetResult(null);
