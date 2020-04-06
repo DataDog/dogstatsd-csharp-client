@@ -8,10 +8,11 @@ namespace StatsdClient
         private StatsSender _statsSender;
         private StatsBufferize _statsBufferize;
 
-        public StatsdData(Statsd statsd,
-                          StatsBufferize statsBufferize,
-                          StatsSender statsSender,
-                          Telemetry telemetry)
+        public StatsdData(
+            Statsd statsd,
+            StatsBufferize statsBufferize,
+            StatsSender statsSender,
+            Telemetry telemetry)
         {
             Statsd = statsd;
             Telemetry = telemetry;
@@ -20,6 +21,7 @@ namespace StatsdClient
         }
 
         public Statsd Statsd { get; private set; }
+
         public Telemetry Telemetry { get; private set; }
 
         public void Dispose()

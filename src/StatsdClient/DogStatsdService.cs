@@ -15,13 +15,19 @@ namespace StatsdClient
         public void Configure(StatsdConfig config)
         {
             if (_statsdBuilder == null)
+            {
                 throw new ObjectDisposedException(nameof(DogStatsdService));
+            }
 
             if (config == null)
+            {
                 throw new ArgumentNullException("config");
+            }
 
             if (_config != null)
+            {
                 throw new InvalidOperationException("Configuration for DogStatsdService already performed");
+            }
 
             _config = config;
             _prefix = config.Prefix;

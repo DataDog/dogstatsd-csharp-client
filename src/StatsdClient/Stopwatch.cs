@@ -19,7 +19,7 @@ namespace StatsdClient
 
         public int ElapsedMilliseconds()
         {
-            return (int) unchecked(_stopwatch.ElapsedMilliseconds);
+            return (int)unchecked(_stopwatch.ElapsedMilliseconds);
         }
     }
 }
