@@ -19,12 +19,6 @@ namespace StatsdClient
         private readonly Telemetry _optionalTelemetry;
         private List<string> _commands = new List<string>();
 
-        private IStopWatchFactory StopwatchFactory { get; set; }
-
-        private IStatsdUDP Udp { get; set; }
-
-        private IRandomGenerator RandomGenerator { get; set; }
-
         public bool TruncateIfTooLong { get; set; }
 
         public List<string> Commands
@@ -33,6 +27,11 @@ namespace StatsdClient
             private set { _commands = value; }
         }
 
+        private IStopWatchFactory StopwatchFactory { get; set; }
+
+        private IStatsdUDP Udp { get; set; }
+
+        private IRandomGenerator RandomGenerator { get; set; }
 
         public abstract class Metric : ICommandType
         {
