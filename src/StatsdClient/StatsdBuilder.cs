@@ -68,13 +68,6 @@ namespace StatsdClient
             return new Telemetry();
         }
 
-        private class StatsSenderData
-        {
-            public StatsSender Sender { get; set; }
-
-            public int BufferCapacity { get; set; }
-        }
-
         private StatsSenderData CreateStatsSender(StatsdConfig config, string statsdServerName)
         {
             var statsSenderData = new StatsSenderData();
@@ -144,6 +137,13 @@ namespace StatsdClient
             }
 
             return StatsdConfig.DefaultStatsdPort;
+        }
+
+        private class StatsSenderData
+        {
+            public StatsSender Sender { get; set; }
+
+            public int BufferCapacity { get; set; }
         }
     }
 }
