@@ -9,11 +9,11 @@ namespace StatsdClient
     /// <summary>
     /// StatsdBuilder builds an instance of `Statsd` from StatsdConfig.
     /// </summary>
-    class StatsdBuilder
+    internal class StatsdBuilder
     {
         public static readonly string UnixDomainSocketPrefix = "unix://";
 
-        readonly IStatsBufferizeFactory _factory;
+        private readonly IStatsBufferizeFactory _factory;
 
         public StatsdBuilder(IStatsBufferizeFactory factory)
         {
@@ -36,21 +36,23 @@ namespace StatsdClient
             var statsSenderData = CreateStatsSender(config, statsdServerName);
             var statsSender = statsSenderData.Sender;
             var telemetry = CreateTelemetry(config, statsSenderData.Sender);
-            var statsBufferize = CreateStatsBufferize(telemetry,
-                                                   statsSenderData.Sender,
-                                                   statsSenderData.BufferCapacity,
-                                                   config.Advanced);
-            var statsD = new Statsd(statsBufferize,
-                                    new RandomGenerator(),
-                                    new StopWatchFactory(),
-                                    "",
-                                    config.ConstantTags,
-                                    telemetry);
+            var statsBufferize = CreateStatsBufferize(
+                telemetry,
+                statsSenderData.Sender,
+                statsSenderData.BufferCapacity,
+                config.Advanced);
+            var statsD = new Statsd(
+                statsBufferize,
+                new RandomGenerator(),
+                new StopWatchFactory(),
+                string.Empty,
+                config.ConstantTags,
+                telemetry);
             statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
             return new StatsdData(statsD, statsBufferize, statsSender, telemetry);
         }
 
-        Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
+        private Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
 
@@ -66,13 +68,14 @@ namespace StatsdClient
             return new Telemetry();
         }
 
-        class StatsSenderData
+        private class StatsSenderData
         {
             public StatsSender Sender { get; set; }
+
             public int BufferCapacity { get; set; }
         }
 
-        StatsSenderData CreateStatsSender(StatsdConfig config, string statsdServerName)
+        private StatsSenderData CreateStatsSender(StatsdConfig config, string statsdServerName)
         {
             var statsSenderData = new StatsSenderData();
 
@@ -80,8 +83,9 @@ namespace StatsdClient
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                statsSenderData.Sender = _factory.CreateUnixDomainSocketStatsSender(endPoint,
-                                                                          config.Advanced.UDSBufferFullBlockDuration);
+                statsSenderData.Sender = _factory.CreateUnixDomainSocketStatsSender(
+                    endPoint,
+                    config.Advanced.UDSBufferFullBlockDuration);
                 statsSenderData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
@@ -93,7 +97,7 @@ namespace StatsdClient
             return statsSenderData;
         }
 
-        StatsBufferize CreateStatsBufferize(
+        private StatsBufferize CreateStatsBufferize(
             Telemetry telemetry,
             StatsSender statsSender,
             int bufferCapacity,
@@ -112,7 +116,7 @@ namespace StatsdClient
             return statsBufferize;
         }
 
-        StatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
+        private StatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
         {
             var address = StatsdUDP.GetIpv4Address(statsdServerName);
             var port = GetPort(config);
@@ -121,16 +125,21 @@ namespace StatsdClient
             return _factory.CreateUDPStatsSender(endPoint);
         }
 
-        static int GetPort(StatsdConfig config)
+        private static int GetPort(StatsdConfig config)
         {
             if (config.StatsdPort != 0)
+            {
                 return config.StatsdPort;
+            }
 
             var portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
             if (!string.IsNullOrEmpty(portString))
             {
-                if (Int32.TryParse(portString, out var port))
+                if (int.TryParse(portString, out var port))
+                {
                     return port;
+                }
+
                 throw new ArgumentException($"Environment Variable '{StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR}' bad format: {portString}");
             }
 
