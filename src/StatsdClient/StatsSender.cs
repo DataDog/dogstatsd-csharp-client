@@ -1,38 +1,41 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Mono.Unix;
 using System.Threading.Tasks;
+using Mono.Unix;
 
 namespace StatsdClient
 {
-    class StatsSender : IStatsSender, IDisposable
+    internal class StatsSender : IStatsSender, IDisposable
     {
-        readonly Socket _socket;
-        readonly int _noBufferSpaceAvailableRetryCount;
+        private readonly Socket _socket;
+        private readonly int _noBufferSpaceAvailableRetryCount;
 
-        static readonly TimeSpan NoBufferSpaceAvailableWait = TimeSpan.FromMilliseconds(10);
+        private static readonly TimeSpan NoBufferSpaceAvailableWait = TimeSpan.FromMilliseconds(10);
 
         public static StatsSender CreateUDPStatsSender(IPEndPoint endPoint)
         {
-            return new StatsSender(StatsSenderTransportType.UDP,
-                                   endPoint,
-                                   AddressFamily.InterNetwork,
-                                   ProtocolType.Udp,
-                                   null);
+            return new StatsSender(
+                StatsSenderTransportType.UDP,
+                endPoint,
+                AddressFamily.InterNetwork,
+                ProtocolType.Udp,
+                null);
         }
 
-        public static StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint,
-                                                                    TimeSpan? udsBufferFullBlockDuration)
+        public static StatsSender CreateUnixDomainSocketStatsSender(
+            UnixEndPoint endPoint,
+            TimeSpan? udsBufferFullBlockDuration)
         {
-            return new StatsSender(StatsSenderTransportType.UDS,
-                                   endPoint,
-                                   AddressFamily.Unix,
-                                   ProtocolType.IP,
-                                   udsBufferFullBlockDuration);
+            return new StatsSender(
+                StatsSenderTransportType.UDS,
+                endPoint,
+                AddressFamily.Unix,
+                ProtocolType.IP,
+                udsBufferFullBlockDuration);
         }
 
-        StatsSender(
+        private StatsSender(
             StatsSenderTransportType transport,
             EndPoint endPoint,
             AddressFamily addressFamily,
@@ -59,6 +62,7 @@ namespace StatsdClient
                     case StatsSenderTransportType.UDS: transportStr = "UDP"; break;
                     default: transportStr = transport.ToString(); break;
                 }
+
                 throw new NotSupportedException($"{transportStr} is not supported on your operating system.", e);
             }
 
@@ -71,6 +75,7 @@ namespace StatsdClient
             {
                 // It is not supported on Windows for Dgram with UDP.
             }
+
             _socket.Connect(endPoint);
         }
 
@@ -78,7 +83,7 @@ namespace StatsdClient
 
         /// <summary>
         /// Send the buffer.
-        /// Must be thread safe. 
+        /// Must be thread safe.
         /// </summary>
         public bool Send(byte[] buffer, int length)
         {
@@ -94,6 +99,7 @@ namespace StatsdClient
                     Task.Delay(NoBufferSpaceAvailableWait).Wait();
                 }
             }
+
             return false;
         }
 
