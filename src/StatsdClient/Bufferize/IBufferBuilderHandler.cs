@@ -1,6 +1,6 @@
 namespace StatsdClient.Bufferize
 {
-    interface IBufferBuilderHandler
+    internal interface IBufferBuilderHandler
     {
         void Handle(byte[] buffer, int length);
     }

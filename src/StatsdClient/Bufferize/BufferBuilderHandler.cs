@@ -1,7 +1,7 @@
 namespace StatsdClient.Bufferize
 {
     /// <summary>
-    /// BufferBuilderHandler forwards metrics to StatsSender and update telemetry.  
+    /// BufferBuilderHandler forwards metrics to StatsSender and update telemetry.
     /// </summary>
     internal class BufferBuilderHandler : IBufferBuilderHandler
     {
