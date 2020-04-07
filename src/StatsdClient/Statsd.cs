@@ -218,7 +218,7 @@ namespace StatsdClient
                 return;
             }
 
-            Send(1 == count ? Commands[0] : string.Join("\n", Commands.ToArray()));
+            Send(count == 1 ? Commands[0] : string.Join("\n", Commands.ToArray()));
         }
 
         public Task SendAsync()
@@ -229,7 +229,7 @@ namespace StatsdClient
                 return Task.FromResult((object)null);
             }
 
-            return SendAsync(1 == count ? Commands[0] : string.Join("\n", Commands.ToArray()));
+            return SendAsync(count == 1 ? Commands[0] : string.Join("\n", Commands.ToArray()));
         }
 
         public void Add(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null)

@@ -49,31 +49,6 @@ namespace StatsdClient
 
         private int Port { get; set; }
 
-        private static string GetHostNameFromEnvVar()
-        {
-            return Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
-        }
-
-        private static int GetPortFromEnvVar(int defaultValue)
-        {
-            int port = defaultValue;
-            string portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
-
-            if (portString != null)
-            {
-                try
-                {
-                    port = int.Parse(portString);
-                }
-                catch (FormatException)
-                {
-                    throw new ArgumentException("Environment Variable 'DD_DOGSTATSD_PORT' bad format");
-                }
-            }
-
-            return port;
-        }
-
         public void Send(string command)
         {
             SocketSender.Send(
@@ -127,6 +102,31 @@ namespace StatsdClient
             }
 
             return ipAddress;
+        }
+
+        private static string GetHostNameFromEnvVar()
+        {
+            return Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+        }
+
+        private static int GetPortFromEnvVar(int defaultValue)
+        {
+            int port = defaultValue;
+            string portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
+
+            if (portString != null)
+            {
+                try
+                {
+                    port = int.Parse(portString);
+                }
+                catch (FormatException)
+                {
+                    throw new ArgumentException("Environment Variable 'DD_DOGSTATSD_PORT' bad format");
+                }
+            }
+
+            return port;
         }
     }
 }

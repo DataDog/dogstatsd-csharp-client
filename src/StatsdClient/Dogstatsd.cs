@@ -18,6 +18,8 @@ namespace StatsdClient
     {
         private static readonly DogStatsdService _dogStatsdService = new DogStatsdService();
 
+        public static ITelemetryCounters TelemetryCounters => _dogStatsdService.TelemetryCounters;
+
         public static void Configure(StatsdConfig config) => _dogStatsdService.Configure(config);
 
         public static void Event(
@@ -83,7 +85,5 @@ namespace StatsdClient
             string[] tags = null,
             string message = null) =>
                 _dogStatsdService.ServiceCheck(name, status, timestamp, hostname, tags, message);
-
-        public static ITelemetryCounters TelemetryCounters => _dogStatsdService.TelemetryCounters;
     }
 }

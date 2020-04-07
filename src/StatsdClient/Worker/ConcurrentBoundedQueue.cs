@@ -19,6 +19,10 @@ namespace StatsdClient.Worker
             MaxItemCount = maxItemCount;
         }
 
+        public int QueueCurrentSize => _queueCurrentSize;
+
+        public int MaxItemCount { get; }
+
         public virtual bool TryEnqueue(T value)
         {
             if (_queueCurrentSize >= MaxItemCount)
@@ -42,9 +46,5 @@ namespace StatsdClient.Worker
 
             return false;
         }
-
-        public int QueueCurrentSize => _queueCurrentSize;
-
-        public int MaxItemCount { get; }
     }
 }

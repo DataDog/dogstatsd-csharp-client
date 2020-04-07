@@ -1,10 +1,10 @@
 namespace StatsdClient.Worker
 {
-    interface IAsynchronousWorkerHandler<T>
+    internal interface IAsynchronousWorkerHandler<T>
     {
         /// <summary>
         /// Called when a new value is ready to be handled by the worker.
-        /// </summary> 
+        /// </summary>
         void OnNewValue(T v);
 
         /// <summary>
