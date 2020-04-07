@@ -64,6 +64,11 @@ namespace StatsdClient
             string[] tags = null, string message = null) =>
                 _dogStatsdService.ServiceCheck(name, status, timestamp, hostname, tags, message);
 
+        public static void Dispose()
+        {
+            _dogStatsdService.Dispose();
+        }
+
         public static ITelemetryCounters TelemetryCounters => _dogStatsdService.TelemetryCounters;
     }
 }

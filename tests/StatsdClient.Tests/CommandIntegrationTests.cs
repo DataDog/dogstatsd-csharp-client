@@ -23,6 +23,7 @@ namespace Tests
         {
             _udpListener = new UdpListener(serverName, _serverPort);
             var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort};
+            metricsConfig.Advanced.TelemetryFlushInterval = TimeSpan.FromDays(1);
             _dogStatsdService = new DogStatsdService();
             _dogStatsdService.Configure(metricsConfig);
         }
@@ -31,6 +32,7 @@ namespace Tests
         public void TearDownUdpListener()
         {
             _udpListener.Dispose();
+            _dogStatsdService.Dispose();
         }
 
         [SetUp]
