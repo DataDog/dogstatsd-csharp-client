@@ -12,7 +12,7 @@ namespace StatsdClient
         " buffering with asynchronous calls (metrics are added to a queue and another thread send them).")]
     public class Statsd : IStatsd
     {
-        private const string ENTITY_ID_INTERNAL_TAG_KEY = "dd.internal.entity_id";
+        private const string _entityIdInternalTagKey = "dd.internal.entity_id";
         private static readonly string[] EmptyStringArray = new string[0];
         private readonly string _prefix;
         private readonly string[] _constantTags;
@@ -72,7 +72,7 @@ namespace StatsdClient
             }
             else
             {
-                var entityIdTags = new[] { $"{ENTITY_ID_INTERNAL_TAG_KEY}:{entityId}" };
+                var entityIdTags = new[] { $"{_entityIdInternalTagKey}:{entityId}" };
                 _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
             }
         }

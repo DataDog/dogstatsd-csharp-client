@@ -1,4 +1,5 @@
-﻿using StatsdClient.Bufferize;
+﻿using System.Diagnostics.CodeAnalysis;
+using StatsdClient.Bufferize;
 
 namespace StatsdClient
 {
@@ -6,8 +7,14 @@ namespace StatsdClient
     {
         public const int DefaultStatsdPort = 8125;
         public const int DefaultStatsdMaxUDPPacketSize = 512;
+
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Avoid breaking changes.")]
         public const string DD_ENTITY_ID_ENV_VAR = "DD_ENTITY_ID";
+
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Avoid breaking changes.")]
         public const string DD_DOGSTATSD_PORT_ENV_VAR = "DD_DOGSTATSD_PORT";
+
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Avoid breaking changes.")]
         public const string DD_AGENT_HOST_ENV_VAR = "DD_AGENT_HOST";
 
         public StatsdConfig()
