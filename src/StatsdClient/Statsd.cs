@@ -19,34 +19,6 @@ namespace StatsdClient
         private readonly Telemetry _optionalTelemetry;
         private List<string> _commands = new List<string>();
 
-        internal Statsd(
-            IStatsdUDP udp,
-            IRandomGenerator randomGenerator,
-            IStopWatchFactory stopwatchFactory,
-            string prefix,
-            string[] constantTags,
-            Telemetry optionalTelemetry)
-        {
-            StopwatchFactory = stopwatchFactory;
-            Udp = udp;
-            RandomGenerator = randomGenerator;
-            _prefix = prefix;
-            _optionalTelemetry = optionalTelemetry;
-
-            string entityId = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
-
-            if (string.IsNullOrEmpty(entityId))
-            {
-                // copy array to prevent changes, coalesce to empty array
-                _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
-            }
-            else
-            {
-                var entityIdTags = new[] { $"{ENTITY_ID_INTERNAL_TAG_KEY}:{entityId}" };
-                _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
-            }
-        }
-
         public Statsd(
             IStatsdUDP udp,
             IRandomGenerator randomGenerator,
@@ -77,6 +49,34 @@ namespace StatsdClient
         {
         }
 
+        internal Statsd(
+                    IStatsdUDP udp,
+                    IRandomGenerator randomGenerator,
+                    IStopWatchFactory stopwatchFactory,
+                    string prefix,
+                    string[] constantTags,
+                    Telemetry optionalTelemetry)
+        {
+            StopwatchFactory = stopwatchFactory;
+            Udp = udp;
+            RandomGenerator = randomGenerator;
+            _prefix = prefix;
+            _optionalTelemetry = optionalTelemetry;
+
+            string entityId = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
+
+            if (string.IsNullOrEmpty(entityId))
+            {
+                // copy array to prevent changes, coalesce to empty array
+                _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
+            }
+            else
+            {
+                var entityIdTags = new[] { $"{ENTITY_ID_INTERNAL_TAG_KEY}:{entityId}" };
+                _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
+            }
+        }
+
         public bool TruncateIfTooLong { get; set; }
 
         public List<string> Commands
@@ -90,34 +90,6 @@ namespace StatsdClient
         private IStatsdUDP Udp { get; set; }
 
         private IRandomGenerator RandomGenerator { get; set; }
-
-        private static string EscapeContent(string content)
-        {
-            return content
-                .Replace("\r", string.Empty)
-                .Replace("\n", "\\n");
-        }
-
-        private static string ConcatTags(string[] constantTags, string[] tags)
-        {
-            // avoid dealing with null arrays
-            constantTags = constantTags ?? EmptyStringArray;
-            tags = tags ?? EmptyStringArray;
-
-            if (constantTags.Length == 0 && tags.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            var allTags = constantTags.Concat(tags);
-            string concatenatedTags = string.Join(",", allTags);
-            return $"|#{concatenatedTags}";
-        }
-
-        private static string TruncateOverage(string str, int overage)
-        {
-            return str.Substring(0, str.Length - overage);
-        }
 
         public void Add<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null)
             where TCommandType : Metric
@@ -306,6 +278,34 @@ namespace StatsdClient
                 stopwatch.Stop();
                 await SendAsync<Timing, int>(statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags).ConfigureAwait(false);
             }
+        }
+
+        private static string EscapeContent(string content)
+        {
+            return content
+                .Replace("\r", string.Empty)
+                .Replace("\n", "\\n");
+        }
+
+        private static string ConcatTags(string[] constantTags, string[] tags)
+        {
+            // avoid dealing with null arrays
+            constantTags = constantTags ?? EmptyStringArray;
+            tags = tags ?? EmptyStringArray;
+
+            if (constantTags.Length == 0 && tags.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var allTags = constantTags.Concat(tags);
+            string concatenatedTags = string.Join(",", allTags);
+            return $"|#{concatenatedTags}";
+        }
+
+        private static string TruncateOverage(string str, int overage)
+        {
+            return str.Substring(0, str.Length - overage);
         }
 
         public class Counting : Metric

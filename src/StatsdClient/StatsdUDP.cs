@@ -74,6 +74,28 @@ namespace StatsdClient
             return port;
         }
 
+        public void Send(string command)
+        {
+            SocketSender.Send(
+                MaxUDPPacketSize,
+                command,
+                encodedCommand => UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint));
+        }
+
+        public Task SendAsync(string command)
+        {
+            return SocketSender.SendAsync(
+                IPEndpoint,
+                UDPSocket,
+                MaxUDPPacketSize,
+                new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
+        }
+
+        public void Dispose()
+        {
+            UDPSocket.Dispose();
+        }
+
         internal static IPAddress GetIpv4Address(string name)
         {
             IPAddress ipAddress;
@@ -105,28 +127,6 @@ namespace StatsdClient
             }
 
             return ipAddress;
-        }
-
-        public void Send(string command)
-        {
-            SocketSender.Send(
-                MaxUDPPacketSize,
-                command,
-                encodedCommand => UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint));
-        }
-
-        public Task SendAsync(string command)
-        {
-            return SocketSender.SendAsync(
-                IPEndpoint,
-                UDPSocket,
-                MaxUDPPacketSize,
-                new ArraySegment<byte>(Encoding.UTF8.GetBytes(command)));
-        }
-
-        public void Dispose()
-        {
-            UDPSocket.Dispose();
         }
     }
 }
