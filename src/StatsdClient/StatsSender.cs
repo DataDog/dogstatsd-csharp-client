@@ -8,10 +8,9 @@ namespace StatsdClient
 {
     internal class StatsSender : IStatsSender, IDisposable
     {
+        private static readonly TimeSpan NoBufferSpaceAvailableWait = TimeSpan.FromMilliseconds(10);
         private readonly Socket _socket;
         private readonly int _noBufferSpaceAvailableRetryCount;
-
-        private static readonly TimeSpan NoBufferSpaceAvailableWait = TimeSpan.FromMilliseconds(10);
 
         private StatsSender(
             StatsSenderTransportType transport,

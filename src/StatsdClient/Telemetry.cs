@@ -9,6 +9,7 @@ namespace StatsdClient
     /// </summary>
     internal class Telemetry : IDisposable, ITelemetryCounters
     {
+        private static string _telemetryPrefix = "datadog.dogstatsd.client.";
         private readonly Timer _optionalTimer;
         private readonly string[] _optionalTags;
         private readonly IStatsSender _optionalStatsSender;
@@ -21,8 +22,6 @@ namespace StatsdClient
         private int _packetsSent;
         private int _packetsDropped;
         private int _packetsDroppedQueue;
-
-        private static string _telemetryPrefix = "datadog.dogstatsd.client.";
 
         /// <summary>
         /// This constructor does not send telemetry.

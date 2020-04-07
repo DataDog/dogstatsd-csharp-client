@@ -52,6 +52,27 @@ namespace StatsdClient
             return new StatsdData(statsD, statsBufferize, statsSender, telemetry);
         }
 
+        private static int GetPort(StatsdConfig config)
+        {
+            if (config.StatsdPort != 0)
+            {
+                return config.StatsdPort;
+            }
+
+            var portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
+            if (!string.IsNullOrEmpty(portString))
+            {
+                if (int.TryParse(portString, out var port))
+                {
+                    return port;
+                }
+
+                throw new ArgumentException($"Environment Variable '{StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR}' bad format: {portString}");
+            }
+
+            return StatsdConfig.DefaultStatsdPort;
+        }
+
         private Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
@@ -116,27 +137,6 @@ namespace StatsdClient
 
             var endPoint = new IPEndPoint(address, port);
             return _factory.CreateUDPStatsSender(endPoint);
-        }
-
-        private static int GetPort(StatsdConfig config)
-        {
-            if (config.StatsdPort != 0)
-            {
-                return config.StatsdPort;
-            }
-
-            var portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
-            if (!string.IsNullOrEmpty(portString))
-            {
-                if (int.TryParse(portString, out var port))
-                {
-                    return port;
-                }
-
-                throw new ArgumentException($"Environment Variable '{StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR}' bad format: {portString}");
-            }
-
-            return StatsdConfig.DefaultStatsdPort;
         }
 
         private class StatsSenderData
