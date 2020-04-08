@@ -584,7 +584,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 16; // 16 is the number of characters in the final message that is not the title
+            var length = (8 * 1024) - 16; // 16 is the number of characters in the final message that is not the title
             var builder = BuildLongString(length);
             var title = builder;
 
@@ -597,7 +597,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 16; // 16 is the number of characters in the final message that is not the title
+            var length = (8 * 1024) - 16; // 16 is the number of characters in the final message that is not the title
             var builder = BuildLongString(length);
             var title = builder;
 
@@ -611,7 +611,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 17; // 17 is the number of characters in the final message that is not the text
+            var length = (8 * 1024) - 17; // 17 is the number of characters in the final message that is not the text
             var builder = BuildLongString(length);
             var text = builder;
 
@@ -627,7 +627,7 @@ namespace StatsdClient.Tests
             // Enable truncation at Statsd level
             s.TruncateIfTooLong = true;
 
-            var length = 8 * 1024 - 17; // 17 is the number of characters in the final message that is not the text
+            var length = (8 * 1024) - 17; // 17 is the number of characters in the final message that is not the text
             var builder = BuildLongString(length);
             var text = builder;
 
@@ -1049,7 +1049,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 13;
+            var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
             var message = builder;
 
@@ -1062,7 +1062,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 13;
+            var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
             var message = builder;
 
@@ -1077,7 +1077,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 6;
+            var length = (8 * 1024) - 6;
             var builder = BuildLongString(length);
             var name = builder;
 
@@ -1180,7 +1180,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 13;
+            var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
             var message = builder;
 
@@ -1193,7 +1193,7 @@ namespace StatsdClient.Tests
         {
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
 
-            var length = 8 * 1024 - 6;
+            var length = (8 * 1024) - 6;
             var builder = BuildLongString(length);
             var name = builder;
 
