@@ -1,8 +1,8 @@
-using System;
+using Moq;
 using NUnit.Framework;
 using StatsdClient;
+using System;
 using System.Collections.Generic;
-using Moq;
 using System.Text;
 
 namespace Tests

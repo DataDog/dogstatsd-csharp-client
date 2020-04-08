@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using NUnit.Framework;
 using Moq;
-using System.Threading.Tasks;
+using NUnit.Framework;
 using StatsdClient.Worker;
-using System.Linq;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Tests
 {
