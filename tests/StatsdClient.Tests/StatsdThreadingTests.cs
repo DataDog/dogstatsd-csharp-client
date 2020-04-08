@@ -34,7 +34,7 @@ namespace Tests
             counts.ExpectSequence(sends);
         }
 
-        static WaitCallback CreateSender(int sends, int threads, int which, IStatsd statsd, ManualResetEvent done)
+        private static WaitCallback CreateSender(int sends, int threads, int which, IStatsd statsd, ManualResetEvent done)
         {
             return x =>
             {
@@ -45,9 +45,9 @@ namespace Tests
             };
         }
 
-        class CountingUDP : IStatsdUDP
+        private class CountingUDP : IStatsdUDP
         {
-            readonly IDictionary<string, int> _commands = new Dictionary<string, int>();
+            private readonly IDictionary<string, int> _commands = new Dictionary<string, int>();
 
             public void Send(string command)
             {

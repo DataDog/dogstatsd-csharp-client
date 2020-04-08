@@ -9,14 +9,14 @@ using StatsdClient;
 
 namespace Tests.Utils
 {
-    class SocketServer : IDisposable
+    internal class SocketServer : IDisposable
     {
-        readonly Socket _server;
-        readonly Task _receiver;
-        readonly ManualResetEventSlim _serverStop = new ManualResetEventSlim(false);
-        readonly List<string> _messagesReceived = new List<string>();
+        private readonly Socket _server;
+        private readonly Task _receiver;
+        private readonly ManualResetEventSlim _serverStop = new ManualResetEventSlim(false);
+        private readonly List<string> _messagesReceived = new List<string>();
 
-        volatile bool _shutdown = false;
+        private volatile bool _shutdown = false;
 
         public SocketServer(StatsdConfig config)
         {
@@ -60,7 +60,7 @@ namespace Tests.Utils
             return _messagesReceived;
         }
 
-        void ReadFromServer(int bufferSize)
+        private void ReadFromServer(int bufferSize)
         {
             var buffer = new byte[bufferSize];
 

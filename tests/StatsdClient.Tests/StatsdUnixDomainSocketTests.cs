@@ -68,7 +68,7 @@ namespace Tests
             }
         }
 
-        static DogStatsdService CreateService(
+        private static DogStatsdService CreateService(
                     TemporaryPath temporaryPath,
                     HostnameProvider hostnameProvider = HostnameProvider.Property)
         {
@@ -91,7 +91,7 @@ namespace Tests
             return dogStatsdService;
         }
 
-        static Socket CreateSocketServer(TemporaryPath temporaryPath)
+        private static Socket CreateSocketServer(TemporaryPath temporaryPath)
         {
             var endPoint = new UnixEndPoint(temporaryPath.Path);
             var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
@@ -100,7 +100,7 @@ namespace Tests
             return server;
         }
 
-        static string ReadFromServer(Socket socket)
+        private static string ReadFromServer(Socket socket)
         {
             var builder = new StringBuilder();
             var buffer = new byte[8096];

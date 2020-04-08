@@ -8,8 +8,8 @@ namespace Tests
     [TestFixture]
     public class ConcurrentBoundedBlockingQueueTests
     {
-        Mock<IManualResetEvent> _mock;
-        ConcurrentBoundedBlockingQueue<int> _queue;
+        private Mock<IManualResetEvent> _mock;
+        private ConcurrentBoundedBlockingQueue<int> _queue;
 
         [SetUp]
         public void Init()

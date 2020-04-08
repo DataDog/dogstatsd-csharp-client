@@ -3,7 +3,7 @@ using StatsdClient.Bufferize;
 
 namespace Tests
 {
-    class BufferBuilderHandlerMock : IBufferBuilderHandler
+    internal class BufferBuilderHandlerMock : IBufferBuilderHandler
     {
         public byte[] Buffer { get; set; }
 

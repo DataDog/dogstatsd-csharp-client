@@ -10,8 +10,8 @@ namespace Tests
     [TestFixture]
     public class TelemetryTests
     {
-        Telemetry _telemetry;
-        readonly List<string> _metrics = new List<string>();
+        private Telemetry _telemetry;
+        private readonly List<string> _metrics = new List<string>();
 
         [SetUp]
         public void Init()
@@ -88,7 +88,7 @@ namespace Tests
                 "client:csharp,client_version:1.0.0.0,client_transport:uds", _metrics[0]);
         }
 
-        void AssertTelemetryReceived(Dictionary<string, int> expectedResults)
+        private void AssertTelemetryReceived(Dictionary<string, int> expectedResults)
         {
             _telemetry.Flush();
             foreach (var m in _metrics)

@@ -13,10 +13,10 @@ namespace Tests
     [TestFixture]
     public class AsynchronousWorkerTests
     {
-        Mock<IAsynchronousWorkerHandler<int>> _handler;
+        private Mock<IAsynchronousWorkerHandler<int>> _handler;
 
-        Mock<IWaiter> _waiter;
-        readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
+        private Mock<IWaiter> _waiter;
+        private readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
 
         [SetUp]
         public void Init()
@@ -74,7 +74,7 @@ namespace Tests
             worker.Dispose();
         }
 
-        AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
+        private AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
         {
             var worker = new AsynchronousWorker<int>(
                 _handler.Object,

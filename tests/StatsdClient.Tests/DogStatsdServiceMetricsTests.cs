@@ -45,7 +45,7 @@ namespace Tests
         }
 #endif
 
-        static void SendAndCheckMetricsAreReceived(StatsdConfig config, int metricToSendCount)
+        private static void SendAndCheckMetricsAreReceived(StatsdConfig config, int metricToSendCount)
         {
             using (var service = new DogStatsdService())
             {

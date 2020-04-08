@@ -11,10 +11,10 @@ namespace StatsdClient.Tests
     [TestFixture]
     public class StatsdBuilderTests
     {
-        Mock<IStatsBufferizeFactory> _mock;
-        StatsdBuilder _statsdBuilder;
-        readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
-        readonly List<string> _envVarsKeyToRestore = new List<string> { 
+        private Mock<IStatsBufferizeFactory> _mock;
+        private StatsdBuilder _statsdBuilder;
+        private readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
+        private readonly List<string> _envVarsKeyToRestore = new List<string> { 
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
             StatsdConfig.DD_AGENT_HOST_ENV_VAR };
 
@@ -112,7 +112,7 @@ namespace StatsdClient.Tests
                                                      It.IsAny<TimeSpan>()));
         }
 
-        static StatsdConfig CreateUDSConfig(string server = null)
+        private static StatsdConfig CreateUDSConfig(string server = null)
         {
             var config = new StatsdConfig();
             if (server != null)
@@ -121,19 +121,19 @@ namespace StatsdClient.Tests
             return config;
         }
 
-        int GetUDPPort(StatsdConfig config)
+        private int GetUDPPort(StatsdConfig config)
         {
             var endPoint = GetUDPIPEndPoint(config);
             return endPoint.Port;
         }
 
-        string GetStatsdServerName(StatsdConfig config)
+        private string GetStatsdServerName(StatsdConfig config)
         {
             var endPoint = GetUDPIPEndPoint(config);
             return endPoint.Address.ToString();
         }
 
-        string GetUDSStatsdServerName(StatsdConfig config)
+        private string GetUDSStatsdServerName(StatsdConfig config)
         {
             UnixEndPoint endPoint = null;
 
@@ -146,7 +146,7 @@ namespace StatsdClient.Tests
             return endPoint.Filename;
         }
 
-        IPEndPoint GetUDPIPEndPoint(StatsdConfig config)
+        private IPEndPoint GetUDPIPEndPoint(StatsdConfig config)
         {
             IPEndPoint endPoint = null;
 
@@ -158,13 +158,13 @@ namespace StatsdClient.Tests
             return endPoint;
         }
 
-        void BuildStatsData(StatsdConfig config)
+        private void BuildStatsData(StatsdConfig config)
         {
             var buildStatsData = _statsdBuilder.BuildStatsData(config);
             buildStatsData.Dispose();
         }
 
-        static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
+        private static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
         {
             var config = new StatsdConfig { StatsdServerName = statsdServerName };
             if (statsdPort.HasValue)
