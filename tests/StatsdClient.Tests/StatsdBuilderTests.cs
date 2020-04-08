@@ -16,7 +16,7 @@ namespace StatsdClient.Tests
         readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
         readonly List<string> _envVarsKeyToRestore = new List<string>{
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
-            StatsdConfig.DD_AGENT_HOST_ENV_VAR};
+            StatsdConfig.DD_AGENT_HOST_ENV_VAR };
 
         [SetUp]
         public void Init()
