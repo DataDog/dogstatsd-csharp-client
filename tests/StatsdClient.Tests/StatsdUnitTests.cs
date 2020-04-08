@@ -636,17 +636,6 @@ namespace StatsdClient.Tests
             Mock.Get(_udp).Verify(x => x.Send(expected));
         }
 
-        private static string BuildLongString(int length)
-        {
-            var builder = new StringBuilder();
-            for (int i = 0; i < length; i++)
-            {
-                builder.Append(i % 10);
-            }
-
-            return builder.ToString();
-        }
-
         // =-=-=-=- PREFIX -=-=-=-=
 
         [Test]
@@ -669,11 +658,6 @@ namespace StatsdClient.Tests
             s.Send();
 
             Mock.Get(_udp).Verify(x => x.Send("another.prefix.counter:1|c|@0.1\nanother.prefix.timer:1|ms"));
-        }
-
-        private int testMethod()
-        {
-            return 5;
         }
 
         // DOGSTATSD-SPECIFIC
@@ -1199,6 +1183,22 @@ namespace StatsdClient.Tests
 
             var exception = Assert.Throws<Exception>(() => s.Add(name + "x", 0));
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
+        }
+
+        private static string BuildLongString(int length)
+        {
+            var builder = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                builder.Append(i % 10);
+            }
+
+            return builder.ToString();
+        }
+
+        private int testMethod()
+        {
+            return 5;
         }
     }
 }

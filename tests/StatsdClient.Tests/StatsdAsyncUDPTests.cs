@@ -53,30 +53,6 @@ namespace Tests
             _udpListener.GetAndClearLastMessages(); // just to be sure that nothing is left over
         }
 
-        // Test helper. Waits until the listener is done receiving a message,
-        // then asserts that the passed string is equal to the message received.
-        private void AssertWasReceived(string shouldBe, int index = 0)
-        {
-            if (_lastPulledMessages.Count == 0)
-            {
-                // Stall until the the listener receives a message or times out
-                while (_listenThread.IsAlive)
-                {
-                }
-
-                _lastPulledMessages = _udpListener.GetAndClearLastMessages();
-            }
-
-            string actual = null;
-
-            if (index < _lastPulledMessages.Count)
-            {
-                actual = _lastPulledMessages[index];
-            }
-
-            Assert.AreEqual(shouldBe, actual);
-        }
-
         [Test]
         public async Task send_async()
         {
@@ -162,6 +138,30 @@ namespace Tests
                 // reset statsd, so we don't get stuck with max size of 10 for other tests
                 _statsd = oldStatsd;
             }
+        }
+
+        // Test helper. Waits until the listener is done receiving a message,
+        // then asserts that the passed string is equal to the message received.
+        private void AssertWasReceived(string shouldBe, int index = 0)
+        {
+            if (_lastPulledMessages.Count == 0)
+            {
+                // Stall until the the listener receives a message or times out
+                while (_listenThread.IsAlive)
+                {
+                }
+
+                _lastPulledMessages = _udpListener.GetAndClearLastMessages();
+            }
+
+            string actual = null;
+
+            if (index < _lastPulledMessages.Count)
+            {
+                actual = _lastPulledMessages[index];
+            }
+
+            Assert.AreEqual(shouldBe, actual);
         }
     }
 }

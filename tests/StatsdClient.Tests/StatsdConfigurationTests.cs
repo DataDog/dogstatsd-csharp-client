@@ -10,31 +10,6 @@ namespace Tests
     [TestFixture]
     public class StatsdConfigurationTests
     {
-        private void testReceive(
-            string testServerName,
-            int testPort,
-            string testCounterName,
-            string expectedOutput,
-            DogStatsdService dogStatsdService)
-        {
-            UdpListener udpListener = new UdpListener(testServerName, testPort);
-            Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
-            listenThread.Start();
-            dogStatsdService.Increment(testCounterName);
-            dogStatsdService.Dispose();
-            while (listenThread.IsAlive)
-            {
-            }
-
-            Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
-            udpListener.Dispose();
-        }
-
-        private DogStatsdService CreateSut()
-        {
-            return new DogStatsdService();
-        }
-
         [Test]
         public void throw_exception_when_no_config_provided()
         {
@@ -112,6 +87,31 @@ namespace Tests
 
                 Assert.Throws<InvalidOperationException>(() => sut.Configure(metricsConfig));
             }
+        }
+
+        private DogStatsdService CreateSut()
+        {
+            return new DogStatsdService();
+        }
+
+        private void testReceive(
+            string testServerName,
+            int testPort,
+            string testCounterName,
+            string expectedOutput,
+            DogStatsdService dogStatsdService)
+        {
+            UdpListener udpListener = new UdpListener(testServerName, testPort);
+            Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
+            listenThread.Start();
+            dogStatsdService.Increment(testCounterName);
+            dogStatsdService.Dispose();
+            while (listenThread.IsAlive)
+            {
+            }
+
+            Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
+            udpListener.Dispose();
         }
     }
 }

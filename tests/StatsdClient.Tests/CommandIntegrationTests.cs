@@ -45,30 +45,6 @@ namespace Tests
             _udpListener.GetAndClearLastMessages(); // just to be sure that nothing is left over
         }
 
-        // Test helper. Waits until the listener is done receiving a message,
-        // then asserts that the passed string is equal to the message received.
-        private void AssertWasReceived(string shouldBe, int index = 0)
-        {
-            // Stall until the the listener receives a message or times out
-            while (_listenThread.IsAlive)
-            {
-            }
-
-            Assert.AreEqual(shouldBe, _udpListener.GetAndClearLastMessages()[index]);
-        }
-
-        // Test helper. Waits until the listener is done receiving a message,
-        // then asserts that the passed regular expression matches the received message.
-        private void AssertWasReceivedMatches(string pattern, int index = 0)
-        {
-            // Stall until the the listener receives a message or times out
-            while (_listenThread.IsAlive)
-            {
-            }
-
-            StringAssert.IsMatch(pattern, _udpListener.GetAndClearLastMessages()[index]);
-        }
-
         [Test]
         public void _udp_listener_sanity_test()
         {
@@ -465,13 +441,6 @@ namespace Tests
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
         }
 
-        // [Helper]
-        private int pauseAndReturnInt()
-        {
-            Thread.Sleep(100);
-            return 42;
-        }
-
         [Test]
         public void timer_method_sets_return_value()
         {
@@ -502,13 +471,6 @@ namespace Tests
             var returnValue = _dogStatsdService.Time(pauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
             AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2\|#fjords");
             Assert.AreEqual(42, returnValue);
-        }
-
-        // [Helper]
-        private int throwException()
-        {
-            Thread.Sleep(100);
-            throw new Exception("test exception");
         }
 
         [Test]
@@ -667,6 +629,44 @@ namespace Tests
         {
             _dogStatsdService.Distribution("distribution", 42.1, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
             AssertWasReceived("distribution:42.1|d|@1.1|#tag1:true,tag2");
+        }
+
+        // Test helper. Waits until the listener is done receiving a message,
+        // then asserts that the passed string is equal to the message received.
+        private void AssertWasReceived(string shouldBe, int index = 0)
+        {
+            // Stall until the the listener receives a message or times out
+            while (_listenThread.IsAlive)
+            {
+            }
+
+            Assert.AreEqual(shouldBe, _udpListener.GetAndClearLastMessages()[index]);
+        }
+
+        // Test helper. Waits until the listener is done receiving a message,
+        // then asserts that the passed regular expression matches the received message.
+        private void AssertWasReceivedMatches(string pattern, int index = 0)
+        {
+            // Stall until the the listener receives a message or times out
+            while (_listenThread.IsAlive)
+            {
+            }
+
+            StringAssert.IsMatch(pattern, _udpListener.GetAndClearLastMessages()[index]);
+        }
+
+        // [Helper]
+        private int pauseAndReturnInt()
+        {
+            Thread.Sleep(100);
+            return 42;
+        }
+
+        // [Helper]
+        private int throwException()
+        {
+            Thread.Sleep(100);
+            throw new Exception("test exception");
         }
     }
 }

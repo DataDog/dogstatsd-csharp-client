@@ -10,23 +10,6 @@ namespace Tests
     [TestFixture]
     public class DogStatsdServiceConfigurationTest
     {
-        private List<string> ReceiveData(DogStatsdService dogstasdService, string testServerName, int testPort, Action sendData)
-        {
-            using (var udpListener = new UdpListener(testServerName, testPort))
-            {
-                var listenThread = new Thread(udpListener.ListenAndWait);
-                listenThread.Start();
-
-                sendData();
-
-                dogstasdService.Dispose();
-                udpListener.Shutdown();
-                listenThread.Join();
-
-                return udpListener.GetAndClearLastMessages();
-            }
-        }
-
         [Test]
         public void default_port_is_8125()
         {
@@ -203,6 +186,23 @@ namespace Tests
             }
 
             Environment.SetEnvironmentVariable("DD_ENTITY_ID", null);
+        }
+
+        private List<string> ReceiveData(DogStatsdService dogstasdService, string testServerName, int testPort, Action sendData)
+        {
+            using (var udpListener = new UdpListener(testServerName, testPort))
+            {
+                var listenThread = new Thread(udpListener.ListenAndWait);
+                listenThread.Start();
+
+                sendData();
+
+                dogstasdService.Dispose();
+                udpListener.Shutdown();
+                listenThread.Join();
+
+                return udpListener.GetAndClearLastMessages();
+            }
         }
     }
 }
