@@ -99,9 +99,13 @@ namespace Tests
                 var metricValue = Int32.Parse(part[1]);
 
                 if (metricValue == 0)
+                {
                     Assert.False(expectedResults.TryGetValue(metricName, out var res));
+                }
                 else
+                {
                     Assert.AreEqual(metricValue, expectedResults[metricName]);
+                }
             }
         }
     }

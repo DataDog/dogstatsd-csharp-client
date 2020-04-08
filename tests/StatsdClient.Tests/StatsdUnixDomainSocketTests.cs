@@ -62,7 +62,10 @@ namespace Tests
                     // We are sending several Gauge to make sure there is no buffer
                     // that can make service.Gauge blocks after several calls.
                     for (int i = 0; i < 10; ++i)
+                    {
                         service.Gauge("metric" + i, 42, 1, tags);
+                    }
+
                     // If the code go here that means we do not block.
                 }
             }

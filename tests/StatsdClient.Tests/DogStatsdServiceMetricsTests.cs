@@ -53,12 +53,17 @@ namespace Tests
                 {
                     service.Configure(config);
                     for (int i = 0; i < metricToSendCount; ++i)
+                    {
                         service.Increment($"test{i}", tags: new[] { "KEY:VALUE" });
+                    }
+
                     service.Dispose();
                     var metricsReceived = server.Stop();
                     Assert.AreEqual(metricToSendCount, metricsReceived.Count);
                     for (int i = 0; i < metricToSendCount; ++i)
+                    {
                         Assert.AreEqual($"test{i}:1|c|#KEY:VALUE", metricsReceived[i]);
+                    }
                 }
             }
         }

@@ -50,7 +50,10 @@ namespace Tests
                 try
                 {
                     if (count == null)
+                    {
                         count = 1;
+                    }
+
                     for (int i = 0; i < (int)count; i++)
                     {
                         byte[] lastReceivedBytes = _socket.Receive(ref _senderIpEndPoint);
@@ -63,9 +66,13 @@ namespace Tests
                     // If we timeout, stop listening.
                     // If we get another error, propagate it upwards.
                     if (ex.SocketErrorCode == SocketError.TimedOut)
+                    {
                         return;
+                    }
                     else
-                    throw;
+                    {
+                        throw;
+                    }
                 }
             }
 
@@ -85,7 +92,9 @@ namespace Tests
                         if (ex.SocketErrorCode == SocketError.TimedOut)
                         {
                             if (_shutdown)
+                            {
                                 return;
+                            }
                         }
                         else
                         {

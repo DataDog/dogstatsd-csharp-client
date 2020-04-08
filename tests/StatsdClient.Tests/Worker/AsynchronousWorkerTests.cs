@@ -29,7 +29,10 @@ namespace Tests
         public void Cleanup()
         {
             foreach (var worker in _workers)
+            {
                 worker.Dispose();
+            }
+
             _workers.Clear();
         }
 
@@ -56,7 +59,9 @@ namespace Tests
             using (var worker = CreateWorker(workerThreadCount: 1))
             {
                 while (waitDurationQueue.Count() < 100)
+                {
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
+                }
             }
 
             var waitDurations = new List<TimeSpan>(waitDurationQueue);

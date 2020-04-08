@@ -20,14 +20,20 @@ namespace Tests
             {
                 statsBufferize.Send("123");
                 while (handler.Buffer == null)
+                {
                     await Task.Delay(1);
+                }
+
                 // Sent because buffer is full.
                 Assert.AreEqual("123", Encoding.UTF8.GetString(handler.Buffer));
                 handler.Buffer = null;
 
                 statsBufferize.Send("4");
                 while (handler.Buffer == null)
+                {
                     await Task.Delay(1);
+                }
+
                 // Sent because we wait more than the timeout.
                 Assert.AreEqual("4", Encoding.UTF8.GetString(handler.Buffer));
             }

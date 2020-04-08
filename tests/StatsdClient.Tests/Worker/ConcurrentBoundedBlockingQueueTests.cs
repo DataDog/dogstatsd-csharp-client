@@ -44,7 +44,10 @@ namespace Tests
 
             Assert.True(_queue.TryEnqueue(1));
             for (int i = 0; i < 3; ++i)
+            {
                 Assert.False(_queue.TryEnqueue(1));
+            }
+
             _mock.Verify(m => m.Wait(It.IsAny<TimeSpan>()), Times.Exactly(3));
         }
     }

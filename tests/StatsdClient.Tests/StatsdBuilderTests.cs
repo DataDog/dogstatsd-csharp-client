@@ -14,7 +14,7 @@ namespace StatsdClient.Tests
         private Mock<IStatsBufferizeFactory> _mock;
         private StatsdBuilder _statsdBuilder;
         private readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
-        private readonly List<string> _envVarsKeyToRestore = new List<string> { 
+        private readonly List<string> _envVarsKeyToRestore = new List<string> {
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
             StatsdConfig.DD_AGENT_HOST_ENV_VAR };
 
@@ -25,7 +25,9 @@ namespace StatsdClient.Tests
             _statsdBuilder = new StatsdBuilder(_mock.Object);
 
             foreach (var key in _envVarsKeyToRestore)
+            {
                 _envVarsToRestore[key] = Environment.GetEnvironmentVariable(key);
+            }
 
             // Set default hostname
             Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, "0.0.0.0");
@@ -35,7 +37,9 @@ namespace StatsdClient.Tests
         public void Cleanup()
         {
             foreach (var env in _envVarsToRestore)
+            {
                 Environment.SetEnvironmentVariable(env.Key, env.Value);
+            }
         }
 
         [Test]
@@ -116,7 +120,10 @@ namespace StatsdClient.Tests
         {
             var config = new StatsdConfig();
             if (server != null)
+            {
                 config.StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + server;
+            }
+
             config.Advanced.TelemetryFlushInterval = null;
             return config;
         }
@@ -168,7 +175,10 @@ namespace StatsdClient.Tests
         {
             var config = new StatsdConfig { StatsdServerName = statsdServerName };
             if (statsdPort.HasValue)
+            {
                 config.StatsdPort = statsdPort.Value;
+            }
+
             config.Advanced.TelemetryFlushInterval = null;
             return config;
         }

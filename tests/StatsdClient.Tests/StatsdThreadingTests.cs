@@ -29,7 +29,9 @@ namespace Tests
             // allow threads to complete, cleanup
             WaitHandle.WaitAll(sent);
             foreach (IDisposable d in sent)
+            {
                 d.Dispose();
+            }
 
             counts.ExpectSequence(sends);
         }
@@ -39,8 +41,13 @@ namespace Tests
             return x =>
             {
                 for (int i = 0; i < sends; i++)
+                {
                     if (which == (i % threads))
+                    {
                         statsd.Send(i.ToString());
+                    }
+                }
+
                 done.Set();
             };
         }
@@ -55,9 +62,14 @@ namespace Tests
                 {
                     int count;
                     if (_commands.TryGetValue(command, out count))
+                    {
                         count++;
+                    }
                     else
+                    {
                         count = 1;
+                    }
+
                     _commands[command] = count;
                 }
             }
@@ -68,9 +80,13 @@ namespace Tests
                 {
                     int count;
                     if (_commands.TryGetValue(command, out count))
+                    {
                         count++;
+                    }
                     else
+                    {
                         count = 1;
+                    }
 
                     _commands[command] = count;
                     return Task.CompletedTask;
@@ -81,7 +97,9 @@ namespace Tests
             {
                 int empty, missing = 0, dupes = 0;
                 if (!_commands.TryGetValue("", out empty))
+                {
                     empty = 0;
+                }
 
                 for (int i = 0; i < n; i++)
                 {
@@ -99,7 +117,9 @@ namespace Tests
                 }
 
                 if (empty > 0 || missing > 0 || dupes > 0)
+                {
                     Assert.Fail("{0} empty command(s), {1} missing, {2} duplicate(s)", empty, missing, dupes);
+                }
             }
         }
     }
