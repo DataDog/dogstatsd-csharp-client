@@ -14,6 +14,12 @@ namespace Tests
     {
         private TemporaryPath _temporaryPath;
 
+        public enum HostnameProvider
+        {
+            Environment,
+            Property,
+        }
+
         [SetUp]
         public void Setup()
         {
@@ -24,12 +30,6 @@ namespace Tests
         public void TearDown()
         {
             _temporaryPath.Dispose();
-        }
-
-        public enum HostnameProvider
-        {
-            Environment,
-            Property,
         }
 
         [TestCase(HostnameProvider.Property)]
