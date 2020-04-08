@@ -23,8 +23,8 @@ namespace Tests
                 dogstasdService.Dispose();
                 udpListener.Shutdown();
                 listenThread.Join();
-                
-                return udpListener.GetAndClearLastMessages();  
+
+                return udpListener.GetAndClearLastMessages();
             }
         }
 
@@ -42,7 +42,7 @@ namespace Tests
                 var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8125,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
-                Assert.AreEqual(new List<string> {"test:1|c"}, receivedData);
+                Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
             }
         }
 
@@ -62,7 +62,7 @@ namespace Tests
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
-            }            
+            }
         }
 
 
@@ -81,7 +81,7 @@ namespace Tests
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(0, receivedData.Count);
-            }       
+            }
         }
 
 
@@ -101,7 +101,7 @@ namespace Tests
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "prefix.test:1|c" }, receivedData);
-            }           
+            }
         }
 
         [Test]
@@ -117,7 +117,8 @@ namespace Tests
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8130,
-                    () => {
+                    () =>
+                    {
                         using (nonStaticServiceInstance.StartTimer("timer.test"))
                         {
                             Thread.Sleep(1000);
@@ -141,7 +142,7 @@ namespace Tests
                 var metricTimeInMs = Convert.ToInt32(metricTimeInMsSplit[0]);
                 Assert.IsTrue((metricTimeInMs >= 1000), "Processing should have taken at least 1000ms");
                 Assert.IsTrue((metricTimeInMs < 1300), $"Timer reported 30% higher than time taken in action: {metricTimeInMs} VS 1300");
-            }  
+            }
         }
 
         [Test]
@@ -151,7 +152,7 @@ namespace Tests
             Environment.SetEnvironmentVariable("DD_AGENT_HOST", "127.0.0.1");
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
-                var metricsConfig = new StatsdConfig{};
+                var metricsConfig = new StatsdConfig { };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8131,
@@ -159,8 +160,9 @@ namespace Tests
 
                 Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
             }
+
             Environment.SetEnvironmentVariable("DD_DOGSTATSD_PORT", null);
-            Environment.SetEnvironmentVariable("DD_AGENT_HOST", null);            
+            Environment.SetEnvironmentVariable("DD_AGENT_HOST", null);
         }
 
         [Test]
@@ -172,7 +174,7 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                     StatsdPort = 8132,
+                    StatsdPort = 8132,
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
@@ -181,6 +183,7 @@ namespace Tests
 
                 Assert.AreEqual(new List<string> { "test:1|c|#dd.internal.entity_id:foobar" }, receivedData);
             }
+
             Environment.SetEnvironmentVariable("DD_ENTITY_ID", null);
         }
     }

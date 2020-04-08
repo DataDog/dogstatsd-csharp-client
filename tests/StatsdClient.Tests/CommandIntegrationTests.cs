@@ -22,7 +22,7 @@ namespace Tests
         public void SetUpUdpListener()
         {
             _udpListener = new UdpListener(serverName, _serverPort);
-            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort};
+            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort };
             _dogStatsdService = new DogStatsdService();
             _dogStatsdService.Configure(metricsConfig);
         }
@@ -287,7 +287,7 @@ namespace Tests
             AssertWasReceived("histogram:42.1|h|@1.1|#tag1:true,tag2");
         }
 
-       
+
 
         [Test]
         public void set()
@@ -526,6 +526,7 @@ namespace Tests
                 Thread.Sleep(50);
                 Thread.Sleep(60);
             }
+
             AssertWasReceivedMatches(@"timer:\d{3}\|ms");
         }
 
@@ -537,6 +538,7 @@ namespace Tests
                 Thread.Sleep(50);
                 Thread.Sleep(60);
             }
+
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|#tag1:true,tag2");
         }
 
@@ -548,6 +550,7 @@ namespace Tests
                 Thread.Sleep(50);
                 Thread.Sleep(60);
             }
+
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
         }
 
@@ -559,6 +562,7 @@ namespace Tests
                 Thread.Sleep(50);
                 Thread.Sleep(60);
             }
+
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
         }
 
@@ -573,6 +577,7 @@ namespace Tests
                 {
                     throwException();
                 }
+
                 Assert.Fail();
             }
             catch (Exception)

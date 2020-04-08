@@ -20,6 +20,7 @@ namespace Tests
                 TimeSpan.FromSeconds(5),
                 maxItemCount: 1);
         }
+
         [Test]
         public void NoWaitWhenQueueIsNotFull()
         {

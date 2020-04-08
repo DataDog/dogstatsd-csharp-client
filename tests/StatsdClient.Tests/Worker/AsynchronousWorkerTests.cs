@@ -73,6 +73,7 @@ namespace Tests
             // Check we do not block
             worker.Dispose();
         }
+
         AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
         {
             var worker = new AsynchronousWorker<int>(

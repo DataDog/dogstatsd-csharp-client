@@ -37,6 +37,7 @@ namespace Tests.Utils
                 _server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 bufferSize = config.StatsdMaxUDPPacketSize;
             }
+
             _server.ReceiveTimeout = 1000;
             _server.Bind(endPoint);
             _receiver = Task.Run(() => ReadFromServer(bufferSize));
@@ -55,6 +56,7 @@ namespace Tests.Utils
                 _shutdown = true;
                 _serverStop.Wait();
             }
+
             return _messagesReceived;
         }
 

@@ -25,6 +25,7 @@ namespace Tests
                 var done = sent[i] = new ManualResetEvent(false);
                 ThreadPool.QueueUserWorkItem(CreateSender(sends, threads, i, test, done));
             }
+
             // allow threads to complete, cleanup
             WaitHandle.WaitAll(sent);
             foreach (IDisposable d in sent)
@@ -35,7 +36,8 @@ namespace Tests
 
         static WaitCallback CreateSender(int sends, int threads, int which, IStatsd statsd, ManualResetEvent done)
         {
-            return x => {
+            return x =>
+            {
                 for (int i = 0; i < sends; i++)
                     if (which == (i % threads))
                         statsd.Send(i.ToString());
@@ -62,17 +64,17 @@ namespace Tests
 
             public Task SendAsync(string command)
             {
-              lock (_commands)
-              {
-                  int count;
-                  if (_commands.TryGetValue(command, out count))
-                      count++;
-                  else
-                      count = 1;
+                lock (_commands)
+                {
+                    int count;
+                    if (_commands.TryGetValue(command, out count))
+                        count++;
+                    else
+                        count = 1;
 
-                  _commands[command] = count;
-                  return Task.CompletedTask;
-              }
+                    _commands[command] = count;
+                    return Task.CompletedTask;
+                }
             }
 
             public void ExpectSequence(int n)
