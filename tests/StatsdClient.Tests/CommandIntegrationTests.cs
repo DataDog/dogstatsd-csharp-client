@@ -224,7 +224,7 @@ namespace Tests
         [Test]
         public void gauge_double_rounding()
         {
-            _dogStatsdService.Gauge("gauge", (double)1 / 9);
+            _dogStatsdService.Gauge("gauge", 1.0 / 9);
             AssertWasReceived("gauge:0.111111111111111|g");
         }
 
