@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+#pragma warning disable CS1591
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "See ObsoleteAttribute.")]
     [ObsoleteAttribute("This class will become private in a future release.\n" +
         "You can use instead `DogStatsdService` or `DogStatsd` which provides automatic metrics" +
         " buffering with asynchronous calls (metrics are added to a queue and another thread send them).")]
