@@ -33,56 +33,62 @@ namespace Tests
         public void MetricSent()
         {
             _telemetry.OnMetricSent();
-            AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.MetricsMetricName, 1 },
-                                        });
+            AssertTelemetryReceived(new Dictionary<string, int>
+            {
+                { Telemetry.MetricsMetricName, 1 },
+            });
         }
 
         [Test]
         public void ServiceCheckSent()
         {
             _telemetry.OnServiceCheckSent();
-            AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.ServiceCheckMetricName, 1 },
-                                        });
+            AssertTelemetryReceived(new Dictionary<string, int>
+            {
+                { Telemetry.ServiceCheckMetricName, 1 },
+            });
         }
 
         [Test]
         public void EventSent()
         {
             _telemetry.OnEventSent();
-            AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.EventsMetricName, 1 },
-                                        });
+            AssertTelemetryReceived(new Dictionary<string, int>
+            {
+                { Telemetry.EventsMetricName, 1 },
+            });
         }
 
         [Test]
         public void PacketSent()
         {
             _telemetry.OnPacketSent(42);
-            AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.PacketsSentMetricName, 1 },
-                                        { Telemetry.BytesSentMetricName, 42 },
-                                         });
+            AssertTelemetryReceived(new Dictionary<string, int>
+            {
+                { Telemetry.PacketsSentMetricName, 1 },
+                { Telemetry.BytesSentMetricName, 42 },
+            });
         }
 
         [Test]
         public void PacketDropped()
         {
             _telemetry.OnPacketDropped(42);
-            AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.PacketsDroppedMetricName, 1 },
-                                        { Telemetry.BytesDroppedMetricName, 42 },
-                                        });
+            AssertTelemetryReceived(new Dictionary<string, int>
+            {
+                { Telemetry.PacketsDroppedMetricName, 1 },
+                { Telemetry.BytesDroppedMetricName, 42 },
+            });
         }
 
         [Test]
         public void PacketsDroppedQueue()
         {
             _telemetry.OnPacketsDroppedQueue();
-            AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.PacketsDroppedQueueMetricName, 1 },
-                                        });
+            AssertTelemetryReceived(new Dictionary<string, int>
+            {
+                { Telemetry.PacketsDroppedQueueMetricName, 1 },
+            });
         }
 
         [Test]
