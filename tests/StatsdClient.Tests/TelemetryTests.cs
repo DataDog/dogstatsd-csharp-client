@@ -109,7 +109,7 @@ namespace Tests
                 var nameWithoutTags = m.Split("|")[0];
                 var part = nameWithoutTags.Split(":");
                 var metricName = part[0];
-                var metricValue = Int32.Parse(part[1]);
+                var metricValue = int.Parse(part[1]);
 
                 if (metricValue == 0)
                 {
