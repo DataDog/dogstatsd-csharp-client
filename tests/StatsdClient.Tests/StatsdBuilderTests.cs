@@ -133,6 +133,18 @@ namespace StatsdClient.Tests
             return config;
         }
 
+        private static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
+        {
+            var config = new StatsdConfig { StatsdServerName = statsdServerName };
+            if (statsdPort.HasValue)
+            {
+                config.StatsdPort = statsdPort.Value;
+            }
+
+            config.Advanced.TelemetryFlushInterval = null;
+            return config;
+        }
+
         private int GetUDPPort(StatsdConfig config)
         {
             var endPoint = GetUDPIPEndPoint(config);
@@ -175,18 +187,6 @@ namespace StatsdClient.Tests
         {
             var buildStatsData = _statsdBuilder.BuildStatsData(config);
             buildStatsData.Dispose();
-        }
-
-        private static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
-        {
-            var config = new StatsdConfig { StatsdServerName = statsdServerName };
-            if (statsdPort.HasValue)
-            {
-                config.StatsdPort = statsdPort.Value;
-            }
-
-            config.Advanced.TelemetryFlushInterval = null;
-            return config;
         }
     }
 }
