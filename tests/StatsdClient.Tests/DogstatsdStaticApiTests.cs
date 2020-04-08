@@ -14,7 +14,9 @@ namespace Tests
     /// For this fixture to work properly, it must be run single threaded and create a fresh instance each time.
     /// This means if you are using NCrunch you must ensure this runs in a new process each time
     /// </summary>
-    [TestFixture, SingleThreaded, NonParallelizable]
+    [TestFixture]
+    [SingleThreaded]
+    [NonParallelizable]
     public class DogstatsdStaticApiTests
     {
         private UdpListener _udpListener;

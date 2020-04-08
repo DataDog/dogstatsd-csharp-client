@@ -50,7 +50,8 @@ namespace Tests
         }
 
         // Use a timeout in case Gauge become blocking
-        [Test, Timeout(30000)]
+        [Test]
+        [Timeout(30000)]
         public void CheckNotBlockWhenServerNotReadMessage()
         {
             var tags = new string[] { new string('A', 100) };

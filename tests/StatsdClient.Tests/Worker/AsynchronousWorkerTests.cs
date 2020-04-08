@@ -47,7 +47,8 @@ namespace Tests
             Assert.IsTrue(valueReceived.WaitOne(TimeSpan.FromSeconds(3)));
         }
 
-        [Test, Timeout(30000)]
+        [Test]
+        [Timeout(30000)]
         public async Task OnIdle()
         {
             var waitDurationQueue = new ConcurrentQueue<TimeSpan>();
@@ -71,7 +72,8 @@ namespace Tests
             Assert.That(waitDurations, Is.Ordered);
         }
 
-        [Test, Timeout(2000)]
+        [Test]
+        [Timeout(2000)]
         public void DisposeNotBlock()
         {
             var worker = CreateWorker();
