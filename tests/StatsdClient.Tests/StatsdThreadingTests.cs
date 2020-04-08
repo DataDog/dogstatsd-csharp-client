@@ -96,7 +96,7 @@ namespace Tests
             public void ExpectSequence(int n)
             {
                 int empty, missing = 0, dupes = 0;
-                if (!_commands.TryGetValue("", out empty))
+                if (!_commands.TryGetValue(string.Empty, out empty))
                 {
                     empty = 0;
                 }
