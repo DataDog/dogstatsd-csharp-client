@@ -123,9 +123,6 @@ namespace StatsdClient
             return task;
         }
 
-        /// <summary>
-        /// Add a Service check
-        /// </summary>
         public void Add(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
@@ -133,9 +130,6 @@ namespace StatsdClient
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
-        /// <summary>
-        /// Send a service check
-        /// </summary>
         public void Send(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
@@ -143,9 +137,6 @@ namespace StatsdClient
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
-        /// <summary>
-        /// Send a service check
-        /// </summary>
         public Task SendAsync(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;

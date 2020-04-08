@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace StatsdClient
 {
-    ///----------------------------------------------------------------------------
-    /// SocketSender splits a message before sending them.
-    ///----------------------------------------------------------------------------
+    // SocketSender splits a message before sending them.
     internal static class SocketSender
     {
         public static void Send(int maxPacketSize, string command, Action<byte[]> sender)
