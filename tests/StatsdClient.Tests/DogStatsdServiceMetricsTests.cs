@@ -16,7 +16,7 @@ namespace Tests
             var config = new StatsdConfig
             {
                 StatsdServerName = "127.0.0.1",
-                StatsdPort = 8132
+                StatsdPort = 8132,
             };
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;

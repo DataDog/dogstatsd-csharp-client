@@ -34,7 +34,8 @@ namespace Tests
         {
             _telemetry.OnMetricSent();
             AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.MetricsMetricName, 1 } });
+                                        { Telemetry.MetricsMetricName, 1 },
+                                        });
         }
 
         [Test]
@@ -42,7 +43,8 @@ namespace Tests
         {
             _telemetry.OnServiceCheckSent();
             AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.ServiceCheckMetricName, 1 } });
+                                        { Telemetry.ServiceCheckMetricName, 1 },
+                                        });
         }
 
         [Test]
@@ -50,7 +52,8 @@ namespace Tests
         {
             _telemetry.OnEventSent();
             AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.EventsMetricName, 1 } });
+                                        { Telemetry.EventsMetricName, 1 },
+                                        });
         }
 
         [Test]
@@ -59,7 +62,8 @@ namespace Tests
             _telemetry.OnPacketSent(42);
             AssertTelemetryReceived(new Dictionary<string, int> {
                                         { Telemetry.PacketsSentMetricName, 1 },
-                                        { Telemetry.BytesSentMetricName, 42 } });
+                                        { Telemetry.BytesSentMetricName, 42 },
+                                         });
         }
 
         [Test]
@@ -68,7 +72,8 @@ namespace Tests
             _telemetry.OnPacketDropped(42);
             AssertTelemetryReceived(new Dictionary<string, int> {
                                         { Telemetry.PacketsDroppedMetricName, 1 },
-                                        { Telemetry.BytesDroppedMetricName, 42 } });
+                                        { Telemetry.BytesDroppedMetricName, 42 },
+                                        });
         }
 
         [Test]
@@ -76,7 +81,8 @@ namespace Tests
         {
             _telemetry.OnPacketsDroppedQueue();
             AssertTelemetryReceived(new Dictionary<string, int> {
-                                        { Telemetry.PacketsDroppedQueueMetricName, 1 } });
+                                        { Telemetry.PacketsDroppedQueueMetricName, 1 },
+                                        });
         }
 
         [Test]

@@ -34,7 +34,7 @@ namespace Tests
             {
                 var metricsConfig = new StatsdConfig
                 {
-                    StatsdServerName = "127.0.0.1"
+                    StatsdServerName = "127.0.0.1",
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
@@ -53,7 +53,7 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8126
+                    StatsdPort = 8126,
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
@@ -72,7 +72,7 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8126
+                    StatsdPort = 8126,
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8125,
@@ -91,7 +91,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8129,
-                    Prefix = "prefix"
+                    Prefix = "prefix",
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8129,
@@ -110,7 +110,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8130,
-                    Prefix = "prefix"
+                    Prefix = "prefix",
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(nonStaticServiceInstance, "127.0.0.1", 8130,

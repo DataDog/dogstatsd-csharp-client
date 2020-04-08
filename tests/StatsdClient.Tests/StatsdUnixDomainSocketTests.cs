@@ -30,7 +30,7 @@ namespace Tests
         public enum HostnameProvider
         {
             Environment,
-            Property
+            Property,
         }
 
         [TestCase(HostnameProvider.Property)]

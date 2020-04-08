@@ -54,7 +54,7 @@ namespace Tests
             {
                 var metricsConfig = new StatsdConfig
                 {
-                    StatsdServerName = "127.0.0.1"
+                    StatsdServerName = "127.0.0.1",
                 };
                 sut.Configure(metricsConfig);
                 testReceive("127.0.0.1", 8125, "test", "test:1|c", sut);
@@ -69,7 +69,7 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8126
+                    StatsdPort = 8126,
                 };
                 sut.Configure(metricsConfig);
                 testReceive("127.0.0.1", 8126, "test", "test:1|c", sut);
@@ -85,7 +85,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8129,
-                    Prefix = "prefix"
+                    Prefix = "prefix",
                 };
                 sut.Configure(metricsConfig);
                 testReceive("127.0.0.1", 8129, "test", "prefix.test:1|c", sut);
@@ -101,7 +101,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8129,
-                    Prefix = "prefix"
+                    Prefix = "prefix",
                 };
 
                 sut.Configure(metricsConfig);
