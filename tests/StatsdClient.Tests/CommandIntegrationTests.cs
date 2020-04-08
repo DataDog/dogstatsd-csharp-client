@@ -614,8 +614,6 @@ namespace Tests
             AssertWasReceived("_sc|na\\nme|2|#t1,t2:v2|m:m\\:mess\\nage");
         }
 
-        #region Distrubution
-
         [Test]
         public void distribution()
         {
@@ -671,7 +669,5 @@ namespace Tests
             _dogStatsdService.Distribution("distribution", 42.1, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
             AssertWasReceived("distribution:42.1|d|@1.1|#tag1:true,tag2");
         }
-
-        #endregion
     }
 }
