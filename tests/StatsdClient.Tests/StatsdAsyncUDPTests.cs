@@ -13,10 +13,10 @@ namespace Tests
     [TestFixture]
     public class StatsdAsyncUDPTests
     {
-        private UdpListener _udpListener;
-        private Thread _listenThread;
         private readonly int _serverPort = Convert.ToInt32("8127");
         private readonly string _serverName = "127.0.0.1";
+        private UdpListener _udpListener;
+        private Thread _listenThread;
         private StatsdUDP _udp;
         private Statsd _statsd;
         private List<string> _lastPulledMessages;

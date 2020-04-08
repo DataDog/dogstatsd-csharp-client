@@ -11,14 +11,15 @@ namespace StatsdClient.Tests
     [TestFixture]
     public class StatsdBuilderTests
     {
-        private Mock<IStatsBufferizeFactory> _mock;
-        private StatsdBuilder _statsdBuilder;
         private readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
         private readonly List<string> _envVarsKeyToRestore = new List<string>
         {
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
             StatsdConfig.DD_AGENT_HOST_ENV_VAR,
         };
+
+        private Mock<IStatsBufferizeFactory> _mock;
+        private StatsdBuilder _statsdBuilder;
 
         [SetUp]
         public void Init()

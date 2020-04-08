@@ -11,9 +11,9 @@ namespace Tests
     [TestFixture]
     public class CommandIntegrationTests
     {
+        private readonly int _serverPort = Convert.ToInt32("8126");
         private UdpListener _udpListener;
         private Thread _listenThread;
-        private readonly int _serverPort = Convert.ToInt32("8126");
         private string serverName = "127.0.0.1";
         private DogStatsdService _dogStatsdService;
 

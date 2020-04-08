@@ -13,10 +13,10 @@ namespace Tests
     [TestFixture]
     public class AsynchronousWorkerTests
     {
+        private readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
         private Mock<IAsynchronousWorkerHandler<int>> _handler;
 
         private Mock<IWaiter> _waiter;
-        private readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
 
         [SetUp]
         public void Init()

@@ -10,8 +10,8 @@ namespace Tests
     [TestFixture]
     public class TelemetryTests
     {
-        private Telemetry _telemetry;
         private readonly List<string> _metrics = new List<string>();
+        private Telemetry _telemetry;
 
         [SetUp]
         public void Init()
