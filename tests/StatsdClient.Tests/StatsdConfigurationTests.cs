@@ -10,8 +10,12 @@ namespace Tests
     [TestFixture]
     public class StatsdConfigurationTests
     {
-        private void testReceive(string testServerName, int testPort, string testCounterName,
-            string expectedOutput, DogStatsdService dogStatsdService)
+        private void testReceive(
+            string testServerName,
+            int testPort,
+            string testCounterName,
+            string expectedOutput,
+            DogStatsdService dogStatsdService)
         {
             UdpListener udpListener = new UdpListener(testServerName, testPort);
             Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));

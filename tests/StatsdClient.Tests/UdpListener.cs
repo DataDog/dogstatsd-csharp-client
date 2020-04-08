@@ -57,8 +57,10 @@ namespace Tests
                     for (int i = 0; i < (int)count; i++)
                     {
                         byte[] lastReceivedBytes = _socket.Receive(ref _senderIpEndPoint);
-                        _lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
-                                                                          lastReceivedBytes.Length));
+                        _lastReceivedMessages.Add(Encoding.UTF8.GetString(
+                            lastReceivedBytes,
+                            0,
+                            lastReceivedBytes.Length));
                     }
                 }
                 catch (SocketException ex)
@@ -83,8 +85,11 @@ namespace Tests
                     try
                     {
                         byte[] lastReceivedBytes = _socket.Receive(ref _senderIpEndPoint);
-                        _lastReceivedMessages.Add(Encoding.UTF8.GetString(lastReceivedBytes, 0,
-                            lastReceivedBytes.Length));
+                        _lastReceivedMessages.Add(
+                            Encoding.UTF8.GetString(
+                                lastReceivedBytes,
+                                0,
+                                lastReceivedBytes.Length));
                     }
                     catch (SocketException ex)
                     {
