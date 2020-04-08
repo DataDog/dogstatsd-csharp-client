@@ -1,10 +1,10 @@
+using System;
+using System.Net.Sockets;
+using System.Text;
 using Mono.Unix;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Utils;
-using System;
-using System.Net.Sockets;
-using System.Text;
 
 #if !OS_WINDOWS
 namespace Tests
