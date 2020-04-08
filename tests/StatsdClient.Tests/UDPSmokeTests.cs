@@ -16,7 +16,7 @@ namespace Tests
                 var client = new StatsdUDP(name: "127.0.0.1", port: 8126);
                 client.Send("socket2:1|c");
             }
-            catch(SocketException ex)
+            catch (SocketException ex)
             {
                 Assert.Fail("Socket Exception, have you set up your Statsd name and port? Error: {0}", ex.Message);
             }
