@@ -5,7 +5,6 @@ using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
 
-
 namespace Tests
 {
     [TestFixture]

@@ -5,7 +5,6 @@ using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
 
-
 namespace Tests
 {
     [TestFixture]
@@ -65,7 +64,6 @@ namespace Tests
             }
         }
 
-
         [Test]
         public void setting_port_listen_on_other_port_should_return_no_data()
         {
@@ -83,7 +81,6 @@ namespace Tests
                 Assert.AreEqual(0, receivedData.Count);
             }
         }
-
 
         [Test]
         public void setting_prefix()

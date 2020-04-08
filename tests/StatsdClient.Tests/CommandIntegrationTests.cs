@@ -6,7 +6,6 @@ using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
 
-
 namespace Tests
 {
     [TestFixture]
@@ -79,7 +78,6 @@ namespace Tests
             _dogStatsdService.Counter("counter", 1337);
             AssertWasReceived("counter:1337|c");
         }
-
 
         [Test]
         public void counter_tags()
@@ -285,8 +283,6 @@ namespace Tests
             _dogStatsdService.Histogram("histogram", 42.1, sampleRate: 1.1, tags: new[] { "tag1:true,tag2" });
             AssertWasReceived("histogram:42.1|h|@1.1|#tag1:true,tag2");
         }
-
-
 
         [Test]
         public void set()
@@ -565,7 +561,6 @@ namespace Tests
             AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
         }
 
-
         [Test]
         public void timer_block_doesnt_swallow_exception_and_submits_metric()
         {
@@ -628,7 +623,6 @@ namespace Tests
             _dogStatsdService.Distribution("distribution", 42, tags: new[] { "tag1:true", "tag2" });
             AssertWasReceived("distribution:42|d|#tag1:true,tag2");
         }
-
 
         [Test]
         public void distribution_sample_rate()
