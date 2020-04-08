@@ -12,7 +12,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
     <NoWarn>0618</NoWarn>
-    <CodeAnalysisRuleSet>stylecop.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../../stylecop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
@@ -27,6 +27,6 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="stylecop.json" />
+    <AdditionalFiles Include="../../stylecop.json" />
   </ItemGroup>
 </Project>
