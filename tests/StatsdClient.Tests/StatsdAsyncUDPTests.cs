@@ -54,7 +54,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task send_async()
+        public async Task Send_async()
         {
             // (Sanity test)
             _listenThread.Start();
@@ -63,7 +63,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task send_async_equal_to_udp_packet_limit_is_still_sent()
+        public async Task Send_async_equal_to_udp_packet_limit_is_still_sent()
         {
             var msg = new string('f', StatsdConfig.DefaultStatsdMaxUDPPacketSize);
             _listenThread.Start();
@@ -73,7 +73,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task send_async_unsplittable_oversized_udp_packets_are_not_split_or_sent_and_no_exception_is_raised()
+        public async Task Send_async_unsplittable_oversized_udp_packets_are_not_split_or_sent_and_no_exception_is_raised()
         {
             // This message will be one byte longer than the theoretical limit of a UDP packet
             var msg = new string('f', 65508);
@@ -85,7 +85,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task send_async_oversized_udp_packets_are_split_if_possible()
+        public async Task Send_async_oversized_udp_packets_are_split_if_possible()
         {
             var msg = new string('f', (StatsdConfig.DefaultStatsdMaxUDPPacketSize - 15));
             _listenThread.Start(3); // Listen for 3 messages
@@ -100,7 +100,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task send_async_oversized_udp_packets_are_split_if_possible_with_multiple_messages_in_one_packet()
+        public async Task Send_async_oversized_udp_packets_are_split_if_possible_with_multiple_messages_in_one_packet()
         {
             var msg = new string('f', StatsdConfig.DefaultStatsdMaxUDPPacketSize / 2);
             _listenThread.Start(3); // Listen for 3 messages
@@ -114,7 +114,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task async_set_max_udp_packet_size()
+        public async Task Async_set_max_udp_packet_size()
         {
             // Make sure that we can set the max UDP packet size
             _udp = new StatsdUDP(_serverName, _serverPort, 10);

@@ -12,7 +12,7 @@ namespace Tests
     public class StatsdThreadingTests
     {
         [Test]
-        public void single_send_is_thread_safe()
+        public void Single_send_is_thread_safe()
         {
             var counts = new CountingUDP();
             var test = new Statsd(counts);

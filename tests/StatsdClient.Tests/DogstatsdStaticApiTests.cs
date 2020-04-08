@@ -51,7 +51,7 @@ namespace Tests
         }
 
         [Test]
-        public void distribution_should_be_received()
+        public void Distribution_should_be_received()
         {
             DogStatsd.Distribution("distribution", 42);
             AssertWasReceived("distribution:42|d");

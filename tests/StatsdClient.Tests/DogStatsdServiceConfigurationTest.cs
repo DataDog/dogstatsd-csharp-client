@@ -11,7 +11,7 @@ namespace Tests
     public class DogStatsdServiceConfigurationTest
     {
         [Test]
-        public void default_port_is_8125()
+        public void Default_port_is_8125()
         {
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
@@ -32,7 +32,7 @@ namespace Tests
         }
 
         [Test]
-        public void setting_port()
+        public void Setting_port()
         {
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
@@ -54,7 +54,7 @@ namespace Tests
         }
 
         [Test]
-        public void setting_port_listen_on_other_port_should_return_no_data()
+        public void Setting_port_listen_on_other_port_should_return_no_data()
         {
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
@@ -75,7 +75,7 @@ namespace Tests
         }
 
         [Test]
-        public void setting_prefix()
+        public void Setting_prefix()
         {
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
@@ -97,7 +97,7 @@ namespace Tests
         }
 
         [Test]
-        public void setting_prefix_starttimer()
+        public void Setting_prefix_starttimer()
         {
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
@@ -141,7 +141,7 @@ namespace Tests
         }
 
         [Test]
-        public void setting_with_env_arg()
+        public void Setting_with_env_arg()
         {
             Environment.SetEnvironmentVariable("DD_DOGSTATSD_PORT", "8131");
             Environment.SetEnvironmentVariable("DD_AGENT_HOST", "127.0.0.1");
@@ -164,7 +164,7 @@ namespace Tests
         }
 
         [Test]
-        public void setting_entity_id_with_env_arg()
+        public void Setting_entity_id_with_env_arg()
         {
             Environment.SetEnvironmentVariable("DD_ENTITY_ID", "foobar");
             using (var nonStaticServiceInstance = new DogStatsdService())

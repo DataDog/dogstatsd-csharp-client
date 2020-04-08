@@ -11,7 +11,7 @@ namespace Tests
     public class StatsdConfigurationTests
     {
         [Test]
-        public void throw_exception_when_no_config_provided()
+        public void Throw_exception_when_no_config_provided()
         {
             var sut = CreateSut();
             StatsdConfig metricsConfig = null;
@@ -19,7 +19,7 @@ namespace Tests
         }
 
         [Test]
-        public void throw_exception_when_no_hostname_provided()
+        public void Throw_exception_when_no_hostname_provided()
         {
             var sut = CreateSut();
             var metricsConfig = new StatsdConfig { };
@@ -27,7 +27,7 @@ namespace Tests
         }
 
         [Test]
-        public void default_port_is_8125()
+        public void Default_port_is_8125()
         {
             using (var sut = CreateSut())
             {
@@ -36,12 +36,12 @@ namespace Tests
                     StatsdServerName = "127.0.0.1",
                 };
                 sut.Configure(metricsConfig);
-                testReceive("127.0.0.1", 8125, "test", "test:1|c", sut);
+                TestReceive("127.0.0.1", 8125, "test", "test:1|c", sut);
             }
         }
 
         [Test]
-        public void setting_port()
+        public void Setting_port()
         {
             using (var sut = CreateSut())
             {
@@ -51,12 +51,12 @@ namespace Tests
                     StatsdPort = 8126,
                 };
                 sut.Configure(metricsConfig);
-                testReceive("127.0.0.1", 8126, "test", "test:1|c", sut);
+                TestReceive("127.0.0.1", 8126, "test", "test:1|c", sut);
             }
         }
 
         [Test]
-        public void setting_prefix()
+        public void Setting_prefix()
         {
             using (var sut = CreateSut())
             {
@@ -67,12 +67,12 @@ namespace Tests
                     Prefix = "prefix",
                 };
                 sut.Configure(metricsConfig);
-                testReceive("127.0.0.1", 8129, "test", "prefix.test:1|c", sut);
+                TestReceive("127.0.0.1", 8129, "test", "prefix.test:1|c", sut);
             }
         }
 
         [Test]
-        public void service_cannot_be_configured_more_than_once()
+        public void Service_cannot_be_configured_more_than_once()
         {
             using (var sut = CreateSut())
             {
@@ -94,7 +94,7 @@ namespace Tests
             return new DogStatsdService();
         }
 
-        private void testReceive(
+        private void TestReceive(
             string testServerName,
             int testPort,
             string testCounterName,

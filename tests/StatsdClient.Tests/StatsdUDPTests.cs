@@ -53,7 +53,7 @@ namespace Tests
         }
 
         [Test]
-        public void send()
+        public void Send()
         {
             // (Sanity test)
             _listenThread.Start();
@@ -62,7 +62,7 @@ namespace Tests
         }
 
         [Test]
-        public void send_equal_to_udp_packet_limit_is_still_sent()
+        public void Send_equal_to_udp_packet_limit_is_still_sent()
         {
             var msg = new string('f', StatsdConfig.DefaultStatsdMaxUDPPacketSize);
             _listenThread.Start();
@@ -72,7 +72,7 @@ namespace Tests
         }
 
         [Test]
-        public void send_unsplittable_oversized_udp_packets_are_not_split_or_sent_and_no_exception_is_raised()
+        public void Send_unsplittable_oversized_udp_packets_are_not_split_or_sent_and_no_exception_is_raised()
         {
             // This message will be one byte longer than the theoretical limit of a UDP packet
             var msg = new string('f', 65508);
@@ -84,7 +84,7 @@ namespace Tests
         }
 
         [Test]
-        public void send_oversized_udp_packets_are_split_if_possible()
+        public void Send_oversized_udp_packets_are_split_if_possible()
         {
             var msg = new string('f', (StatsdConfig.DefaultStatsdMaxUDPPacketSize - 15));
             _listenThread.Start(3); // Listen for 3 messages
@@ -99,7 +99,7 @@ namespace Tests
         }
 
         [Test]
-        public void send_oversized_udp_packets_are_split_if_possible_with_multiple_messages_in_one_packet()
+        public void Send_oversized_udp_packets_are_split_if_possible_with_multiple_messages_in_one_packet()
         {
             var msg = new string('f', StatsdConfig.DefaultStatsdMaxUDPPacketSize / 2);
             _listenThread.Start(3); // Listen for 3 messages
@@ -113,7 +113,7 @@ namespace Tests
         }
 
         [Test]
-        public void set_max_udp_packet_size()
+        public void Set_max_udp_packet_size()
         {
             // Make sure that we can set the max UDP packet size
             _udp = new StatsdUDP(_serverName, _serverPort, 10);
