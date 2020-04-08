@@ -72,8 +72,7 @@ namespace Tests
         [Test]
         public void _udp_listener_sanity_test()
         {
-            var client = new StatsdUDP("127.0.0.1",
-                                       Convert.ToInt32("8126"));
+            var client = new StatsdUDP("127.0.0.1", Convert.ToInt32("8126"));
             client.Send("iamnotinsane!");
             AssertWasReceived("iamnotinsane!");
         }

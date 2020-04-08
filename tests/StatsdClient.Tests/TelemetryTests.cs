@@ -84,7 +84,8 @@ namespace Tests
         {
             _telemetry.OnMetricSent();
             _telemetry.Flush();
-            Assert.AreEqual("datadog.dogstatsd.client.metrics:1|c|#" +
+            Assert.AreEqual(
+                "datadog.dogstatsd.client.metrics:1|c|#" +
                 "client:csharp,client_version:1.0.0.0,client_transport:uds", _metrics[0]);
         }
 
