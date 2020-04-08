@@ -62,7 +62,6 @@ namespace Tests
             // Stall until the the listener receives a message or times out
             while (_listenThread.IsAlive) ;
             StringAssert.IsMatch(pattern, _udpListener.GetAndClearLastMessages()[index]);
-
         }
 
         [Test]
