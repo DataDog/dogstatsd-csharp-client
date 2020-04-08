@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace StatsdClient.Tests
 {
     [TestFixture]
-    public class UnitTests
+    public class StatsdUnitTests
     {
         private IStatsdUDP _udp;
         private IRandomGenerator _randomGenerator;

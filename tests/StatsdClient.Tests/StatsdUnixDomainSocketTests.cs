@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Tests
 {
     [TestFixture]
-    public class StatsdUnixDomainSocketTest
+    public class StatsdUnixDomainSocketTests
     {
         private TemporaryPath _temporaryPath;
 

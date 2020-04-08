@@ -8,7 +8,7 @@ using Tests.Helpers;
 namespace Tests
 {
     [TestFixture]
-    public class StatsdConfigurationTest
+    public class StatsdConfigurationTests
     {
         private void testReceive(string testServerName, int testPort, string testCounterName,
             string expectedOutput, DogStatsdService dogStatsdService)
