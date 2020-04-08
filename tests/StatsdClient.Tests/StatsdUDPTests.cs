@@ -60,7 +60,7 @@ namespace Tests
             if (_lastPulledMessages.Count == 0)
             {
                 // Stall until the the listener receives a message or times out
-                while (_listenThread.IsAlive) ;
+                while (_listenThread.IsAlive);
                 _lastPulledMessages = _udpListener.GetAndClearLastMessages();
             }
 

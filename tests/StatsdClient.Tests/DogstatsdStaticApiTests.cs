@@ -60,7 +60,7 @@ namespace Tests
         private void AssertWasReceived(string shouldBe, int index = 0)
         {
             // Stall until the the listener receives a message or times out
-            while (_listenThread.IsAlive) ;
+            while (_listenThread.IsAlive);
             Assert.AreEqual(shouldBe, _udpListener.GetAndClearLastMessages()[index]);
         }
     }

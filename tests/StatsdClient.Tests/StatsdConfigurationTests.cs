@@ -18,7 +18,7 @@ namespace Tests
             listenThread.Start();
             dogStatsdService.Increment(testCounterName);
             dogStatsdService.Dispose();
-            while (listenThread.IsAlive) ;
+            while (listenThread.IsAlive);
             Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
             udpListener.Dispose();
         }
