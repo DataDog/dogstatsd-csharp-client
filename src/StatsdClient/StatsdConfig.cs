@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace StatsdClient
 {
@@ -21,19 +22,37 @@ namespace StatsdClient
         /// The name of the environment variable defining the global tags to be applied to every metric, event, and service check.
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Avoid breaking changes.")]
+        [ObsoleteAttribute("This field will be removed in a future release. You should use instead EntityIdEnvVar.")]
         public const string DD_ENTITY_ID_ENV_VAR = "DD_ENTITY_ID";
+
+        /// <summary>
+        /// The name of the environment variable defining the global tags to be applied to every metric, event, and service check.
+        /// </summary>
+        public const string EntityIdEnvVar = "DD_ENTITY_ID";
 
         /// <summary>
         /// The name of the environment variable defining the port of the targeted StatsD server.
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Avoid breaking changes.")]
+        [ObsoleteAttribute("This field will be removed in a future release. You should use instead DogStatsdPortEnvVar.")]
         public const string DD_DOGSTATSD_PORT_ENV_VAR = "DD_DOGSTATSD_PORT";
+
+        /// <summary>
+        /// The name of the environment variable defining the port of the targeted StatsD server.
+        /// </summary>
+        public const string DogStatsdPortEnvVar = "DD_DOGSTATSD_PORT";
 
         /// <summary>
         /// The name of the environment variable defining the host name of the targeted StatsD server.
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Avoid breaking changes.")]
+        [ObsoleteAttribute("This field will be removed in a future release. You should use instead AgentHostEnvVar.")]
         public const string DD_AGENT_HOST_ENV_VAR = "DD_AGENT_HOST";
+
+        /// <summary>
+        /// The name of the environment variable defining the host name of the targeted StatsD server.
+        /// </summary>
+        public const string AgentHostEnvVar = "DD_AGENT_HOST";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StatsdConfig"/> class.
