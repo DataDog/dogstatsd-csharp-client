@@ -11,7 +11,7 @@ namespace Tests
     public class StatsBufferizeTests
     {
         [Test]
-        public async Task StatsBufferize()
+        public void StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
@@ -22,7 +22,7 @@ namespace Tests
                 statsBufferize.Send("123");
                 statsBufferize.Send("4"); // Send "123" as "4" cannot be added to the current buffer.
                 while (handler.Buffer == null)
-                    await Task.Delay(TimeSpan.FromMilliseconds(1));
+                    Task.Delay(TimeSpan.FromMilliseconds(1)).Wait();
                 byte[] buffer = Interlocked.Exchange(ref handler.Buffer, null);
 
                 // Sent because buffer is full.
@@ -30,7 +30,7 @@ namespace Tests
                 Assert.AreEqual("123", Encoding.UTF8.GetString(buffer));
 
                 while (handler.Buffer == null)
-                    await Task.Delay(1);
+                    Task.Delay(1).Wait();
                 // Sent because we wait more than the timeout.
                 Assert.Greater(stopWatch.ElapsedMilliseconds, timeout.TotalMilliseconds);
                 Assert.AreEqual("4", Encoding.UTF8.GetString(handler.Buffer));
