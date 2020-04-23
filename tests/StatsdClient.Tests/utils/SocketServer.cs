@@ -27,7 +27,7 @@ namespace Tests.StatsSender
             if (serverName.StartsWith(StatsdBuilder.UnixDomainSocketPrefix))
             {
                 serverName = serverName.Substring(StatsdBuilder.UnixDomainSocketPrefix.Length);
-                _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
+                _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
                 endPoint = new UnixEndPoint(serverName);
                 bufferSize = config.StatsdMaxUnixDomainSocketPacketSize;
             }
