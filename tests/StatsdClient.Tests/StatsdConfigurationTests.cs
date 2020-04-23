@@ -14,14 +14,19 @@ namespace Tests
         private void testReceive(string testServerName, int testPort, string testCounterName,
             string expectedOutput, DogStatsdService dogStatsdService)
         {
-            UdpListener udpListener = new UdpListener(testServerName, testPort);
-            Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
-            listenThread.Start();
-            dogStatsdService.Increment(testCounterName);
-            dogStatsdService.Dispose();
-            while (listenThread.IsAlive) ;
-            Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
-            udpListener.Dispose();
+            using (UdpListener udpListener = new UdpListener(testServerName, testPort))
+            {
+                Thread listenThread = new Thread(udpListener.ListenAndWait);
+                listenThread.Start();
+
+                dogStatsdService.Increment(testCounterName);
+
+                dogStatsdService.Dispose();
+                udpListener.Shutdown();
+                listenThread.Join();
+                
+                Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
+            }
         }
 
         private DogStatsdService CreateSut()
