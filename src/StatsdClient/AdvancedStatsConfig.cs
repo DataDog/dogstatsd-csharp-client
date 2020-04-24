@@ -45,6 +45,6 @@ namespace StatsdClient
         /// This value defines the duration between two telemetry flushes.
         /// When this value is set at null, telemetry is disabled.
         /// </summary>
-        public TimeSpan? TelemetryFlushInterval { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan? TelemetryFlushInterval { get; set; } = TimeSpan.FromSeconds(10);
     }
 }

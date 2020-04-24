@@ -94,7 +94,7 @@ namespace Tests
         static Socket CreateSocketServer(TemporaryPath temporaryPath)
         {
             var endPoint = new UnixEndPoint(temporaryPath.Path);
-            var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
+            var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
             server.Bind(endPoint);
 
             return server;
