@@ -1,4 +1,6 @@
-﻿namespace StatsdClient
+﻿using StatsdClient.Bufferize;
+
+namespace StatsdClient
 {
     public class StatsdConfig
     {
@@ -8,6 +10,8 @@
         public int StatsdMaxUnixDomainSocketPacketSize {get; set;} = 2048;
         public bool StatsdTruncateIfTooLong { get; set; } = true;
         public string Prefix { get; set; }
+
+        public AdvancedStatsConfig Advanced { get; }
 
         public string[] ConstantTags { get; set; }
         public const int DefaultStatsdPort = 8125;
@@ -21,6 +25,7 @@
         {
             StatsdPort = 0;
             StatsdMaxUDPPacketSize = DefaultStatsdMaxUDPPacketSize;
+            Advanced = new AdvancedStatsConfig();
         }
     }
 }

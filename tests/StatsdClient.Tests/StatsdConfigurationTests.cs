@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
@@ -13,13 +14,19 @@ namespace Tests
         private void testReceive(string testServerName, int testPort, string testCounterName,
             string expectedOutput, DogStatsdService dogStatsdService)
         {
-            UdpListener udpListener = new UdpListener(testServerName, testPort);
-            Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
-            listenThread.Start();
-            dogStatsdService.Increment(testCounterName);
-            while (listenThread.IsAlive) ;
-            Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
-            udpListener.Dispose();
+            using (UdpListener udpListener = new UdpListener(testServerName, testPort))
+            {
+                Thread listenThread = new Thread(udpListener.ListenAndWait);
+                listenThread.Start();
+
+                dogStatsdService.Increment(testCounterName);
+
+                dogStatsdService.Dispose();
+                udpListener.Shutdown();
+                listenThread.Join();
+                
+                Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
+            }
         }
 
         private DogStatsdService CreateSut()
@@ -46,56 +53,64 @@ namespace Tests
         [Test]
         public void default_port_is_8125()
         {
-            var sut = CreateSut();
-            var metricsConfig = new StatsdConfig
+            using (var sut = CreateSut())
             {
-                StatsdServerName = "127.0.0.1"
-            };
-            sut.Configure(metricsConfig);
-            testReceive("127.0.0.1", 8125, "test", "test:1|c", sut);
+                var metricsConfig = new StatsdConfig
+                {
+                    StatsdServerName = "127.0.0.1"
+                };
+                sut.Configure(metricsConfig);
+                testReceive("127.0.0.1", 8125, "test", "test:1|c", sut);
+            }
         }
 
         [Test]
         public void setting_port()
         {
-            var sut = CreateSut();
-            var metricsConfig = new StatsdConfig
+            using (var sut = CreateSut())
             {
-                StatsdServerName = "127.0.0.1",
-                StatsdPort = 8126
-            };
-            sut.Configure(metricsConfig);
-            testReceive("127.0.0.1", 8126, "test", "test:1|c", sut);
+                var metricsConfig = new StatsdConfig
+                {
+                    StatsdServerName = "127.0.0.1",
+                    StatsdPort = 8126
+                };
+                sut.Configure(metricsConfig);
+                testReceive("127.0.0.1", 8126, "test", "test:1|c", sut);
+            }
         }
 
         [Test]
         public void setting_prefix()
         {
-            var sut = CreateSut();
-            var metricsConfig = new StatsdConfig
+            using (var sut = CreateSut())
             {
-                StatsdServerName = "127.0.0.1",
-                StatsdPort = 8129,
-                Prefix = "prefix"
-            };
-            sut.Configure(metricsConfig);
-            testReceive("127.0.0.1", 8129, "test", "prefix.test:1|c", sut);
+                var metricsConfig = new StatsdConfig
+                {
+                    StatsdServerName = "127.0.0.1",
+                    StatsdPort = 8129,
+                    Prefix = "prefix"
+                };
+                sut.Configure(metricsConfig);
+                testReceive("127.0.0.1", 8129, "test", "prefix.test:1|c", sut);
+            }
         }
 
         [Test]
         public void service_cannot_be_configured_more_than_once()
         {
-            var sut = CreateSut();
-            StatsdConfig metricsConfig = new StatsdConfig()
+            using (var sut = CreateSut())
             {
-                StatsdServerName = "127.0.0.1",
-                StatsdPort = 8129,
-                Prefix = "prefix"
-            };
+                StatsdConfig metricsConfig = new StatsdConfig()
+                {
+                    StatsdServerName = "127.0.0.1",
+                    StatsdPort = 8129,
+                    Prefix = "prefix"
+                };
 
-            sut.Configure(metricsConfig);
+                sut.Configure(metricsConfig);
 
-            Assert.Throws<InvalidOperationException>(() => sut.Configure(metricsConfig));
+                Assert.Throws<InvalidOperationException>(() => sut.Configure(metricsConfig));
+            }
         }
     }
 }

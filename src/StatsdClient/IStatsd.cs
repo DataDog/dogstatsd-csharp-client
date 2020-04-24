@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This interface will become private in a future release.")]
     public interface IStatsd
     {
         List<string> Commands { get; }

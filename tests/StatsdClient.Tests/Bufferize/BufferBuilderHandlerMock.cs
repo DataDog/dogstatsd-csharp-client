@@ -1,11 +1,11 @@
 using System;
-using StatsdClient;
+using StatsdClient.Bufferize;
 
 namespace Tests
 {
     class BufferBuilderHandlerMock : IBufferBuilderHandler
     {
-        public byte[] Buffer { get; private set; }
+        public byte[] Buffer;
 
         public void Handle(byte[] buffer, int length)
         {

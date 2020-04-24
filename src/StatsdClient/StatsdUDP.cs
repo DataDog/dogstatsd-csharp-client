@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This class will become private in a future release.")]
     public class StatsdUDP : IDisposable, IStatsdUDP
     {
         private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
@@ -64,7 +65,7 @@ namespace StatsdClient
             }
             return port;
         }
-        private IPAddress GetIpv4Address(string name)
+        internal static IPAddress GetIpv4Address(string name)
         {
             IPAddress ipAddress;
             bool isValidIPAddress = IPAddress.TryParse(name, out ipAddress);

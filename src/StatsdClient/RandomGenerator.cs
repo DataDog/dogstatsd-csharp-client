@@ -2,6 +2,7 @@ using System;
 
 namespace StatsdClient
 {
+    [ObsoleteAttribute("This class will become private in a future release.")]
     public class RandomGenerator : IRandomGenerator
     {
         readonly ThreadSafeRandom _random;

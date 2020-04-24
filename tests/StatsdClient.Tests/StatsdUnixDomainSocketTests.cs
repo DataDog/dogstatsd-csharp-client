@@ -5,6 +5,7 @@ using Mono.Unix;
 using System.Text;
 using System.Net.Sockets;
 using System;
+using System.Threading.Tasks;
 
 #if !OS_WINDOWS
 namespace Tests
@@ -36,37 +37,14 @@ namespace Tests
         [TestCase(HostnameProvider.Environment)]
         public void SendSingleMetric(HostnameProvider hostnameProvider)
         {
-            using (var service = CreateService(_temporaryPath, hostnameProvider))
+            using (var socket = CreateSocketServer(_temporaryPath))
             {
-                using (var socket = CreateSocketServer(_temporaryPath))
+                using (var service = CreateService(_temporaryPath, hostnameProvider))
                 {
                     var metric = "gas_tank.level";
                     var value = 0.75;
                     service.Gauge(metric, value);
                     Assert.AreEqual($"{metric}:{value}|g", ReadFromServer(socket));
-                }
-            }
-        }
-
-        [Test]
-        public void SendSplitMetrics()
-        {
-            using (var statdUds = new StatsdUnixDomainSocket(StatsdUnixDomainSocket.UnixDomainSocketPrefix + _temporaryPath.Path, 25))
-            {
-                using (var socket = CreateSocketServer(_temporaryPath))
-                {
-                    var statd = new Statsd(statdUds);
-                    var messageCount = 7;
-
-                    for (int i = 0; i < messageCount; ++i)
-                        statd.Add("title" + i, "text");
-                    Assert.AreEqual(messageCount, statd.Commands.Count);
-
-                    statd.Send();
-
-                    var response = ReadFromServer(socket);
-                    for (int i = 0; i < messageCount; ++i)
-                        Assert.True(response.Contains("title" + i));
                 }
             }
         }
@@ -77,13 +55,16 @@ namespace Tests
         {
             var tags = new string[] { new string('A', 100) };
 
-            using (var service = CreateService(_temporaryPath))
+            using (var socket = CreateSocketServer(_temporaryPath))
             {
-                // We are sending several Gauge to make sure there is no buffer
-                // that can make service.Gauge blocks after several calls.
-                for (int i = 0; i < 1000; ++i)
-                    service.Gauge("metric" + i, 42, 1, tags);
-                // If the code go here that means we do not block.
+                using (var service = CreateService(_temporaryPath))
+                {
+                    // We are sending several Gauge to make sure there is no buffer
+                    // that can make service.Gauge blocks after several calls.
+                    for (int i = 0; i < 10; ++i)
+                        service.Gauge("metric" + i, 42, 1, tags);
+                    // If the code go here that means we do not block.
+                }
             }
         }
 
@@ -91,17 +72,17 @@ namespace Tests
                     TemporaryPath temporaryPath,
                     HostnameProvider hostnameProvider = HostnameProvider.Property)
         {
-            var serverName = StatsdUnixDomainSocket.UnixDomainSocketPrefix + temporaryPath.Path;
-            var dogstatsdConfig = new StatsdConfig{ StatsdMaxUnixDomainSocketPacketSize = 1000 };
+            var serverName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path;
+            var dogstatsdConfig = new StatsdConfig { StatsdMaxUnixDomainSocketPacketSize = 1000 };
 
             switch (hostnameProvider)
             {
                 case HostnameProvider.Property: dogstatsdConfig.StatsdServerName = serverName; break;
-                case HostnameProvider.Environment: 
-                {
-                    Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, serverName); 
-                    break;
-                }
+                case HostnameProvider.Environment:
+                    {
+                        Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, serverName);
+                        break;
+                    }
             }
 
             var dogStatsdService = new DogStatsdService();
@@ -113,7 +94,7 @@ namespace Tests
         static Socket CreateSocketServer(TemporaryPath temporaryPath)
         {
             var endPoint = new UnixEndPoint(temporaryPath.Path);
-            var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP);
+            var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
             server.Bind(endPoint);
 
             return server;
@@ -124,7 +105,7 @@ namespace Tests
             var builder = new StringBuilder();
             var buffer = new byte[8096];
 
-            while (socket.Available > 0)
+            while (socket.Available > 0 || builder.Length == 0)
             {
                 var count = socket.Receive(buffer);
                 var chars = System.Text.Encoding.UTF8.GetChars(buffer, 0, count);
