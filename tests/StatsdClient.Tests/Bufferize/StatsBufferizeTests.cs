@@ -11,25 +11,18 @@ namespace Tests
     public class StatsBufferizeTests
     {
         [Test]
-        public async Task StatsBufferize()
+        public void StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
-            var timeout = TimeSpan.FromMilliseconds(10);
-            using (var statsBufferize = new StatsBufferize(new Telemetry(), bufferBuilder, 10, null, timeout))
+            using (var statsBufferize = new StatsBufferize(new Telemetry(), bufferBuilder, 10, null, TimeSpan.Zero))
             {
-                statsBufferize.Send("123");
+                statsBufferize.Send("1");
                 while (handler.Buffer == null)
-                    await Task.Delay(1);
-                // Sent because buffer is full.
-                Assert.AreEqual("123", Encoding.UTF8.GetString(handler.Buffer));
-                handler.Buffer = null;
+                    Task.Delay(TimeSpan.FromMilliseconds(1)).Wait();
 
-                statsBufferize.Send("4");
-                while (handler.Buffer == null)
-                    await Task.Delay(1);
-                // Sent because we wait more than the timeout.
-                Assert.AreEqual("4", Encoding.UTF8.GetString(handler.Buffer));
+                // Sent because buffer is full.                
+                Assert.AreEqual("1", Encoding.UTF8.GetString(handler.Buffer));
             }
         }
     }
