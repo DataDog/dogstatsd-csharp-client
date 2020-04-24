@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
 using StatsdClient;
-using Tests.StatsSender;
 using Tests.Utils;
 
 namespace Tests

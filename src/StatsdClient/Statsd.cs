@@ -21,6 +21,7 @@ namespace StatsdClient
         private readonly string _prefix;
         private readonly string[] _constantTags;
         public bool TruncateIfTooLong {get; set; }
+        private readonly Telemetry _optionalTelemetry;
 
         public List<string> Commands
         {
@@ -228,12 +229,18 @@ namespace StatsdClient
         public class Meter : Metric { }
         public class Set : Metric { }
 
-        public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory, string prefix, string[] constantTags)
+        internal Statsd(IStatsdUDP udp,
+                      IRandomGenerator randomGenerator,
+                      IStopWatchFactory stopwatchFactory,
+                      string prefix,
+                      string[] constantTags,
+                      Telemetry optionalTelemetry)
         {
             StopwatchFactory = stopwatchFactory;
             Udp = udp;
             RandomGenerator = randomGenerator;
             _prefix = prefix;
+            _optionalTelemetry = optionalTelemetry;
 
             string entityId = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
 
@@ -247,6 +254,15 @@ namespace StatsdClient
                 var entityIdTags = new[] { $"{ENTITY_ID_INTERNAL_TAG_KEY}:{entityId}" };
                 _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
             }
+        }
+
+        public Statsd(IStatsdUDP udp,
+                      IRandomGenerator randomGenerator,
+                      IStopWatchFactory stopwatchFactory,
+                      string prefix,
+                      string[] constantTags)
+                      : this(udp, randomGenerator, stopwatchFactory, prefix, constantTags, null)
+        {
         }
 
         public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory, string prefix)
@@ -264,24 +280,29 @@ namespace StatsdClient
         public void Add<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null) where TCommandType : Metric
         {
             _commands.Add(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
+            _optionalTelemetry?.OnMetricSent();
         }
 
         public void Add(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             _commands.Add(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
+            _optionalTelemetry?.OnEventSent();
         }
 
         public void Send(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             Send(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
+            _optionalTelemetry?.OnEventSent();
         }
 
         public Task SendAsync(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            return SendAsync(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
+            var task = SendAsync(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
+            _optionalTelemetry?.OnEventSent();
+            return task;
         }
 
         /// <summary>
@@ -291,6 +312,7 @@ namespace StatsdClient
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             _commands.Add(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
+            _optionalTelemetry?.OnServiceCheckSent();
         }
 
         /// <summary>
@@ -300,6 +322,7 @@ namespace StatsdClient
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             Send(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
+            _optionalTelemetry?.OnServiceCheckSent();
         }
 
         /// <summary>
@@ -308,7 +331,9 @@ namespace StatsdClient
         public Task SendAsync(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            return SendAsync(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
+            var task = SendAsync(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
+            _optionalTelemetry?.OnServiceCheckSent();
+            return task;
         }
 
         public void Send<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null) where TCommandType : Metric
@@ -316,6 +341,7 @@ namespace StatsdClient
             if (RandomGenerator.ShouldSend(sampleRate))
             {
                 Send(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
+                _optionalTelemetry?.OnMetricSent();
             }
         }
 
@@ -323,7 +349,9 @@ namespace StatsdClient
         {
             if (RandomGenerator.ShouldSend(sampleRate))
             {
-                return SendAsync(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
+                var task = SendAsync(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
+                _optionalTelemetry?.OnMetricSent();
+                return task;
             }
             return Task.FromResult((object)null);
         }

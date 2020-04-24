@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Reflection;
 using Mono.Unix;
 using StatsdClient.Bufferize;
 
@@ -8,22 +9,18 @@ namespace StatsdClient
     /// <summary>
     /// StatsdBuilder builds an instance of `Statsd` from StatsdConfig.
     /// </summary>
-    class StatsdBuilder : IDisposable
+    class StatsdBuilder
     {
         public static readonly string UnixDomainSocketPrefix = "unix://";
 
         readonly IStatsBufferizeFactory _factory;
-
-        StatsSender _statsSender;
-        StatsBufferize _statsBufferize;
-
 
         public StatsdBuilder(IStatsBufferizeFactory factory)
         {
             _factory = factory;
         }
 
-        public Statsd BuildStats(StatsdConfig config)
+        public StatsdData BuildStatsData(StatsdConfig config)
         {
             var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
                     ? config.StatsdServerName
@@ -36,47 +33,77 @@ namespace StatsdClient
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            var metricsSender = CreateMetricsSender(config, statsdServerName);
-            var statsD = new Statsd(metricsSender,
+            var statsSenderData = CreateStatsSender(config, statsdServerName);
+            var statsSender = statsSenderData.Sender;
+            var telemetry = CreateTelemetry(config, statsSenderData.Sender);
+            var statsBufferize = CreateStatsBufferize(telemetry,
+                                                   statsSenderData.Sender,
+                                                   statsSenderData.BufferCapacity,
+                                                   config.Advanced);
+            var statsD = new Statsd(statsBufferize,
                                     new RandomGenerator(),
                                     new StopWatchFactory(),
                                     "",
-                                    config.ConstantTags);
+                                    config.ConstantTags,
+                                    telemetry);
             statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
-            return statsD;
+            return new StatsdData(statsD, statsBufferize, statsSender, telemetry);
         }
 
-        IStatsdUDP CreateMetricsSender(StatsdConfig config, string statsdServerName)
+        Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
         {
-            int bufferCapacity;
+            var telemetryFlush = config.Advanced.TelemetryFlushInterval;
+
+            if (telemetryFlush.HasValue)
+            {
+                var assembly = typeof(StatsdBuilder).GetTypeInfo().Assembly;
+                var version = assembly.GetName().Version.ToString();
+
+                return new Telemetry(version, telemetryFlush.Value, statsSender);
+            }
+
+            // Telemetry is not enabled
+            return new Telemetry();
+        }
+
+        class StatsSenderData
+        {
+            public StatsSender Sender { get; set; }
+            public int BufferCapacity { get; set; }
+        }
+
+        StatsSenderData CreateStatsSender(StatsdConfig config, string statsdServerName)
+        {
+            var statsSenderData = new StatsSenderData();
+
             if (statsdServerName.StartsWith(UnixDomainSocketPrefix))
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                _statsSender = _factory.CreateUnixDomainSocketStatsSender(endPoint,
+                statsSenderData.Sender = _factory.CreateUnixDomainSocketStatsSender(endPoint,
                                                                           config.Advanced.UDSBufferFullBlockDuration);
-                bufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
+                statsSenderData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
             {
-                _statsSender = CreateUDPStatsSender(config, statsdServerName);
-                bufferCapacity = config.StatsdMaxUDPPacketSize;
+                statsSenderData.Sender = CreateUDPStatsSender(config, statsdServerName);
+                statsSenderData.BufferCapacity = config.StatsdMaxUDPPacketSize;
             }
 
-            _statsBufferize = CreateStatsBufferize(_statsSender,
-                                                   bufferCapacity,
-                                                   config.Advanced);
-            return _statsBufferize;
+            return statsSenderData;
         }
 
         StatsBufferize CreateStatsBufferize(
+            Telemetry telemetry,
             StatsSender statsSender,
             int bufferCapacity,
             AdvancedStatsConfig config)
         {
-            var bufferBuilder = new BufferBuilder(statsSender, bufferCapacity, "\n");
+            var bufferHandler = new BufferBuilderHandler(telemetry, statsSender);
+            var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
             var statsBufferize = _factory.CreateStatsBufferize(
+                telemetry,
                 bufferBuilder,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,
@@ -108,16 +135,6 @@ namespace StatsdClient
             }
 
             return StatsdConfig.DefaultStatsdPort;
-        }
-
-        public void Dispose()
-        {
-            // _statsBufferize must be disposed before _statsSender to make
-            // sure _statsBufferize does not send data to a disposed object.
-            _statsBufferize?.Dispose();
-            _statsSender?.Dispose();
-            _statsBufferize = null;
-            _statsSender = null;
         }
     }
 }

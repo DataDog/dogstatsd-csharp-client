@@ -10,13 +10,17 @@ namespace StatsdClient.Bufferize
     class StatsBufferize : IStatsdUDP, IDisposable
     {
         readonly AsynchronousWorker<string> _worker;
+        readonly Telemetry _telemetry;
 
         public StatsBufferize(
+            Telemetry telemetry,
             BufferBuilder bufferBuilder,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending)
         {
+            _telemetry = telemetry;
+
             var handler = new WorkerHandler(bufferBuilder, maxIdleWaitBeforeSending);
 
             // `handler` (and also `bufferBuilder`) do not need to be thread safe as long as workerMaxItemCount is 1.
@@ -29,7 +33,10 @@ namespace StatsdClient.Bufferize
 
         public void Send(string command)
         {
-            this._worker.TryEnqueue(command);
+            if (!this._worker.TryEnqueue(command))
+            {
+                _telemetry.OnPacketsDroppedQueue();
+            }
         }
 
         public void Dispose()

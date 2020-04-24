@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Mono.Unix;
 using StatsdClient;
 
-namespace Tests.StatsSender
+namespace Tests.Utils
 {
     class SocketServer : IDisposable
     {

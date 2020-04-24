@@ -7,6 +7,7 @@ namespace StatsdClient
     {
         private StatsdBuilder _statsdBuilder = new StatsdBuilder(new StatsBufferizeFactory());
         private Statsd _statsD;
+        private StatsdData _statsdData;
         private string _prefix;
         private StatsdConfig _config;
 
@@ -25,7 +26,8 @@ namespace StatsdClient
             _config = config;
             _prefix = config.Prefix;
 
-            _statsD = _statsdBuilder.BuildStats(config);
+            _statsdData = _statsdBuilder.BuildStatsData(config);
+            _statsD = _statsdData.Statsd;
         }
 
         public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
@@ -119,10 +121,12 @@ namespace StatsdClient
             return _prefix + "." + statName;
         }
 
+        public ITelemetryCounters TelemetryCounters => _statsdData?.Telemetry;
+
         public void Dispose()
         {
-            _statsdBuilder?.Dispose();
-            _statsdBuilder = null;
+            _statsdData?.Dispose();
+            _statsdData = null;
         }
     }
 }

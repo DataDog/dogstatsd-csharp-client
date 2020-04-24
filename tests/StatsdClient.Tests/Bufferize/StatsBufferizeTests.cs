@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using StatsdClient;
 using StatsdClient.Bufferize;
 
 namespace Tests
@@ -14,7 +15,7 @@ namespace Tests
         {
             var handler = new BufferBuilderHandlerMock();
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
-            using (var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, TimeSpan.Zero))
+            using (var statsBufferize = new StatsBufferize(new Telemetry(), bufferBuilder, 10, null, TimeSpan.Zero))
             {
                 statsBufferize.Send("1");
                 while (handler.Buffer == null)
