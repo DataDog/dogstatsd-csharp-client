@@ -10,6 +10,19 @@ namespace Tests
     [TestFixture]
     public class StatsdConfigurationTests
     {
+            using (UdpListener udpListener = new UdpListener(testServerName, testPort))
+            {
+                Thread listenThread = new Thread(udpListener.ListenAndWait);
+                listenThread.Start();
+
+                dogStatsdService.Increment(testCounterName);
+
+                dogStatsdService.Dispose();
+                udpListener.Shutdown();
+                listenThread.Join();
+                
+                Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
+            }
         [Test]
         public void Throw_exception_when_no_config_provided()
         {
