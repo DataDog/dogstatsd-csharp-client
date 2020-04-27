@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Mono.Unix;
 using Moq;
@@ -16,6 +17,7 @@ namespace StatsdClient.Tests
         {
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
             StatsdConfig.DD_AGENT_HOST_ENV_VAR,
+            StatsdConfig.EntityIdEnvVar,
         };
 
         private Mock<IStatsBufferizeFactory> _mock;
@@ -120,6 +122,27 @@ namespace StatsdClient.Tests
                 It.IsAny<int>(),
                 null,
                 It.IsAny<TimeSpan>()));
+        }
+
+        [Test]
+        public void CreateTelemetry()
+        {
+            var config = new StatsdConfig { };
+            var conf = config.Advanced;
+
+            conf.TelemetryFlushInterval = TimeSpan.FromMinutes(1);
+            config.ConstantTags = new[] { "key:value" };
+            Environment.SetEnvironmentVariable(StatsdConfig.EntityIdEnvVar, "EntityId");
+
+            var expectedTags = new List<string>(config.ConstantTags);
+            expectedTags.Add("dd.internal.entity_id:EntityId");
+
+            BuildStatsData(config);
+            _mock.Verify(m => m.CreateTelemetry(
+                It.Is<string>(v => !string.IsNullOrEmpty(v)),
+                conf.TelemetryFlushInterval.Value,
+                null,
+                It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags))));
         }
 
         private static StatsdConfig CreateUDSConfig(string server = null)
