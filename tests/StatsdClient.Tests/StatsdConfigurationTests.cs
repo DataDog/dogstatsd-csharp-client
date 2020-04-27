@@ -10,19 +10,6 @@ namespace Tests
     [TestFixture]
     public class StatsdConfigurationTests
     {
-            using (UdpListener udpListener = new UdpListener(testServerName, testPort))
-            {
-                Thread listenThread = new Thread(udpListener.ListenAndWait);
-                listenThread.Start();
-
-                dogStatsdService.Increment(testCounterName);
-
-                dogStatsdService.Dispose();
-                udpListener.Shutdown();
-                listenThread.Join();
-                
-                Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
-            }
         [Test]
         public void Throw_exception_when_no_config_provided()
         {
@@ -114,17 +101,19 @@ namespace Tests
             string expectedOutput,
             DogStatsdService dogStatsdService)
         {
-            UdpListener udpListener = new UdpListener(testServerName, testPort);
-            Thread listenThread = new Thread(new ParameterizedThreadStart(udpListener.Listen));
-            listenThread.Start();
-            dogStatsdService.Increment(testCounterName);
-            dogStatsdService.Dispose();
-            while (listenThread.IsAlive)
+            using (UdpListener udpListener = new UdpListener(testServerName, testPort))
             {
-            }
+                Thread listenThread = new Thread(udpListener.ListenAndWait);
+                listenThread.Start();
 
-            Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
-            udpListener.Dispose();
+                dogStatsdService.Increment(testCounterName);
+
+                dogStatsdService.Dispose();
+                udpListener.Shutdown();
+                listenThread.Join();
+
+                Assert.AreEqual(expectedOutput, udpListener.GetAndClearLastMessages()[0]);
+            }
         }
     }
 }
