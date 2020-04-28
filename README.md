@@ -70,12 +70,12 @@ using (var service = new DogStatsdService())
 {
     service.Configure(dogstatsdConfig);
     service.Increment("example_metric.increment", tags: new[]{"environment:dev"});
-}  // Flush all metrics
+}  // Flush all metrics not yet sent
 
 // Or using DogStatsd static class
 DogStatsd.Configure(dogstatsdConfig);
 DogStatsd.Increment("example_metric.increment", tags: new[]{"environment:dev"});
-DogStatsd.Dispose(); // Flush all metrics
+DogStatsd.Dispose(); // Flush all metrics not yet sent
 ```
 
 ### Metrics
