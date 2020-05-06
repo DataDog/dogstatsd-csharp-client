@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using StatsdClient.Bufferize;
 
@@ -28,7 +29,11 @@ namespace StatsdClient
         {
         }
 
-        public Telemetry(string assemblyVersion, TimeSpan flushInterval, IStatsSender statsSender)
+        public Telemetry(
+            string assemblyVersion,
+            TimeSpan flushInterval,
+            IStatsSender statsSender,
+            string[] globalTags)
         {
             _optionalStatsSender = statsSender;
 
@@ -40,7 +45,9 @@ namespace StatsdClient
                 default: transport = statsSender.TransportType.ToString(); break;
             }
 
-            _optionalTags = new[] { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
+            var optionalTags = new List<string> { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
+            optionalTags.AddRange(globalTags);
+            _optionalTags = optionalTags.ToArray();
 
             _optionalTimer = new Timer(
                 _ => Flush(),

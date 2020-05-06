@@ -19,7 +19,11 @@ namespace Tests
             var statsSender = new Mock<IStatsSender>();
             statsSender.Setup(s => s.Send(It.IsAny<byte[]>(), It.IsAny<int>()))
                 .Callback<byte[], int>((bytes, l) => _metrics.Add(Encoding.UTF8.GetString(bytes, 0, l)));
-            _telemetry = new Telemetry("1.0.0.0", TimeSpan.FromHours(1), statsSender.Object);
+            _telemetry = new Telemetry(
+                "1.0.0.0",
+                TimeSpan.FromHours(1),
+                statsSender.Object,
+                new string[] { "globalTagKey:globalTagValue" });
         }
 
         [TearDown]
@@ -98,7 +102,8 @@ namespace Tests
             _telemetry.Flush();
             Assert.AreEqual(
                 "datadog.dogstatsd.client.metrics:1|c|#" +
-                "client:csharp,client_version:1.0.0.0,client_transport:uds", _metrics[0]);
+                "client:csharp,client_version:1.0.0.0,client_transport:uds," +
+                "globalTagKey:globalTagValue", _metrics[0]);
         }
 
         private void AssertTelemetryReceived(Dictionary<string, int> expectedResults)

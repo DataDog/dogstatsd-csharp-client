@@ -22,5 +22,11 @@ namespace StatsdClient.Bufferize
         StatsSender CreateUnixDomainSocketStatsSender(
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration);
+
+        Telemetry CreateTelemetry(
+            string assemblyVersion,
+            TimeSpan flushInterval,
+            IStatsSender statsSender,
+            string[] globalTags);
     }
 }

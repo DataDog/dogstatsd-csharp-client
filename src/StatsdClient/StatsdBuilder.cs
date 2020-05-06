@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using Mono.Unix;
@@ -12,6 +13,7 @@ namespace StatsdClient
     internal class StatsdBuilder
     {
         public static readonly string UnixDomainSocketPrefix = "unix://";
+        private const string _entityIdInternalTagKey = "dd.internal.entity_id";
 
         private readonly IStatsBufferizeFactory _factory;
 
@@ -35,7 +37,8 @@ namespace StatsdClient
 
             var statsSenderData = CreateStatsSender(config, statsdServerName);
             var statsSender = statsSenderData.Sender;
-            var telemetry = CreateTelemetry(config, statsSenderData.Sender);
+            var globalTags = GetGlobalTags(config);
+            var telemetry = CreateTelemetry(config, globalTags, statsSenderData.Sender);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 statsSenderData.Sender,
@@ -73,7 +76,28 @@ namespace StatsdClient
             return StatsdConfig.DefaultStatsdPort;
         }
 
-        private Telemetry CreateTelemetry(StatsdConfig config, IStatsSender statsSender)
+        private string[] GetGlobalTags(StatsdConfig config)
+        {
+            var globalTags = new List<string>();
+
+            if (config.ConstantTags != null)
+            {
+                globalTags.AddRange(config.ConstantTags);
+            }
+
+            string entityId = Environment.GetEnvironmentVariable(StatsdConfig.EntityIdEnvVar);
+            if (!string.IsNullOrEmpty(entityId))
+            {
+                globalTags.Add($"{_entityIdInternalTagKey}:{entityId}");
+            }
+
+            return globalTags.ToArray();
+        }
+
+        private Telemetry CreateTelemetry(
+            StatsdConfig config,
+            string[] globalTags,
+            IStatsSender statsSender)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
 
@@ -82,7 +106,7 @@ namespace StatsdClient
                 var assembly = typeof(StatsdBuilder).GetTypeInfo().Assembly;
                 var version = assembly.GetName().Version.ToString();
 
-                return new Telemetry(version, telemetryFlush.Value, statsSender);
+                return _factory.CreateTelemetry(version, telemetryFlush.Value, statsSender, globalTags);
             }
 
             // Telemetry is not enabled
