@@ -3,9 +3,9 @@ using StatsdClient.Bufferize;
 
 namespace Tests
 {
-    class BufferBuilderHandlerMock : IBufferBuilderHandler
+    internal class BufferBuilderHandlerMock : IBufferBuilderHandler
     {
-        public byte[] Buffer;
+        public byte[] Buffer { get; private set; }
 
         public void Handle(byte[] buffer, int length)
         {

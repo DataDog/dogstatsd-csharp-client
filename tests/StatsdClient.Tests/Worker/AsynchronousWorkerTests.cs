@@ -1,22 +1,22 @@
 using System;
-using System.Collections.Generic;
-using System.Threading;
-using NUnit.Framework;
-using Moq;
-using System.Threading.Tasks;
-using StatsdClient.Worker;
-using System.Linq;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Moq;
+using NUnit.Framework;
+using StatsdClient.Worker;
 
 namespace Tests
 {
     [TestFixture]
     public class AsynchronousWorkerTests
     {
-        Mock<IAsynchronousWorkerHandler<int>> _handler;
+        private readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
+        private Mock<IAsynchronousWorkerHandler<int>> _handler;
 
-        Mock<IWaiter> _waiter;
-        readonly List<AsynchronousWorker<int>> _workers = new List<AsynchronousWorker<int>>();
+        private Mock<IWaiter> _waiter;
 
         [SetUp]
         public void Init()
@@ -29,7 +29,10 @@ namespace Tests
         public void Cleanup()
         {
             foreach (var worker in _workers)
+            {
                 worker.Dispose();
+            }
+
             _workers.Clear();
         }
 
@@ -44,7 +47,8 @@ namespace Tests
             Assert.IsTrue(valueReceived.WaitOne(TimeSpan.FromSeconds(3)));
         }
 
-        [Test, Timeout(30000)]
+        [Test]
+        [Timeout(30000)]
         public async Task OnIdle()
         {
             var waitDurationQueue = new ConcurrentQueue<TimeSpan>();
@@ -56,7 +60,9 @@ namespace Tests
             using (var worker = CreateWorker(workerThreadCount: 1))
             {
                 while (waitDurationQueue.Count() < 100)
+                {
                     await Task.Delay(TimeSpan.FromMilliseconds(1));
+                }
             }
 
             var waitDurations = new List<TimeSpan>(waitDurationQueue);
@@ -66,14 +72,16 @@ namespace Tests
             Assert.That(waitDurations, Is.Ordered);
         }
 
-        [Test, Timeout(2000)]
+        [Test]
+        [Timeout(2000)]
         public void DisposeNotBlock()
         {
             var worker = CreateWorker();
             // Check we do not block
             worker.Dispose();
         }
-        AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
+
+        private AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
         {
             var worker = new AsynchronousWorker<int>(
                 _handler.Object,

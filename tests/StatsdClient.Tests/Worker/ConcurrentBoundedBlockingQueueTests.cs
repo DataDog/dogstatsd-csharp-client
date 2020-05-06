@@ -8,8 +8,8 @@ namespace Tests
     [TestFixture]
     public class ConcurrentBoundedBlockingQueueTests
     {
-        Mock<IManualResetEvent> _mock;
-        ConcurrentBoundedBlockingQueue<int> _queue;
+        private Mock<IManualResetEvent> _mock;
+        private ConcurrentBoundedBlockingQueue<int> _queue;
 
         [SetUp]
         public void Init()
@@ -20,6 +20,7 @@ namespace Tests
                 TimeSpan.FromSeconds(5),
                 maxItemCount: 1);
         }
+
         [Test]
         public void NoWaitWhenQueueIsNotFull()
         {
@@ -43,7 +44,10 @@ namespace Tests
 
             Assert.True(_queue.TryEnqueue(1));
             for (int i = 0; i < 3; ++i)
+            {
                 Assert.False(_queue.TryEnqueue(1));
+            }
+
             _mock.Verify(m => m.Wait(It.IsAny<TimeSpan>()), Times.Exactly(3));
         }
     }

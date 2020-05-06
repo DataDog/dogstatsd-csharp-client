@@ -16,7 +16,7 @@ namespace Tests
             var config = new StatsdConfig
             {
                 StatsdServerName = "127.0.0.1",
-                StatsdPort = 8132
+                StatsdPort = 8132,
             };
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
@@ -45,7 +45,7 @@ namespace Tests
         }
 #endif
 
-        static void SendAndCheckMetricsAreReceived(StatsdConfig config, int metricToSendCount)
+        private static void SendAndCheckMetricsAreReceived(StatsdConfig config, int metricToSendCount)
         {
             using (var service = new DogStatsdService())
             {
@@ -53,12 +53,17 @@ namespace Tests
                 {
                     service.Configure(config);
                     for (int i = 0; i < metricToSendCount; ++i)
+                    {
                         service.Increment($"test{i}", tags: new[] { "KEY:VALUE" });
+                    }
+
                     service.Dispose();
                     var metricsReceived = server.Stop();
                     Assert.AreEqual(metricToSendCount, metricsReceived.Count);
                     for (int i = 0; i < metricToSendCount; ++i)
+                    {
                         Assert.AreEqual($"test{i}:1|c|#KEY:VALUE", metricsReceived[i]);
+                    }
                 }
             }
         }

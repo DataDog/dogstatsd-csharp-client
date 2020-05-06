@@ -93,6 +93,7 @@ namespace Tests
                     {
                         _service.Increment("test");
                     }
+
                     await Task.Delay(TimeSpan.FromMilliseconds(500));
                     Assert.Greater(_service.TelemetryCounters.PacketsDropped, 1);
                     Assert.Greater(_service.TelemetryCounters.BytesDropped, 8);

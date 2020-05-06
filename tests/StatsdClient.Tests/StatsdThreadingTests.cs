@@ -12,7 +12,7 @@ namespace Tests
     public class StatsdThreadingTests
     {
         [Test]
-        public void single_send_is_thread_safe()
+        public void Single_send_is_thread_safe()
         {
             var counts = new CountingUDP();
             var test = new Statsd(counts);
@@ -25,27 +25,36 @@ namespace Tests
                 var done = sent[i] = new ManualResetEvent(false);
                 ThreadPool.QueueUserWorkItem(CreateSender(sends, threads, i, test, done));
             }
+
             // allow threads to complete, cleanup
             WaitHandle.WaitAll(sent);
             foreach (IDisposable d in sent)
+            {
                 d.Dispose();
+            }
 
             counts.ExpectSequence(sends);
         }
 
-        static WaitCallback CreateSender(int sends, int threads, int which, IStatsd statsd, ManualResetEvent done)
+        private static WaitCallback CreateSender(int sends, int threads, int which, IStatsd statsd, ManualResetEvent done)
         {
-            return x => {
+            return x =>
+            {
                 for (int i = 0; i < sends; i++)
+                {
                     if (which == (i % threads))
+                    {
                         statsd.Send(i.ToString());
+                    }
+                }
+
                 done.Set();
             };
         }
 
-        class CountingUDP : IStatsdUDP
+        private class CountingUDP : IStatsdUDP
         {
-            readonly IDictionary<string, int> _commands = new Dictionary<string, int>();
+            private readonly IDictionary<string, int> _commands = new Dictionary<string, int>();
 
             public void Send(string command)
             {
@@ -53,33 +62,44 @@ namespace Tests
                 {
                     int count;
                     if (_commands.TryGetValue(command, out count))
+                    {
                         count++;
+                    }
                     else
+                    {
                         count = 1;
+                    }
+
                     _commands[command] = count;
                 }
             }
 
             public Task SendAsync(string command)
             {
-              lock (_commands)
-              {
-                  int count;
-                  if (_commands.TryGetValue(command, out count))
-                      count++;
-                  else
-                      count = 1;
+                lock (_commands)
+                {
+                    int count;
+                    if (_commands.TryGetValue(command, out count))
+                    {
+                        count++;
+                    }
+                    else
+                    {
+                        count = 1;
+                    }
 
-                  _commands[command] = count;
-                  return Task.CompletedTask;
-              }
+                    _commands[command] = count;
+                    return Task.CompletedTask;
+                }
             }
 
             public void ExpectSequence(int n)
             {
                 int empty, missing = 0, dupes = 0;
-                if (!_commands.TryGetValue("", out empty))
+                if (!_commands.TryGetValue(string.Empty, out empty))
+                {
                     empty = 0;
+                }
 
                 for (int i = 0; i < n; i++)
                 {
@@ -97,7 +117,9 @@ namespace Tests
                 }
 
                 if (empty > 0 || missing > 0 || dupes > 0)
+                {
                     Assert.Fail("{0} empty command(s), {1} missing, {2} duplicate(s)", empty, missing, dupes);
+                }
             }
         }
     }

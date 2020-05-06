@@ -7,9 +7,9 @@ namespace Tests
     [TestFixture]
     public class BufferBuilderTests
     {
-        BufferBuilder _bufferBuilder;
+        private BufferBuilder _bufferBuilder;
 
-        BufferBuilderHandlerMock _handler;
+        private BufferBuilderHandlerMock _handler;
 
         [SetUp]
         public void Init()

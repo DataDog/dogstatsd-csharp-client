@@ -19,9 +19,11 @@ namespace Tests
             {
                 statsBufferize.Send("1");
                 while (handler.Buffer == null)
+                {
                     Task.Delay(TimeSpan.FromMilliseconds(1)).Wait();
+                }
 
-                // Sent because buffer is full.                
+                // Sent because buffer is full.
                 Assert.AreEqual("1", Encoding.UTF8.GetString(handler.Buffer));
             }
         }

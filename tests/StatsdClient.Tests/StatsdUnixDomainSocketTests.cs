@@ -1,19 +1,24 @@
+using System;
+using System.Net.Sockets;
+using System.Text;
+using Mono.Unix;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Utils;
-using Mono.Unix;
-using System.Text;
-using System.Net.Sockets;
-using System;
-using System.Threading.Tasks;
 
 #if !OS_WINDOWS
 namespace Tests
 {
     [TestFixture]
-    public class StatsdUnixDomainSocketTest
+    public class StatsdUnixDomainSocketTests
     {
         private TemporaryPath _temporaryPath;
+
+        public enum HostnameProvider
+        {
+            Environment,
+            Property,
+        }
 
         [SetUp]
         public void Setup()
@@ -25,12 +30,6 @@ namespace Tests
         public void TearDown()
         {
             _temporaryPath.Dispose();
-        }
-
-        public enum HostnameProvider
-        {
-            Environment,
-            Property
         }
 
         [TestCase(HostnameProvider.Property)]
@@ -50,7 +49,8 @@ namespace Tests
         }
 
         // Use a timeout in case Gauge become blocking
-        [Test, Timeout(30000)]
+        [Test]
+        [Timeout(30000)]
         public void CheckNotBlockWhenServerNotReadMessage()
         {
             var tags = new string[] { new string('A', 100) };
@@ -62,13 +62,16 @@ namespace Tests
                     // We are sending several Gauge to make sure there is no buffer
                     // that can make service.Gauge blocks after several calls.
                     for (int i = 0; i < 10; ++i)
+                    {
                         service.Gauge("metric" + i, 42, 1, tags);
+                    }
+
                     // If the code go here that means we do not block.
                 }
             }
         }
 
-        static DogStatsdService CreateService(
+        private static DogStatsdService CreateService(
                     TemporaryPath temporaryPath,
                     HostnameProvider hostnameProvider = HostnameProvider.Property)
         {
@@ -91,7 +94,7 @@ namespace Tests
             return dogStatsdService;
         }
 
-        static Socket CreateSocketServer(TemporaryPath temporaryPath)
+        private static Socket CreateSocketServer(TemporaryPath temporaryPath)
         {
             var endPoint = new UnixEndPoint(temporaryPath.Path);
             var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
@@ -100,7 +103,7 @@ namespace Tests
             return server;
         }
 
-        static string ReadFromServer(Socket socket)
+        private static string ReadFromServer(Socket socket)
         {
             var builder = new StringBuilder();
             var buffer = new byte[8096];

@@ -15,7 +15,7 @@ namespace Tests
             RandomGenerator randomGenerator = new RandomGenerator();
             for (int i = 0; i < NumberOfTestsRan; i++)
             {
-                Assert.True(randomGenerator.ShouldSend(1));                
+                Assert.True(randomGenerator.ShouldSend(1));
             }
         }
 
@@ -32,7 +32,7 @@ namespace Tests
                 }
             }
 
-            Assert.That( Math.Round(numberOfTrues/(double)NumberOfTestsRan,1),Is.EqualTo(0.5));
+            Assert.That(Math.Round(numberOfTrues / (double)NumberOfTestsRan, 1), Is.EqualTo(0.5));
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace Tests
         {
             int numberOfTrues = 0;
             RandomGenerator randomGenerator = new RandomGenerator();
-            const int sampleRate = 1/4;
+            const int sampleRate = 1 / 4;
             for (int i = 0; i < NumberOfTestsRan; i++)
             {
                 if (randomGenerator.ShouldSend(sampleRate))
@@ -57,7 +57,7 @@ namespace Tests
         {
             int numberOfTrues = 0;
             RandomGenerator randomGenerator = new RandomGenerator();
-            const int sampleRate = 1/1000;
+            const int sampleRate = 1 / 1000;
             for (int i = 0; i < NumberOfTestsRan; i++)
             {
                 if (randomGenerator.ShouldSend(sampleRate))

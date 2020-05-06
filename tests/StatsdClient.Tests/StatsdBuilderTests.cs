@@ -11,12 +11,15 @@ namespace StatsdClient.Tests
     [TestFixture]
     public class StatsdBuilderTests
     {
-        Mock<IStatsBufferizeFactory> _mock;
-        StatsdBuilder _statsdBuilder;
-        readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
-        readonly List<string> _envVarsKeyToRestore = new List<string>{
+        private readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
+        private readonly List<string> _envVarsKeyToRestore = new List<string>
+        {
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
-            StatsdConfig.DD_AGENT_HOST_ENV_VAR};
+            StatsdConfig.DD_AGENT_HOST_ENV_VAR,
+        };
+
+        private Mock<IStatsBufferizeFactory> _mock;
+        private StatsdBuilder _statsdBuilder;
 
         [SetUp]
         public void Init()
@@ -25,7 +28,9 @@ namespace StatsdClient.Tests
             _statsdBuilder = new StatsdBuilder(_mock.Object);
 
             foreach (var key in _envVarsKeyToRestore)
+            {
                 _envVarsToRestore[key] = Environment.GetEnvironmentVariable(key);
+            }
 
             // Set default hostname
             Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, "0.0.0.0");
@@ -35,7 +40,9 @@ namespace StatsdClient.Tests
         public void Cleanup()
         {
             foreach (var env in _envVarsToRestore)
+            {
                 Environment.SetEnvironmentVariable(env.Key, env.Value);
+            }
         }
 
         [Test]
@@ -71,7 +78,8 @@ namespace StatsdClient.Tests
             Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, null);
             Assert.AreEqual("server1", GetUDSStatsdServerName(CreateUDSConfig("server1")));
 
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR,
+            Environment.SetEnvironmentVariable(
+                StatsdConfig.DD_AGENT_HOST_ENV_VAR,
                 StatsdBuilder.UnixDomainSocketPrefix + "server2");
             Assert.AreEqual("server2", GetUDSStatsdServerName(CreateUDSConfig()));
 
@@ -91,11 +99,12 @@ namespace StatsdClient.Tests
             conf.DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(4);
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateStatsBufferize(It.IsAny<Telemetry>(),
-                                                     It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
-                                                     conf.MaxMetricsInAsyncQueue,
-                                                     conf.MaxBlockDuration,
-                                                     conf.DurationBeforeSendingNotFullBuffer));
+            _mock.Verify(m => m.CreateStatsBufferize(
+                It.IsAny<Telemetry>(),
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
+                conf.MaxMetricsInAsyncQueue,
+                conf.MaxBlockDuration,
+                conf.DurationBeforeSendingNotFullBuffer));
         }
 
         [Test]
@@ -105,40 +114,57 @@ namespace StatsdClient.Tests
             config.StatsdMaxUnixDomainSocketPacketSize = 20;
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateStatsBufferize(It.IsAny<Telemetry>(),
-                                                     It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize),
-                                                     It.IsAny<int>(),
-                                                     null,
-                                                     It.IsAny<TimeSpan>()));
+            _mock.Verify(m => m.CreateStatsBufferize(
+                It.IsAny<Telemetry>(),
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize),
+                It.IsAny<int>(),
+                null,
+                It.IsAny<TimeSpan>()));
         }
 
-        static StatsdConfig CreateUDSConfig(string server = null)
+        private static StatsdConfig CreateUDSConfig(string server = null)
         {
             var config = new StatsdConfig();
             if (server != null)
+            {
                 config.StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + server;
+            }
+
             config.Advanced.TelemetryFlushInterval = null;
             return config;
         }
 
-        int GetUDPPort(StatsdConfig config)
+        private static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
+        {
+            var config = new StatsdConfig { StatsdServerName = statsdServerName };
+            if (statsdPort.HasValue)
+            {
+                config.StatsdPort = statsdPort.Value;
+            }
+
+            config.Advanced.TelemetryFlushInterval = null;
+            return config;
+        }
+
+        private int GetUDPPort(StatsdConfig config)
         {
             var endPoint = GetUDPIPEndPoint(config);
             return endPoint.Port;
         }
 
-        string GetStatsdServerName(StatsdConfig config)
+        private string GetStatsdServerName(StatsdConfig config)
         {
             var endPoint = GetUDPIPEndPoint(config);
             return endPoint.Address.ToString();
         }
 
-        string GetUDSStatsdServerName(StatsdConfig config)
+        private string GetUDSStatsdServerName(StatsdConfig config)
         {
             UnixEndPoint endPoint = null;
 
-            _mock.Setup(m => m.CreateUnixDomainSocketStatsSender(It.IsAny<UnixEndPoint>(),
-                                                                 It.IsAny<TimeSpan?>()))
+            _mock.Setup(m => m.CreateUnixDomainSocketStatsSender(
+                It.IsAny<UnixEndPoint>(),
+                It.IsAny<TimeSpan?>()))
                 .Callback<UnixEndPoint, TimeSpan?>((e, d) => endPoint = e);
             BuildStatsData(config);
             Assert.NotNull(endPoint);
@@ -146,7 +172,7 @@ namespace StatsdClient.Tests
             return endPoint.Filename;
         }
 
-        IPEndPoint GetUDPIPEndPoint(StatsdConfig config)
+        private IPEndPoint GetUDPIPEndPoint(StatsdConfig config)
         {
             IPEndPoint endPoint = null;
 
@@ -158,19 +184,10 @@ namespace StatsdClient.Tests
             return endPoint;
         }
 
-        void BuildStatsData(StatsdConfig config)
+        private void BuildStatsData(StatsdConfig config)
         {
             var buildStatsData = _statsdBuilder.BuildStatsData(config);
             buildStatsData.Dispose();
-        }
-
-        static StatsdConfig CreateConfig(string statsdServerName = null, int? statsdPort = null)
-        {
-            var config = new StatsdConfig { StatsdServerName = statsdServerName };
-            if (statsdPort.HasValue)
-                config.StatsdPort = statsdPort.Value;
-            config.Advanced.TelemetryFlushInterval = null;
-            return config;
         }
     }
 }
