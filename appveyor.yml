@@ -6,6 +6,9 @@ before_build:
   - cmd: dotnet --info
   - cmd: dotnet restore
 
+build_script:
+  - cmd: Powershell -File BuildWarningAsError.ps1
+
 test_script:
   - cmd: dotnet test tests/StatsdClient.Tests/
 

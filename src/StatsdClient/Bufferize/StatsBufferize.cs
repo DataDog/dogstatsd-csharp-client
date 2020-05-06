@@ -1,5 +1,5 @@
-using System.Threading.Tasks;
 using System;
+using System.Threading.Tasks;
 using StatsdClient.Worker;
 
 namespace StatsdClient.Bufferize
@@ -7,10 +7,10 @@ namespace StatsdClient.Bufferize
     /// <summary>
     /// StatsBufferize bufferizes metrics before sending them.
     /// </summary>
-    class StatsBufferize : IStatsdUDP, IDisposable
+    internal class StatsBufferize : IStatsdUDP, IDisposable
     {
-        readonly AsynchronousWorker<string> _worker;
-        readonly Telemetry _telemetry;
+        private readonly AsynchronousWorker<string> _worker;
+        private readonly Telemetry _telemetry;
 
         public StatsBufferize(
             Telemetry telemetry,
@@ -24,11 +24,12 @@ namespace StatsdClient.Bufferize
             var handler = new WorkerHandler(bufferBuilder, maxIdleWaitBeforeSending);
 
             // `handler` (and also `bufferBuilder`) do not need to be thread safe as long as workerMaxItemCount is 1.
-            this._worker = new AsynchronousWorker<string>(handler,
-                                                          new Waiter(),
-                                                          1,
-                                                          workerMaxItemCount,
-                                                          blockingQueueTimeout);
+            this._worker = new AsynchronousWorker<string>(
+                handler,
+                new Waiter(),
+                1,
+                workerMaxItemCount,
+                blockingQueueTimeout);
         }
 
         public void Send(string command)
@@ -49,11 +50,11 @@ namespace StatsdClient.Bufferize
             throw new NotSupportedException();
         }
 
-        class WorkerHandler : IAsynchronousWorkerHandler<string>
+        private class WorkerHandler : IAsynchronousWorkerHandler<string>
         {
-            readonly BufferBuilder _bufferBuilder;
-            readonly TimeSpan _maxIdleWaitBeforeSending;
-            System.Diagnostics.Stopwatch _stopwatch;
+            private readonly BufferBuilder _bufferBuilder;
+            private readonly TimeSpan _maxIdleWaitBeforeSending;
+            private System.Diagnostics.Stopwatch _stopwatch;
 
             public WorkerHandler(BufferBuilder bufferBuilder, TimeSpan maxIdleWaitBeforeSending)
             {
@@ -64,14 +65,19 @@ namespace StatsdClient.Bufferize
             public void OnNewValue(string metric)
             {
                 if (!_bufferBuilder.Add(metric))
+                {
                     throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {metric}");
+                }
+
                 _stopwatch = null;
             }
 
             public bool OnIdle()
             {
                 if (_stopwatch == null)
+                {
                     _stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                }
 
                 if (_stopwatch.ElapsedMilliseconds > _maxIdleWaitBeforeSending.TotalMilliseconds)
                 {
@@ -80,6 +86,7 @@ namespace StatsdClient.Bufferize
                     // No need to wait as sending the value takes time.
                     return false;
                 }
+
                 return true;
             }
 

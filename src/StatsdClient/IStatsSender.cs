@@ -1,14 +1,15 @@
 namespace StatsdClient
 {
-    enum StatsSenderTransportType
+    internal enum StatsSenderTransportType
     {
         UDS,
-        UDP
+        UDP,
     }
 
     internal interface IStatsSender
     {
-        bool Send(byte[] buffer, int length);
         StatsSenderTransportType TransportType { get; }
+
+        bool Send(byte[] buffer, int length);
     }
 }

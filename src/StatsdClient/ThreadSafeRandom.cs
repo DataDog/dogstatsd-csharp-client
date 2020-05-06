@@ -21,8 +21,10 @@ namespace StatsdClient
                     {
                         seed = _global.Next();
                     }
+
                     _local = new Random(seed);
                 }
+
                 return _local;
             }
         }

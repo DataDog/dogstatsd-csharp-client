@@ -6,9 +6,9 @@ namespace StatsdClient.Worker
     /// <summary>
     /// Simple wrapper arround ManualResetEventSlim.
     /// </summary>
-    class ManualResetEventWrapper : IManualResetEvent
+    internal class ManualResetEventWrapper : IManualResetEvent
     {
-        readonly ManualResetEventSlim _manualResetEvent = new ManualResetEventSlim(false);
+        private readonly ManualResetEventSlim _manualResetEvent = new ManualResetEventSlim(false);
 
         public void Reset()
         {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="StyleCop" Description="StyleCop rules disabled." ToolsVersion="10.0">
+  <Localization ResourceAssembly="Microsoft.VisualStudio.CodeAnalysis.RuleSets.Strings.dll" ResourceBaseName="Microsoft.VisualStudio.CodeAnalysis.RuleSets.Strings.Localized">
+    <Name Resource="MinimumRecommendedRules_Name" />
+    <Description Resource="MinimumRecommendedRules_Description" />
+  </Localization>
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA0001" Action="None" /> <!-- XML comment analysis is disabled due to project configuration -->
+    <Rule Id="SA1309" Action="None" /> <!-- Field 'XXXX' should not begin with an underscore -->
+    <Rule Id="SA1633" Action="None" /> <!-- The file header is missing or not located at the top of the file -->
+    <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
+    <Rule Id="SA1512" Action="None" /> <!-- Single-line comments must not be followed by blank line -->
+    <Rule Id="SA1200" Action="None" /> <!-- UsingDirectivesMustBePlacedWithinNamespace -->
+    <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
+    <Rule Id="SA1501" Action="None" /> <!-- Single line comment should begin with a space. -->
+    <Rule Id="SA1119" Action="None" /> <!-- StatementMustNotUseUnnecessaryParenthesis -->
+  </Rules>
+</RuleSet>

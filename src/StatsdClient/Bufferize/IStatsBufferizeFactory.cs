@@ -8,7 +8,7 @@ namespace StatsdClient.Bufferize
     /// IStatsBufferizeFactory is a factory for StatsBufferize.
     /// It is used to test StatsBufferize.
     /// </summary>
-    interface IStatsBufferizeFactory
+    internal interface IStatsBufferizeFactory
     {
         StatsBufferize CreateStatsBufferize(
           Telemetry telemetry,
@@ -19,7 +19,8 @@ namespace StatsdClient.Bufferize
 
         StatsSender CreateUDPStatsSender(IPEndPoint endPoint);
 
-        StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint,
-                                                      TimeSpan? udsBufferFullBlockDuration);
+        StatsSender CreateUnixDomainSocketStatsSender(
+            UnixEndPoint endPoint,
+            TimeSpan? udsBufferFullBlockDuration);
     }
 }

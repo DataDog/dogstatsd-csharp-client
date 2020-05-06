@@ -11,17 +11,24 @@ namespace StatsdClient
         private string _prefix;
         private StatsdConfig _config;
 
+        public ITelemetryCounters TelemetryCounters => _statsdData?.Telemetry;
 
         public void Configure(StatsdConfig config)
         {
             if (_statsdBuilder == null)
+            {
                 throw new ObjectDisposedException(nameof(DogStatsdService));
+            }
 
             if (config == null)
+            {
                 throw new ArgumentNullException("config");
+            }
 
             if (_config != null)
+            {
                 throw new InvalidOperationException("Configuration for DogStatsdService already performed");
+            }
 
             _config = config;
             _prefix = config.Prefix;
@@ -34,7 +41,6 @@ namespace StatsdClient
         {
             _statsD?.Send(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags);
         }
-
 
         public void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
@@ -111,6 +117,12 @@ namespace StatsdClient
             _statsD?.Send(name, (int)status, timestamp, hostname, tags, message);
         }
 
+        public void Dispose()
+        {
+            _statsdData?.Dispose();
+            _statsdData = null;
+        }
+
         private string BuildNamespacedStatName(string statName)
         {
             if (string.IsNullOrEmpty(_prefix))
@@ -119,14 +131,6 @@ namespace StatsdClient
             }
 
             return _prefix + "." + statName;
-        }
-
-        public ITelemetryCounters TelemetryCounters => _statsdData?.Telemetry;
-
-        public void Dispose()
-        {
-            _statsdData?.Dispose();
-            _statsdData = null;
         }
     }
 }

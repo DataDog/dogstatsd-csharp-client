@@ -4,7 +4,7 @@ using Mono.Unix;
 
 namespace StatsdClient.Bufferize
 {
-    class StatsBufferizeFactory : IStatsBufferizeFactory
+    internal class StatsBufferizeFactory : IStatsBufferizeFactory
     {
         public StatsBufferize CreateStatsBufferize(
             Telemetry telemetry,
@@ -13,11 +13,12 @@ namespace StatsdClient.Bufferize
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending)
         {
-            return new StatsBufferize(telemetry,
-                                      bufferBuilder,
-                                      workerMaxItemCount,
-                                      blockingQueueTimeout,
-                                      maxIdleWaitBeforeSending);
+            return new StatsBufferize(
+                telemetry,
+                bufferBuilder,
+                workerMaxItemCount,
+                blockingQueueTimeout,
+                maxIdleWaitBeforeSending);
         }
 
         public StatsSender CreateUDPStatsSender(IPEndPoint endPoint)
@@ -25,8 +26,9 @@ namespace StatsdClient.Bufferize
             return StatsSender.CreateUDPStatsSender(endPoint);
         }
 
-        public StatsSender CreateUnixDomainSocketStatsSender(UnixEndPoint endPoint,
-                                                             TimeSpan? udsBufferFullBlockDuration)
+        public StatsSender CreateUnixDomainSocketStatsSender(
+            UnixEndPoint endPoint,
+            TimeSpan? udsBufferFullBlockDuration)
         {
             return StatsSender.CreateUnixDomainSocketStatsSender(endPoint, udsBufferFullBlockDuration);
         }

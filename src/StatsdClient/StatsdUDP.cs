@@ -10,17 +10,11 @@ namespace StatsdClient
     [ObsoleteAttribute("This class will become private in a future release.")]
     public class StatsdUDP : IDisposable, IStatsdUDP
     {
-        private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
-        // Set to zero for no limit.
-        public IPEndPoint IPEndpoint { get; private set; }
-        private Socket UDPSocket { get; set; }
-        private string Name { get; set; }
-        private int Port { get; set; }
-
         public StatsdUDP(int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
-        : this(GetHostNameFromEnvVar(),GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort),maxUDPPacketSize)
+        : this(GetHostNameFromEnvVar(), GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort), maxUDPPacketSize)
         {
         }
+
         public StatsdUDP(string name = null, int port = 0, int maxUDPPacketSize = StatsdConfig.DefaultStatsdMaxUDPPacketSize)
         {
             Port = port;
@@ -28,6 +22,7 @@ namespace StatsdClient
             {
                 Port = GetPortFromEnvVar(StatsdConfig.DefaultStatsdPort);
             }
+
             Name = name;
             if (string.IsNullOrEmpty(Name))
             {
@@ -43,63 +38,23 @@ namespace StatsdClient
             IPEndpoint = new IPEndPoint(ipAddress, Port);
         }
 
-        private static string GetHostNameFromEnvVar()
-        {
-            return Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
-        }
+        public IPEndPoint IPEndpoint { get; private set; }
 
-        private static int GetPortFromEnvVar(int defaultValue)
-        {
-            int port = defaultValue;
-            string portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
-            if (portString != null)
-            {
-                try
-                {
-                    port = Int32.Parse(portString);
-                }
-                catch (FormatException)
-                {
-                    throw new ArgumentException("Environment Variable 'DD_DOGSTATSD_PORT' bad format");
-                }
-            }
-            return port;
-        }
-        internal static IPAddress GetIpv4Address(string name)
-        {
-            IPAddress ipAddress;
-            bool isValidIPAddress = IPAddress.TryParse(name, out ipAddress);
+        private int MaxUDPPacketSize { get; set; } // In bytes; default is MetricsConfig.DefaultStatsdMaxUDPPacketSize.
+                                                   // Set to zero for no limit.
 
-            if (!isValidIPAddress)
-            {
-                ipAddress = null;
-#if NET451
-                IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
-#else
-                IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
-#endif
-                //The IPv4 address is usually the last one, but not always
-                for(int positionToTest = addressList.Length - 1; positionToTest >= 0; --positionToTest)
-                {
-                    if(addressList[positionToTest].AddressFamily == AddressFamily.InterNetwork)
-                    {
-                        ipAddress = addressList[positionToTest];
-                        break;
-                    }
-                }
+        private Socket UDPSocket { get; set; }
 
-                //If no IPV4 address is found, throw an exception here, rather than letting it get squashed when encountered at sendtime
-                if(ipAddress == null)
-                    throw new SocketException((int)SocketError.AddressFamilyNotSupported);
-            }
-            return ipAddress;
-        }
+        private string Name { get; set; }
+
+        private int Port { get; set; }
 
         public void Send(string command)
         {
-            SocketSender.Send(MaxUDPPacketSize, command, 
+            SocketSender.Send(
+                MaxUDPPacketSize,
+                command,
                 encodedCommand => UDPSocket.SendTo(encodedCommand, encodedCommand.Length, SocketFlags.None, IPEndpoint));
-
         }
 
         public Task SendAsync(string command)
@@ -114,6 +69,64 @@ namespace StatsdClient
         public void Dispose()
         {
             UDPSocket.Dispose();
+        }
+
+        internal static IPAddress GetIpv4Address(string name)
+        {
+            IPAddress ipAddress;
+            bool isValidIPAddress = IPAddress.TryParse(name, out ipAddress);
+
+            if (!isValidIPAddress)
+            {
+                ipAddress = null;
+#if NET451
+                IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
+#else
+                IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
+#endif
+                // The IPv4 address is usually the last one, but not always
+                for (int positionToTest = addressList.Length - 1; positionToTest >= 0; --positionToTest)
+                {
+                    if (addressList[positionToTest].AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        ipAddress = addressList[positionToTest];
+                        break;
+                    }
+                }
+
+                // If no IPV4 address is found, throw an exception here, rather than letting it get squashed when encountered at sendtime
+                if (ipAddress == null)
+                {
+                    throw new SocketException((int)SocketError.AddressFamilyNotSupported);
+                }
+            }
+
+            return ipAddress;
+        }
+
+        private static string GetHostNameFromEnvVar()
+        {
+            return Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+        }
+
+        private static int GetPortFromEnvVar(int defaultValue)
+        {
+            int port = defaultValue;
+            string portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
+
+            if (portString != null)
+            {
+                try
+                {
+                    port = int.Parse(portString);
+                }
+                catch (FormatException)
+                {
+                    throw new ArgumentException("Environment Variable 'DD_DOGSTATSD_PORT' bad format");
+                }
+            }
+
+            return port;
         }
     }
 }

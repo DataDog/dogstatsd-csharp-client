@@ -2,7 +2,7 @@ using System;
 
 namespace StatsdClient.Worker
 {
-    interface IManualResetEvent
+    internal interface IManualResetEvent
     {
         bool Wait(TimeSpan duration);
 
