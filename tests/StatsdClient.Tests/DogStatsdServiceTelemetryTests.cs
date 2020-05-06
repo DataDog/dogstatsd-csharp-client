@@ -1,7 +1,10 @@
 using System;
+using System.Net.Sockets;
 using System.Threading.Tasks;
+using Mono.Unix;
 using NUnit.Framework;
 using StatsdClient;
+using Tests.Utils;
 
 namespace Tests
 {
@@ -71,5 +74,33 @@ namespace Tests
             Assert.AreEqual(1, _service.TelemetryCounters.PacketsSent);
             Assert.AreEqual(8, _service.TelemetryCounters.BytesSent);
         }
+
+#if !OS_WINDOWS
+        [Test]
+        public async Task PacketsDropped()
+        {
+            using (var temporaryPath = new TemporaryPath())
+            {
+                using (var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP))
+                {
+                    var endPoint = new UnixEndPoint(temporaryPath.Path);
+                    server.Bind(endPoint);
+
+                    var serverName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path;
+                    _service.Configure(new StatsdConfig { StatsdServerName = serverName });
+
+                    for (int i = 0; i < 10000; ++i)
+                    {
+                        _service.Increment("test");
+                    }
+
+                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+                    Assert.Greater(_service.TelemetryCounters.PacketsDropped, 1);
+                    Assert.Greater(_service.TelemetryCounters.BytesDropped, 8);
+                    _service.Dispose();
+                }
+            }
+        }
+#endif
     }
 }

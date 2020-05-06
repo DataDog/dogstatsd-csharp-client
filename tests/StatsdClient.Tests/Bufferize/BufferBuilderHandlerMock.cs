@@ -5,7 +5,7 @@ namespace Tests
 {
     internal class BufferBuilderHandlerMock : IBufferBuilderHandler
     {
-        public byte[] Buffer { get; set; }
+        public byte[] Buffer { get; private set; }
 
         public void Handle(byte[] buffer, int length)
         {
