@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+    #pragma warning disable CS1591
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "See ObsoleteAttribute.")]
     [ObsoleteAttribute("This class will become private in a future release.")]
     public class StatsdUDP : IDisposable, IStatsdUDP
     {

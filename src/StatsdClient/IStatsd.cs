@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+    #pragma warning disable CS1591
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "See ObsoleteAttribute.")]
     [ObsoleteAttribute("This interface will become private in a future release.")]
     public interface IStatsd
     {
@@ -46,12 +49,11 @@ namespace StatsdClient
         /// <summary>
         /// Send service check
         /// </summary>
-
         void Send(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong);
+
         /// <summary>
         /// Send service check
         /// </summary>
-
         Task SendAsync(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong);
     }
 }

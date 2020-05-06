@@ -13,6 +13,7 @@
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
     <NoWarn>0618</NoWarn>
     <CodeAnalysisRuleSet>../../stylecop.ruleset</CodeAnalysisRuleSet>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">

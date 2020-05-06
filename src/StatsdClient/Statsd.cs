@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace StatsdClient
 {
+#pragma warning disable CS1591
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "See ObsoleteAttribute.")]
     [ObsoleteAttribute("This class will become private in a future release.\n" +
         "You can use instead `DogStatsdService` or `DogStatsd` which provides automatic metrics" +
         " buffering with asynchronous calls (metrics are added to a queue and another thread send them).")]
@@ -120,9 +123,6 @@ namespace StatsdClient
             return task;
         }
 
-        /// <summary>
-        /// Add a Service check
-        /// </summary>
         public void Add(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
@@ -130,9 +130,6 @@ namespace StatsdClient
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
-        /// <summary>
-        /// Send a service check
-        /// </summary>
         public void Send(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
@@ -140,9 +137,6 @@ namespace StatsdClient
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
-        /// <summary>
-        /// Send a service check
-        /// </summary>
         public Task SendAsync(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;

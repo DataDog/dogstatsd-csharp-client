@@ -4,8 +4,7 @@
     <Name Resource="MinimumRecommendedRules_Name" />
     <Description Resource="MinimumRecommendedRules_Description" />
   </Localization>
-  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-    <Rule Id="SA0001" Action="None" /> <!-- XML comment analysis is disabled due to project configuration -->
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">    
     <Rule Id="SA1309" Action="None" /> <!-- Field 'XXXX' should not begin with an underscore -->
     <Rule Id="SA1633" Action="None" /> <!-- The file header is missing or not located at the top of the file -->
     <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->

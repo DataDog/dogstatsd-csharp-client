@@ -23,9 +23,7 @@ namespace StatsdClient
         private int _packetsDropped;
         private int _packetsDroppedQueue;
 
-        /// <summary>
-        /// This constructor does not send telemetry.
-        /// </summary>
+        // This constructor does not send telemetry.
         public Telemetry()
         {
         }
