@@ -222,6 +222,10 @@ namespace StatsdClient
             string message = null) =>
                 _dogStatsdService.ServiceCheck(name, status, timestamp, hostname, tags, message);
 
+        /// <summary>
+        /// Disposes the instance of DogStatsdService.
+        /// Flushes all metrics.
+        /// </summary>
         public static void Dispose()
         {
             _dogStatsdService.Dispose();
