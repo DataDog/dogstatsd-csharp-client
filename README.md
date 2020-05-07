@@ -19,7 +19,7 @@ DogStatsD-CSharp-Client supports the following platforms:
 
 ## Configuration
 
-At start of your app, configure the `DogStatsd` class like this:
+At start of your application, configure an instance of `DogStatsdService` class like this:
 
 ```csharp
 // The code is located under the StatsdClient namespace
@@ -43,7 +43,7 @@ See the full list of available [DogStatsD Client instantiation parameters](https
 
 Supported environment variables:
 
-* The client can use the `DD_AGENT_HOST` and (optionally) the `DD_DOGSTATSD_PORT` environment variables to build the target address if the `addr` parameter is empty.
+* The client can use the `DD_AGENT_HOST` and (optionally) the `DD_DOGSTATSD_PORT` environment variables to build the target address if the `StatsdServerName` and/or `StatsdPort` parameters are empty.
 * If the `DD_ENTITY_ID` enviroment variable is found, its value will be injected as a global `dd.internal.entity_id` tag. This tag will be used by the Datadog Agent to insert container tags to the metrics.
 
 Where `StatsdServerName` is the hostname or address of the StatsD server, `StatsdPort` is the optional DogStatsD port number, and `Prefix` is an optional string that is prepended to all metrics.
@@ -52,7 +52,7 @@ Where `StatsdServerName` is the hostname or address of the StatsD server, `Stats
 
 For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#setup).
 
-Here is an example to submit a COUNT metric with `DogStatsdService` and `DogStatsd`.
+Here is an example to submit different kinds of metrics with `DogStatsdService`.
 ```csharp
 // The code is located under the StatsdClient namespace
 using StatsdClient;
@@ -65,16 +65,53 @@ var dogstatsdConfig = new StatsdConfig
     StatsdPort = 8125,
 };
 
-// Using DogStatsdService instance
 using (var service = new DogStatsdService())
 {
     service.Configure(dogstatsdConfig);
-    service.Increment("example_metric.increment", tags: new[]{"environment:dev"});
-}  // Flush all metrics not yet sent
+    service.Increment("example_metric.increment", tags: new[] { "environment:dev" });
+    service.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
+    service.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
 
-// Or using DogStatsd static class
+    var random = new Random(0);
+
+    for (int i = 0; i < 10; i++)
+    {
+        service.Gauge("example_metric.gauge", i, tags: new[] { "environment:dev" });
+        service.Set("example_metric.set", i, tags: new[] { "environment:dev" });
+        service.Histogram("example_metric.histogram", random.Next(20), tags: new[] { "environment:dev" });
+        System.Threading.Thread.Sleep(random.Next(10000));
+    }
+}  
+```
+
+Here is another example to submit different kinds of metrics with `DogStatsd`.
+```csharp
+// The code is located under the StatsdClient namespace
+using StatsdClient;
+
+// ...
+
+var dogstatsdConfig = new StatsdConfig
+{
+    StatsdServerName = "127.0.0.1",
+    StatsdPort = 8125,
+};
+
 DogStatsd.Configure(dogstatsdConfig);
-DogStatsd.Increment("example_metric.increment", tags: new[]{"environment:dev"});
+DogStatsd.Increment("example_metric.increment", tags: new[] { "environment:dev" });
+DogStatsd.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
+DogStatsd.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
+
+var random = new Random(0);
+
+for (int i = 0; i < 10; i++)
+{
+    DogStatsd.Gauge("example_metric.gauge", i, tags: new[] { "environment:dev" });
+    DogStatsd.Set("example_metric.set", i, tags: new[] { "environment:dev" });
+    DogStatsd.Histogram("example_metric.histogram", random.Next(20), tags: new[] { "environment:dev" });
+    System.Threading.Thread.Sleep(random.Next(10000));
+}
+  
 DogStatsd.Dispose(); // Flush all metrics not yet sent
 ```
 
