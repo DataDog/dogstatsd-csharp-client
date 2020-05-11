@@ -1,5 +1,17 @@
 CHANGELOG
 =========
+# 5.0.0 / XX-XX-2020
+Improve significantly the performance of `DogStatsdService` and `DogStatsd`.
+
+## Breaking changes
+**You must call `DogStatsdService.Dispose()` or `DogStatsd.Dispose()` before your program termination in order to flush metrics not yet sent.** 
+`Statsd` is marked as obsolete.
+
+## Changes 
+* [IMPROVEMENT] Both `DogStatsdService` and `DogStatsd` methods do not block anymore and batch several metrics automatically in one UDP or UDS message. See [#108][] and [#109][].
+* [IMPROVEMENT] Send telemetry metrics. See [#110][] and [#114][].
+* [IMPROVEMENT] Enable StyleCop. See [#111][], [#112][] and [#113][].
+
 # 4.0.1 / 02-11-2020
 * [BUGFIX] Fix `System.ArgumentException: unixSocket must start with unix://` when using the `DD_AGENT_HOST` environment variable with UDS support. See [this comment](https://github.com/DataDog/dogstatsd-csharp-client/issues/85#issuecomment-581371860) (Thanks [@danopia][])
 
@@ -128,6 +140,13 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#78]: https://github.com/DataDog/dogstatsd-csharp-client/issues/78
 [#92]: https://github.com/DataDog/dogstatsd-csharp-client/issues/92
 [#96]: https://github.com/DataDog/dogstatsd-csharp-client/issues/96
+[#108]: https://github.com/DataDog/dogstatsd-csharp-client/issues/108
+[#109]: https://github.com/DataDog/dogstatsd-csharp-client/issues/109
+[#110]: https://github.com/DataDog/dogstatsd-csharp-client/issues/110
+[#111]: https://github.com/DataDog/dogstatsd-csharp-client/issues/111
+[#112]: https://github.com/DataDog/dogstatsd-csharp-client/issues/112
+[#113]: https://github.com/DataDog/dogstatsd-csharp-client/issues/113
+[#114]: https://github.com/DataDog/dogstatsd-csharp-client/issues/114
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
