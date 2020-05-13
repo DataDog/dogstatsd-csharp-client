@@ -1,7 +1,7 @@
 CHANGELOG
 =========
-# 5.0.0 / XX-XX-2020
-Improve significantly the performance of `DogStatsdService` and `DogStatsd`.
+# 5.0.0 / 05-13-2020
+Significant improvements of `DogStatsdService` and `DogStatsd` performance.
 
 ## Breaking changes
 **You must call `DogStatsdService.Dispose()` or `DogStatsd.Dispose()` before your program termination in order to flush metrics not yet sent.** 
