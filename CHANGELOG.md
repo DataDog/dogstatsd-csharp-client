@@ -1,5 +1,9 @@
 CHANGELOG
 =========
+# 5.0.1 / 05-XX-2020
+* [BUGFIX] Fix System.Net.Sockets.SocketException when telemetry is enabled and Statsd server is not up. See [#120][].
+* [BUGFIX] Fix high CPU usage. See [#121][].
+
 # 5.0.0 / 05-13-2020
 Significant improvements of `DogStatsdService` and `DogStatsd` performance.
 
@@ -147,6 +151,8 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#112]: https://github.com/DataDog/dogstatsd-csharp-client/issues/112
 [#113]: https://github.com/DataDog/dogstatsd-csharp-client/issues/113
 [#114]: https://github.com/DataDog/dogstatsd-csharp-client/issues/114
+[#120]: https://github.com/DataDog/dogstatsd-csharp-client/issues/120
+[#121]: https://github.com/DataDog/dogstatsd-csharp-client/issues/121
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
