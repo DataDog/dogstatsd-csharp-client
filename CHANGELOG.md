@@ -1,8 +1,5 @@
 CHANGELOG
 =========
-# 5.0.1 / 05-19-2020
-* [BUGFIX] Fix System.Net.Sockets.SocketException when telemetry is enabled and Statsd server is not up.
-
 # 5.0.0 / 05-13-2020
 Significant improvements of `DogStatsdService` and `DogStatsd` performance.
 
