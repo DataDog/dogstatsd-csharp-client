@@ -83,8 +83,7 @@ namespace StatsdClient.Bufferize
                 {
                     this._bufferBuilder.HandleBufferAndReset();
 
-                    // No need to wait as sending the value takes time.
-                    return false;
+                    return true;
                 }
 
                 return true;
