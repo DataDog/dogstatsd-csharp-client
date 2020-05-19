@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using StatsdClient.Bufferize;
 
@@ -90,14 +91,21 @@ namespace StatsdClient
 
         public void Flush()
         {
-            SendMetric(MetricsMetricName, Interlocked.Exchange(ref _metricsSent, 0));
-            SendMetric(EventsMetricName, Interlocked.Exchange(ref _eventsSent, 0));
-            SendMetric(ServiceCheckMetricName, Interlocked.Exchange(ref _serviceChecksSent, 0));
-            SendMetric(BytesSentMetricName, Interlocked.Exchange(ref _bytesSent, 0));
-            SendMetric(BytesDroppedMetricName, Interlocked.Exchange(ref _bytesDropped, 0));
-            SendMetric(PacketsSentMetricName, Interlocked.Exchange(ref _packetsSent, 0));
-            SendMetric(PacketsDroppedMetricName, Interlocked.Exchange(ref _packetsDropped, 0));
-            SendMetric(PacketsDroppedQueueMetricName, Interlocked.Exchange(ref _packetsDroppedQueue, 0));
+            try
+            {
+                SendMetric(MetricsMetricName, Interlocked.Exchange(ref _metricsSent, 0));
+                SendMetric(EventsMetricName, Interlocked.Exchange(ref _eventsSent, 0));
+                SendMetric(ServiceCheckMetricName, Interlocked.Exchange(ref _serviceChecksSent, 0));
+                SendMetric(BytesSentMetricName, Interlocked.Exchange(ref _bytesSent, 0));
+                SendMetric(BytesDroppedMetricName, Interlocked.Exchange(ref _bytesDropped, 0));
+                SendMetric(PacketsSentMetricName, Interlocked.Exchange(ref _packetsSent, 0));
+                SendMetric(PacketsDroppedMetricName, Interlocked.Exchange(ref _packetsDropped, 0));
+                SendMetric(PacketsDroppedQueueMetricName, Interlocked.Exchange(ref _packetsDroppedQueue, 0));
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
         }
 
         public void OnMetricSent()
