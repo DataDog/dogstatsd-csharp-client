@@ -9,18 +9,18 @@ namespace StatsdClient
         private StatsBufferize _statsBufferize;
 
         public StatsdData(
-            Statsd statsd,
+            MetricsSender metricsSender,
             StatsBufferize statsBufferize,
             StatsSender statsSender,
             Telemetry telemetry)
         {
-            Statsd = statsd;
+            MetricsSender = metricsSender;
             Telemetry = telemetry;
             _statsBufferize = statsBufferize;
             _statsSender = statsSender;
         }
 
-        public Statsd Statsd { get; private set; }
+        public MetricsSender MetricsSender { get; private set; }
 
         public Telemetry Telemetry { get; private set; }
 
@@ -38,7 +38,7 @@ namespace StatsdClient
             _statsSender?.Dispose();
             _statsSender = null;
 
-            Statsd = null;
+            MetricsSender = null;
         }
     }
 }
