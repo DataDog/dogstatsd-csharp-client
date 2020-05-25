@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace StatsdClientTmp
+namespace StatsdClient
 {
-#pragma warning disable CS1591
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "See ObsoleteAttribute.")]
-    [ObsoleteAttribute("This class will become private in a future release.\n" +
-        "You can use instead `DogStatsdService` or `DogStatsd` which provides automatic metrics" +
-        " buffering with asynchronous calls (metrics are added to a queue and another thread send them).")]
-    public class Statsd : IStatsd
+    internal class MetricsSender
     {
         private const string _entityIdInternalTagKey = "dd.internal.entity_id";
         private static readonly string[] EmptyStringArray = new string[0];
@@ -22,37 +15,7 @@ namespace StatsdClientTmp
         private readonly Telemetry _optionalTelemetry;
         private List<string> _commands = new List<string>();
 
-        public Statsd(
-            IStatsdUDP udp,
-            IRandomGenerator randomGenerator,
-            IStopWatchFactory stopwatchFactory,
-            string prefix,
-            string[] constantTags)
-                      : this(udp, randomGenerator, stopwatchFactory, prefix, constantTags, null)
-        {
-        }
-
-        public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory, string prefix)
-            : this(udp, randomGenerator, stopwatchFactory, prefix, null)
-        {
-        }
-
-        public Statsd(IStatsdUDP udp, IRandomGenerator randomGenerator, IStopWatchFactory stopwatchFactory)
-            : this(udp, randomGenerator, stopwatchFactory, string.Empty)
-        {
-        }
-
-        public Statsd(IStatsdUDP udp, string prefix)
-            : this(udp, new RandomGenerator(), new StopWatchFactory(), prefix)
-        {
-        }
-
-        public Statsd(IStatsdUDP udp)
-            : this(udp, string.Empty)
-        {
-        }
-
-        internal Statsd(
+        internal MetricsSender(
                     IStatsdUDP udp,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
@@ -94,20 +57,6 @@ namespace StatsdClientTmp
 
         private IRandomGenerator RandomGenerator { get; set; }
 
-        public void Add<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null)
-            where TCommandType : Metric
-        {
-            _commands.Add(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
-            _optionalTelemetry?.OnMetricSent();
-        }
-
-        public void Add(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
-        {
-            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            _commands.Add(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
-            _optionalTelemetry?.OnEventSent();
-        }
-
         public void Send(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
@@ -115,34 +64,11 @@ namespace StatsdClientTmp
             _optionalTelemetry?.OnEventSent();
         }
 
-        public Task SendAsync(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
-        {
-            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            var task = SendAsync(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
-            _optionalTelemetry?.OnEventSent();
-            return task;
-        }
-
-        public void Add(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
-        {
-            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            _commands.Add(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
-            _optionalTelemetry?.OnServiceCheckSent();
-        }
-
         public void Send(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
             Send(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
             _optionalTelemetry?.OnServiceCheckSent();
-        }
-
-        public Task SendAsync(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
-        {
-            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            var task = SendAsync(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
-            _optionalTelemetry?.OnServiceCheckSent();
-            return task;
         }
 
         public void Send<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null)
@@ -153,19 +79,6 @@ namespace StatsdClientTmp
                 Send(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
                 _optionalTelemetry?.OnMetricSent();
             }
-        }
-
-        public Task SendAsync<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null)
-            where TCommandType : Metric
-        {
-            if (RandomGenerator.ShouldSend(sampleRate))
-            {
-                var task = SendAsync(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
-                _optionalTelemetry?.OnMetricSent();
-                return task;
-            }
-
-            return Task.FromResult((object)null);
         }
 
         public void Send(string command)
@@ -186,24 +99,6 @@ namespace StatsdClientTmp
             }
         }
 
-        public async Task SendAsync(string command)
-        {
-            try
-            {
-                // clear buffer (keep existing behavior)
-                if (Commands.Count > 0)
-                {
-                    Commands = new List<string>();
-                }
-
-                await Udp.SendAsync(command).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
-        }
-
         public void Send()
         {
             int count = Commands.Count;
@@ -213,33 +108,6 @@ namespace StatsdClientTmp
             }
 
             Send(count == 1 ? Commands[0] : string.Join("\n", Commands.ToArray()));
-        }
-
-        public Task SendAsync()
-        {
-            int count = Commands.Count;
-            if (count < 1)
-            {
-                return Task.FromResult((object)null);
-            }
-
-            return SendAsync(count == 1 ? Commands[0] : string.Join("\n", Commands.ToArray()));
-        }
-
-        public void Add(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null)
-        {
-            var stopwatch = StopwatchFactory.Get();
-
-            try
-            {
-                stopwatch.Start();
-                actionToTime();
-            }
-            finally
-            {
-                stopwatch.Stop();
-                Add<Timing, int>(statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
-            }
         }
 
         public void Send(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null)
@@ -255,22 +123,6 @@ namespace StatsdClientTmp
             {
                 stopwatch.Stop();
                 Send<Timing, int>(statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
-            }
-        }
-
-        public async Task SendAsync(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null)
-        {
-            var stopwatch = StopwatchFactory.Get();
-
-            try
-            {
-                stopwatch.Start();
-                actionToTime();
-            }
-            finally
-            {
-                stopwatch.Stop();
-                await SendAsync<Timing, int>(statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags).ConfigureAwait(false);
             }
         }
 
