@@ -44,6 +44,17 @@ namespace StatsdClient
             }
         }
 
+        public enum MetricType
+        {
+            Counting,
+            Timing,
+            Gauge,
+            Histogram,
+            Distribution,
+            Meter,
+            Set,
+        }
+
         public bool TruncateIfTooLong { get; set; }
 
         private IStopWatchFactory StopwatchFactory { get; set; }
@@ -64,12 +75,11 @@ namespace StatsdClient
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
-        public void Send<TCommandType, T>(string name, T value, double sampleRate = 1.0, string[] tags = null)
-            where TCommandType : Metric
+        public void Send<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
         {
             if (RandomGenerator.ShouldSend(sampleRate))
             {
-                Send(Metric.GetCommand<TCommandType, T>(_prefix, name, value, sampleRate, _constantTags, tags));
+                Send(Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags));
                 _optionalTelemetry?.OnMetricSent();
             }
         }
@@ -91,7 +101,7 @@ namespace StatsdClient
             finally
             {
                 stopwatch.Stop();
-                Send<Timing, int>(statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
+                Send(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
             }
         }
 
@@ -123,52 +133,23 @@ namespace StatsdClient
             return str.Substring(0, str.Length - overage);
         }
 
-        public class Counting : Metric
+        public abstract class Metric
         {
-        }
-
-        public class Timing : Metric
-        {
-        }
-
-        public class Gauge : Metric
-        {
-        }
-
-        public class Histogram : Metric
-        {
-        }
-
-        public class Distribution : Metric
-        {
-        }
-
-        public class Meter : Metric
-        {
-        }
-
-        public class Set : Metric
-        {
-        }
-
-        public abstract class Metric : ICommandType
-        {
-            private static readonly Dictionary<Type, string> _commandToUnit = new Dictionary<Type, string>
+            private static readonly Dictionary<MetricType, string> _commandToUnit = new Dictionary<MetricType, string>
                                                                 {
-                                                                    { typeof(Counting), "c" },
-                                                                    { typeof(Timing), "ms" },
-                                                                    { typeof(Gauge), "g" },
-                                                                    { typeof(Histogram), "h" },
-                                                                    { typeof(Distribution), "d" },
-                                                                    { typeof(Meter), "m" },
-                                                                    { typeof(Set), "s" },
+                                                                    { MetricType.Counting, "c" },
+                                                                    { MetricType.Timing, "ms" },
+                                                                    { MetricType.Gauge, "g" },
+                                                                    { MetricType.Histogram, "h" },
+                                                                    { MetricType.Distribution, "d" },
+                                                                    { MetricType.Meter, "m" },
+                                                                    { MetricType.Set, "s" },
                                                                 };
 
-            public static string GetCommand<TCommandType, T>(string prefix, string name, T value, double sampleRate, string[] constantTags, string[] tags)
-                where TCommandType : Metric
+            public static string GetCommand<T>(MetricType metricType, string prefix, string name, T value, double sampleRate, string[] constantTags, string[] tags)
             {
                 string full_name = prefix + name;
-                string unit = _commandToUnit[typeof(TCommandType)];
+                string unit = _commandToUnit[metricType];
                 var allTags = ConcatTags(constantTags, tags);
 
                 return string.Format(
@@ -182,7 +163,7 @@ namespace StatsdClient
             }
         }
 
-        public class Event : ICommandType
+        public class Event
         {
             private const int MaxSize = 8 * 1024;
 
@@ -254,7 +235,7 @@ namespace StatsdClient
             }
         }
 
-        public class ServiceCheck : ICommandType
+        public class ServiceCheck
         {
             private const int MaxSize = 8 * 1024;
 

@@ -1,5 +1,6 @@
 using System;
 using StatsdClient.Bufferize;
+using static StatsdClient.MetricsSender;
 
 namespace StatsdClient
 {
@@ -77,7 +78,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Counting, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Counting, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
@@ -89,7 +90,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Counting, int>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Counting, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
@@ -101,7 +102,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Counting, int>(BuildNamespacedStatName(statName), -value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Counting, BuildNamespacedStatName(statName), -value, sampleRate, tags);
         }
 
         /// <summary>
@@ -114,7 +115,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Gauge<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Gauge, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Gauge, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Histogram<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Histogram, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Histogram, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
@@ -140,7 +141,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Distribution<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Distribution, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Distribution, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
@@ -153,7 +154,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Set, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Set, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
@@ -166,7 +167,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of value parameter.</typeparam>
         public void Timer<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send<MetricsSender.Timing, T>(BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Timing, BuildNamespacedStatName(statName), value, sampleRate, tags);
         }
 
         /// <summary>
