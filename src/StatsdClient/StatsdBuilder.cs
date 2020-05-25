@@ -49,7 +49,7 @@ namespace StatsdClient
                 new RandomGenerator(),
                 new StopWatchFactory(),
                 string.Empty,
-                config.ConstantTags,
+                globalTags,
                 telemetry);
             metricsSender.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
             return new StatsdData(metricsSender, statsBufferize, statsSender, telemetry);

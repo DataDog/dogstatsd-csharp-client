@@ -9,7 +9,6 @@ namespace StatsdClient
 {
     internal class MetricsSender
     {
-        private const string _entityIdInternalTagKey = "dd.internal.entity_id";
         private static readonly string[] EmptyStringArray = new string[0];
         private readonly string _prefix;
         private readonly string[] _constantTags;
@@ -30,18 +29,8 @@ namespace StatsdClient
             _prefix = prefix;
             _optionalTelemetry = optionalTelemetry;
 
-            string entityId = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
-
-            if (string.IsNullOrEmpty(entityId))
-            {
-                // copy array to prevent changes, coalesce to empty array
-                _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
-            }
-            else
-            {
-                var entityIdTags = new[] { $"{_entityIdInternalTagKey}:{entityId}" };
-                _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
-            }
+            // copy array to prevent changes, coalesce to empty array
+            _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
         }
 
         public enum MetricType
