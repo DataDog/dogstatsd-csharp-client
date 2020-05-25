@@ -7,7 +7,7 @@ namespace StatsdClient.Bufferize
     /// <summary>
     /// StatsBufferize bufferizes metrics before sending them.
     /// </summary>
-    internal class StatsBufferize : IStatsdUDP, IDisposable
+    internal class StatsBufferize : IDisposable
     {
         private readonly AsynchronousWorker<string> _worker;
         private readonly Telemetry _telemetry;
@@ -43,11 +43,6 @@ namespace StatsdClient.Bufferize
         public void Dispose()
         {
             this._worker.Dispose();
-        }
-
-        public Task SendAsync(string command)
-        {
-            throw new NotSupportedException();
         }
 
         private class WorkerHandler : IAsynchronousWorkerHandler<string>

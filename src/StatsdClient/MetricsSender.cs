@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using StatsdClient.Bufferize;
 
 namespace StatsdClient
 {
@@ -14,9 +15,10 @@ namespace StatsdClient
         private readonly string[] _constantTags;
         private readonly Telemetry _optionalTelemetry;
         private List<string> _commands = new List<string>();
+        private readonly StatsBufferize _statsBufferize;
 
         internal MetricsSender(
-                    IStatsdUDP udp,
+                    StatsBufferize statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
                     string prefix,
@@ -24,7 +26,7 @@ namespace StatsdClient
                     Telemetry optionalTelemetry)
         {
             StopwatchFactory = stopwatchFactory;
-            Udp = udp;
+            _statsBufferize = statsBufferize;
             RandomGenerator = randomGenerator;
             _prefix = prefix;
             _optionalTelemetry = optionalTelemetry;
@@ -52,8 +54,6 @@ namespace StatsdClient
         }
 
         private IStopWatchFactory StopwatchFactory { get; set; }
-
-        private IStatsdUDP Udp { get; set; }
 
         private IRandomGenerator RandomGenerator { get; set; }
 
@@ -91,7 +91,7 @@ namespace StatsdClient
                     Commands = new List<string>();
                 }
 
-                Udp.Send(command);
+                 _statsBufferize.Send(command);
             }
             catch (Exception e)
             {
