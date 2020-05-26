@@ -6,13 +6,19 @@ namespace StatsdClient
     internal class ServiceCheckSerializer
     {
         private const int MaxSize = 8 * 1024;
+        private readonly string[] _constantTags;
 
-        public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+        public ServiceCheckSerializer(string[] constantTags)
         {
-            return GetCommand(name, status, timestamp, hostname, null, tags, serviceCheckMessage, truncateIfTooLong);
+            _constantTags = constantTags;
         }
 
-        public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] constantTags, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+        public string GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+        {
+            return Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
+        }
+
+        public string Serialize(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
         {
             string processedName = EscapeName(name);
             string processedMessage = EscapeMessage(serviceCheckMessage);
@@ -29,7 +35,7 @@ namespace StatsdClient
                 result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
             }
 
-            result += MetricSerializer.ConcatTags(constantTags, tags);
+            result += MetricSerializer.ConcatTags(_constantTags, tags);
 
             // Note: this must always be appended to the result last.
             if (processedMessage != null)

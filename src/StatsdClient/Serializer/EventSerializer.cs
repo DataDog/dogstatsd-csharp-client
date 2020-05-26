@@ -6,13 +6,19 @@ namespace StatsdClient
     internal class EventSerializer
     {
         private const int MaxSize = 8 * 1024;
+        private readonly string[] _constantTags;
 
-        public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
+        public EventSerializer(string[] constantTags)
         {
-            return GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, null, tags, truncateIfTooLong);
+            _constantTags = constantTags;
         }
 
-        public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] constantTags, string[] tags, bool truncateIfTooLong = false)
+        public string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
+        {
+            return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
+        }
+
+        public string Serialize(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
         {
             string processedTitle = MetricSerializer.EscapeContent(title);
             string processedText = MetricSerializer.EscapeContent(text);
@@ -47,7 +53,7 @@ namespace StatsdClient
                 result += string.Format(CultureInfo.InvariantCulture, "|t:{0}", alertType);
             }
 
-            result += MetricSerializer.ConcatTags(constantTags, tags);
+            result += MetricSerializer.ConcatTags(_constantTags, tags);
 
             if (result.Length > MaxSize)
             {

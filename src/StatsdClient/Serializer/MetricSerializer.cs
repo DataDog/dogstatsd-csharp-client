@@ -14,8 +14,7 @@ namespace StatsdClient
         internal MetricSerializer(string prefix, string[] constantTags)
         {
             _prefix = string.IsNullOrEmpty(prefix) ? string.Empty : prefix + ".";
-            // copy array to prevent changes, coalesce to empty array
-            _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
+            _constantTags = constantTags;
         }
 
         public static string EscapeContent(string content)
@@ -46,17 +45,7 @@ namespace StatsdClient
             return str.Substring(0, str.Length - overage);
         }
 
-        public string SerializeEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
-        {
-            return EventSerializer.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong);
-        }
-
-        public string SerializeServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
-        {
-            return ServiceCheckSerializer.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong);
-        }
-
-        public string SerializeMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
+        public string Serialize<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
         {
             return Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags);
         }

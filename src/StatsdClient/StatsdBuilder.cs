@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using Mono.Unix;
@@ -45,15 +46,28 @@ namespace StatsdClient
                 statsSenderData.BufferCapacity,
                 config.Advanced);
 
-            var metricSerializer = new MetricSerializer(config.Prefix, globalTags);
+            var serializers = CreateSerializers(config.Prefix, globalTags);
             var metricsSender = new MetricsSender(
                 statsBufferize,
                 new RandomGenerator(),
                 new StopWatchFactory(),
-                metricSerializer,
+                serializers,
                 telemetry,
                 config.StatsdTruncateIfTooLong);
             return new StatsdData(metricsSender, statsBufferize, statsSender, telemetry);
+        }
+
+        private static Serializers CreateSerializers(string prefix, string[] constantTags)
+        {
+            // copy array to prevent changes, coalesce to empty array
+            var notNullConstantTags = constantTags?.ToArray() ?? new string[] { };
+
+            return new Serializers
+            {
+                MetricSerializer = new MetricSerializer(prefix, notNullConstantTags),
+                ServiceCheckSerializer = new ServiceCheckSerializer(notNullConstantTags),
+                EventSerializer = new EventSerializer(notNullConstantTags),
+            };
         }
 
         private static int GetPort(StatsdConfig config)
