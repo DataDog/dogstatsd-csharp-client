@@ -18,21 +18,6 @@ namespace StatsdClient
             _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
         }
 
-        public string SerializeEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
-        {
-            return Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong);
-        }
-
-        public string SerializeServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
-        {
-            return ServiceCheckSerializer.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong);
-        }
-
-        public string SerializeMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
-        {
-            return Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags);
-        }
-
         public static string EscapeContent(string content)
         {
             return content
@@ -59,6 +44,21 @@ namespace StatsdClient
         public static string TruncateOverage(string str, int overage)
         {
             return str.Substring(0, str.Length - overage);
+        }
+
+        public string SerializeEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
+        {
+            return Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong);
+        }
+
+        public string SerializeServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
+        {
+            return ServiceCheckSerializer.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong);
+        }
+
+        public string SerializeMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
+        {
+            return Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags);
         }
 
         public abstract class Metric
