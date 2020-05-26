@@ -44,12 +44,13 @@ namespace StatsdClient
                 statsSenderData.Sender,
                 statsSenderData.BufferCapacity,
                 config.Advanced);
+
+            var metricSerializer = new MetricSerializer(string.Empty, globalTags);
             var metricsSender = new MetricsSender(
                 statsBufferize,
                 new RandomGenerator(),
                 new StopWatchFactory(),
-                string.Empty,
-                globalTags,
+                metricSerializer,
                 telemetry);
             metricsSender.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
             return new StatsdData(metricsSender, statsBufferize, statsSender, telemetry);

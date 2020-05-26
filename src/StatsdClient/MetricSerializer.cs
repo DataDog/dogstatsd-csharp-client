@@ -1,97 +1,36 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using StatsdClient.Bufferize;
 
-namespace StatsdClientTpm
+namespace StatsdClient
 {
-    internal class MetricsSender
+    internal class MetricSerializer
     {
         private static readonly string[] EmptyStringArray = new string[0];
         private readonly string _prefix;
         private readonly string[] _constantTags;
-        private readonly Telemetry _optionalTelemetry;
-        private readonly StatsBufferize _statsBufferize;
 
-        internal MetricsSender(
-                    StatsBufferize statsBufferize,
-                    IRandomGenerator randomGenerator,
-                    IStopWatchFactory stopwatchFactory,
-                    string prefix,
-                    string[] constantTags,
-                    Telemetry optionalTelemetry)
+        internal MetricSerializer(string prefix, string[] constantTags)
         {
-            StopwatchFactory = stopwatchFactory;
-            _statsBufferize = statsBufferize;
-            RandomGenerator = randomGenerator;
             _prefix = prefix;
-            _optionalTelemetry = optionalTelemetry;
-
             // copy array to prevent changes, coalesce to empty array
             _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
         }
 
-        public enum MetricType
+        public string SerializeEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
-            Counting,
-            Timing,
-            Gauge,
-            Histogram,
-            Distribution,
-            Meter,
-            Set,
+            return Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong);
         }
 
-        public bool TruncateIfTooLong { get; set; }
-
-        private IStopWatchFactory StopwatchFactory { get; set; }
-
-        private IRandomGenerator RandomGenerator { get; set; }
-
-        public void Send(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
+        public string SerializeServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
-            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            Send(Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong));
-            _optionalTelemetry?.OnEventSent();
+            return ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong);
         }
 
-        public void Send(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
+        public string SerializeMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            truncateIfTooLong = truncateIfTooLong || TruncateIfTooLong;
-            Send(ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong));
-            _optionalTelemetry?.OnServiceCheckSent();
-        }
-
-        public void Send<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
-        {
-            if (RandomGenerator.ShouldSend(sampleRate))
-            {
-                Send(Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags));
-                _optionalTelemetry?.OnMetricSent();
-            }
-        }
-
-        public void Send(string command)
-        {
-            _statsBufferize.Send(command);
-        }
-
-        public void Send(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null)
-        {
-            var stopwatch = StopwatchFactory.Get();
-
-            try
-            {
-                stopwatch.Start();
-                actionToTime();
-            }
-            finally
-            {
-                stopwatch.Stop();
-                Send(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
-            }
+            return Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags);
         }
 
         private static string EscapeContent(string content)
