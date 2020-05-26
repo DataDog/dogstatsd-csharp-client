@@ -25,7 +25,7 @@ namespace StatsdClient
 
         public string SerializeServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
-            return ServiceCheck.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong);
+            return ServiceCheckSerializer.GetCommand(name, status, timestamp, hostname, _constantTags, tags, serviceCheckMessage, truncateIfTooLong);
         }
 
         public string SerializeMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
@@ -33,14 +33,14 @@ namespace StatsdClient
             return Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags);
         }
 
-        private static string EscapeContent(string content)
+        public static string EscapeContent(string content)
         {
             return content
                 .Replace("\r", string.Empty)
                 .Replace("\n", "\\n");
         }
 
-        private static string ConcatTags(string[] constantTags, string[] tags)
+        public static string ConcatTags(string[] constantTags, string[] tags)
         {
             // avoid dealing with null arrays
             constantTags = constantTags ?? EmptyStringArray;
@@ -56,7 +56,7 @@ namespace StatsdClient
             return $"|#{concatenatedTags}";
         }
 
-        private static string TruncateOverage(string str, int overage)
+        public static string TruncateOverage(string str, int overage)
         {
             return str.Substring(0, str.Length - overage);
         }
@@ -160,85 +160,6 @@ namespace StatsdClient
                 }
 
                 return result;
-            }
-        }
-
-        public class ServiceCheck
-        {
-            private const int MaxSize = 8 * 1024;
-
-            public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
-            {
-                return GetCommand(name, status, timestamp, hostname, null, tags, serviceCheckMessage, truncateIfTooLong);
-            }
-
-            public static string GetCommand(string name, int status, int? timestamp, string hostname, string[] constantTags, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
-            {
-                string processedName = EscapeName(name);
-                string processedMessage = EscapeMessage(serviceCheckMessage);
-
-                string result = string.Format(CultureInfo.InvariantCulture, "_sc|{0}|{1}", processedName, status);
-
-                if (timestamp != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|d:{0}", timestamp);
-                }
-
-                if (hostname != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
-                }
-
-                result += ConcatTags(constantTags, tags);
-
-                // Note: this must always be appended to the result last.
-                if (processedMessage != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|m:{0}", processedMessage);
-                }
-
-                if (result.Length > MaxSize)
-                {
-                    if (!truncateIfTooLong)
-                    {
-                        throw new Exception(string.Format("ServiceCheck {0} payload is too big (more than 8kB)", name));
-                    }
-
-                    var overage = result.Length - MaxSize;
-
-                    if (processedMessage == null || overage > processedMessage.Length)
-                    {
-                        throw new ArgumentException(string.Format("ServiceCheck name is too long to truncate, payload is too big (more than 8Kb) for {0}", name), "name");
-                    }
-
-                    var truncMessage = TruncateOverage(processedMessage, overage);
-                    return GetCommand(name, status, timestamp, hostname, tags, truncMessage, true);
-                }
-
-                return result;
-            }
-
-            // Service check name string, shouldn’t contain any |
-            private static string EscapeName(string name)
-            {
-                name = EscapeContent(name);
-
-                if (name.Contains("|"))
-                {
-                    throw new ArgumentException("Name must not contain any | (pipe) characters", "name");
-                }
-
-                return name;
-            }
-
-            private static string EscapeMessage(string message)
-            {
-                if (!string.IsNullOrEmpty(message))
-                {
-                    return EscapeContent(message).Replace("m:", "m\\:");
-                }
-
-                return message;
             }
         }
     }
