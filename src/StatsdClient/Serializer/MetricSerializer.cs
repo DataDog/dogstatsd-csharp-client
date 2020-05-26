@@ -48,7 +48,7 @@ namespace StatsdClient
 
         public string SerializeEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
-            return Event.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong);
+            return EventSerializer.GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, _constantTags, tags, truncateIfTooLong);
         }
 
         public string SerializeServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
@@ -88,78 +88,6 @@ namespace StatsdClient
                     unit,
                     sampleRate == 1.0 ? string.Empty : string.Format(CultureInfo.InvariantCulture, "|@{0}", sampleRate),
                     allTags);
-            }
-        }
-
-        public class Event
-        {
-            private const int MaxSize = 8 * 1024;
-
-            public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
-            {
-                return GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, null, tags, truncateIfTooLong);
-            }
-
-            public static string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] constantTags, string[] tags, bool truncateIfTooLong = false)
-            {
-                string processedTitle = EscapeContent(title);
-                string processedText = EscapeContent(text);
-                string result = string.Format(CultureInfo.InvariantCulture, "_e{{{0},{1}}}:{2}|{3}", processedTitle.Length.ToString(), processedText.Length.ToString(), processedTitle, processedText);
-                if (dateHappened != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|d:{0}", dateHappened);
-                }
-
-                if (hostname != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
-                }
-
-                if (aggregationKey != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|k:{0}", aggregationKey);
-                }
-
-                if (priority != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|p:{0}", priority);
-                }
-
-                if (sourceType != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|s:{0}", sourceType);
-                }
-
-                if (alertType != null)
-                {
-                    result += string.Format(CultureInfo.InvariantCulture, "|t:{0}", alertType);
-                }
-
-                result += ConcatTags(constantTags, tags);
-
-                if (result.Length > MaxSize)
-                {
-                    if (truncateIfTooLong)
-                    {
-                        var overage = result.Length - MaxSize;
-                        if (title.Length > text.Length)
-                        {
-                            title = TruncateOverage(title, overage);
-                        }
-                        else
-                        {
-                            text = TruncateOverage(text, overage);
-                        }
-
-                        return GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, true);
-                    }
-                    else
-                    {
-                        throw new Exception(string.Format("Event {0} payload is too big (more than 8kB)", title));
-                    }
-                }
-
-                return result;
             }
         }
     }
