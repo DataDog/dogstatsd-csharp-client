@@ -1,6 +1,5 @@
 using System;
 using StatsdClient.Bufferize;
-using static StatsdClient.MetricsSender;
 
 namespace StatsdClient
 {
@@ -13,7 +12,6 @@ namespace StatsdClient
         private StatsdBuilder _statsdBuilder = new StatsdBuilder(new StatsBufferizeFactory());
         private MetricsSender _metricsSender;
         private StatsdData _statsdData;
-        private string _prefix;
         private StatsdConfig _config;
 
         /// <summary>
@@ -45,8 +43,6 @@ namespace StatsdClient
             }
 
             _config = config;
-            _prefix = config.Prefix;
-
             _statsdData = _statsdBuilder.BuildStatsData(config);
             _metricsSender = _statsdData.MetricsSender;
         }
@@ -78,7 +74,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Counting, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Counting, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -90,7 +86,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Counting, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Counting, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -102,7 +98,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Counting, BuildNamespacedStatName(statName), -value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Counting, statName, -value, sampleRate, tags);
         }
 
         /// <summary>
@@ -115,7 +111,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Gauge<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Gauge, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Gauge, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -128,7 +124,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Histogram<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Histogram, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Histogram, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -141,7 +137,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Distribution<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Distribution, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Distribution, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -154,7 +150,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Set, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Set, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -167,7 +163,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of value parameter.</typeparam>
         public void Timer<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.Send(MetricType.Timing, BuildNamespacedStatName(statName), value, sampleRate, tags);
+            _metricsSender?.Send(MetricType.Timing, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -197,7 +193,7 @@ namespace StatsdClient
             }
             else
             {
-                _metricsSender.Send(action, BuildNamespacedStatName(statName), sampleRate, tags);
+                _metricsSender.Send(action, statName, sampleRate, tags);
             }
         }
 
@@ -245,16 +241,6 @@ namespace StatsdClient
         {
             _statsdData?.Dispose();
             _statsdData = null;
-        }
-
-        private string BuildNamespacedStatName(string statName)
-        {
-            if (string.IsNullOrEmpty(_prefix))
-            {
-                return statName;
-            }
-
-            return _prefix + "." + statName;
         }
     }
 }
