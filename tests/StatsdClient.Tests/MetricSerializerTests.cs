@@ -71,46 +71,6 @@ namespace StatsdClient.Tests
             s.Send<Statsd.Counting, int>("counter", 5);
         }
 
-        [Test]
-        public void Add_increase_counter_by_x()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("counter:5|c"));
-        }
-
-        [Test]
-        public void Add_increase_counter_by_x_with_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("counter:5|c|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_increase_counter_by_x_with_sample_rate()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 5, sampleRate: 0.5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("counter:5|c|@0.5"));
-        }
-
-        [Test]
-        public void Add_increase_counter_by_x_with_sample_rate_and_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("counter:5|c|@0.5|#tag1:true,tag2"));
-        }
-
         // =-=-=-=- TIMER -=-=-=-=
 
         [Test]
@@ -247,71 +207,6 @@ namespace StatsdClient.Tests
             Assert.That(returnValue, Is.EqualTo(5));
         }
 
-        [Test]
-        public void Add_timer_with_lamba()
-        {
-            const string statName = "name";
-
-            IStopwatch stopwatch = Mock.Of<IStopwatch>();
-            Mock.Get(stopwatch).Setup(x => x.ElapsedMilliseconds()).Returns(500);
-            Mock.Get(_stopwatch).Setup(x => x.Get()).Returns(stopwatch);
-
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add(() => TestMethod(), statName);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("name:500|ms"));
-        }
-
-        [Test]
-        public void Add_timer_with_lamba_and_tags()
-        {
-            const string statName = "name";
-
-            IStopwatch stopwatch = Mock.Of<IStopwatch>();
-            Mock.Get(stopwatch).Setup(x => x.ElapsedMilliseconds()).Returns(500);
-            Mock.Get(_stopwatch).Setup(x => x.Get()).Returns(stopwatch);
-
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add(() => TestMethod(), statName, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("name:500|ms|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_timer_with_lamba_and_sample_rate_and_tags()
-        {
-            const string statName = "name";
-
-            IStopwatch stopwatch = Mock.Of<IStopwatch>();
-            Mock.Get(stopwatch).Setup(x => x.ElapsedMilliseconds()).Returns(500);
-            Mock.Get(_stopwatch).Setup(x => x.Get()).Returns(stopwatch);
-
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add(() => TestMethod(), statName, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("name:500|ms|@0.5|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_timer_with_lamba_still_records_on_error_and_still_bubbles_up_exception()
-        {
-            const string statName = "name";
-
-            var stopwatch = Mock.Of<IStopwatch>();
-            Mock.Get(stopwatch).Setup(x => x.ElapsedMilliseconds()).Returns(500);
-            Mock.Get(_stopwatch).Setup(x => x.Get()).Returns(stopwatch);
-
-            var s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
-            Assert.Throws<InvalidOperationException>(() => s.Add(() => throw new InvalidOperationException(), statName));
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("name:500|ms"));
-        }
-
         // =-=-=-=- GAUGE -=-=-=-=
 
         [Test]
@@ -370,148 +265,6 @@ namespace StatsdClient.Tests
             s.Send<Statsd.Gauge, int>("gauge", 5);
         }
 
-        [Test]
-        public void Add_gauge()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Gauge, int>("gauge", 5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("gauge:5|g"));
-        }
-
-        [Test]
-        public void Add_gauge_double()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Gauge, double>("gauge", 5.3);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("gauge:5.3|g"));
-        }
-
-        [Test]
-        public void Add_gauge_with_sample_rate()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Gauge, int>("gauge", 5, sampleRate: 0.5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("gauge:5|g|@0.5"));
-        }
-
-        [Test]
-        public void Add_gauge_with_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Gauge, int>("gauge", 5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("gauge:5|g|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_gauge_with_sample_rate_and_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Gauge, int>("gauge", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("gauge:5|g|@0.5|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_gauge_with_sample_rate_and_tags_double()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Gauge, int>("gauge", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("gauge:5|g|@0.5|#tag1:true,tag2"));
-        }
-
-        // =-=-=-=- COMBINATION -=-=-=-=
-
-        [Test]
-        public void Add_one_counter_and_one_gauge_shows_in_commands()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 1, 0.1);
-            s.Add<Statsd.Timing, int>("timer", 1);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(2));
-            Assert.That(s.Commands[0], Is.EqualTo("counter:1|c|@0.1"));
-            Assert.That(s.Commands[1], Is.EqualTo("timer:1|ms"));
-        }
-
-        [Test]
-        public void Add_one_counter_and_one_gauge_with_no_sample_rate_shows_in_commands()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 1);
-            s.Add<Statsd.Timing, int>("timer", 1);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(2));
-            Assert.That(s.Commands[0], Is.EqualTo("counter:1|c"));
-            Assert.That(s.Commands[1], Is.EqualTo("timer:1|ms"));
-        }
-
-        [Test]
-        public void Add_one_counter_and_one_gauge_sends_in_one_go()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 1, 0.1);
-            s.Add<Statsd.Timing, int>("timer", 1);
-            s.Send();
-
-            Mock.Get(_udp).Verify(x => x.Send("counter:1|c|@0.1\ntimer:1|ms"));
-        }
-
-        [Test]
-        public void Add_one_counter_and_one_gauge_sends_and_removes_commands()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 1, 0.1);
-            s.Add<Statsd.Timing, int>("timer", 1);
-            s.Send();
-
-            Assert.That(s.Commands.Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void Add_one_counter_and_send_one_gauge_sends_only_sends_the_last_and_clears_queue()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, int>("counter", 1);
-            s.Send<Statsd.Timing, int>("timer", 1);
-
-            Mock.Get(_udp).Verify(x => x.Send("timer:1|ms"));
-
-            s.Send();
-
-            Mock.Get(_udp).Verify(x => x.Send("counter:1|c"), Times.Never);
-        }
-
-        [Test]
-        public void Add_one_counter_and_send_one_gauge_sends_only_sends_the_last_one_double()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, double>("counter", 1.1);
-            s.Send<Statsd.Timing, int>("timer", 1);
-
-            Mock.Get(_udp).Verify(x => x.Send("timer:1|ms"));
-        }
-
-        [Test]
-        public void Add_one_counter_and_send_one_gauge_sends_only_sends_the_last_two_doubles()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Counting, double>("counter", 1.1);
-            s.Send<Statsd.Timing, double>("timer", 1.1);
-
-            Mock.Get(_udp).Verify(x => x.Send("timer:1.1|ms"));
-        }
-
         // =-=-=-=- PREFIX -=-=-=-=
 
         [Test]
@@ -522,18 +275,6 @@ namespace StatsdClient.Tests
             s.Send<Statsd.Counting, int>("counter", 5);
 
             Mock.Get(_udp).Verify(x => x.Send("a.prefix.counter:5|c"), Times.Exactly(2));
-        }
-
-        [Test]
-        public void Add_counter_sets_prefix_on_name()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch, "another.prefix.");
-
-            s.Add<Statsd.Counting, int>("counter", 1, sampleRate: 0.1);
-            s.Add<Statsd.Timing, int>("timer", 1);
-            s.Send();
-
-            Mock.Get(_udp).Verify(x => x.Send("another.prefix.counter:1|c|@0.1\nanother.prefix.timer:1|ms"));
         }
 
         // DOGSTATSD-SPECIFIC
@@ -579,56 +320,6 @@ namespace StatsdClient.Tests
             Mock.Get(_udp).Verify(x => x.Send("histogram:5|h|@0.5|#tag1:true,tag2"));
         }
 
-        [Test]
-        public void Add_histogram()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Histogram, int>("histogram", 5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("histogram:5|h"));
-        }
-
-        [Test]
-        public void Add_histogram_double()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Histogram, double>("histogram", 5.3);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("histogram:5.3|h"));
-        }
-
-        [Test]
-        public void Add_histogram_with_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Histogram, int>("histogram", 5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("histogram:5|h|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_histogram_with_sample_rate()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Histogram, int>("histogram", 5, 0.5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("histogram:5|h|@0.5"));
-        }
-
-        [Test]
-        public void Add_histogram_with_sample_rate_and_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Histogram, int>("histogram", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("histogram:5|h|@0.5|#tag1:true,tag2"));
-        }
-
         // =-=-=-=- DISTRIBUTION -=-=-=-=
         [Test]
         public void Send_distribution()
@@ -668,56 +359,6 @@ namespace StatsdClient.Tests
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
             s.Send<Statsd.Distribution, int>("distribution", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
             Mock.Get(_udp).Verify(x => x.Send("distribution:5|d|@0.5|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_distribution()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Distribution, int>("distribution", 5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d"));
-        }
-
-        [Test]
-        public void Add_distribution_double()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Distribution, double>("distribution", 5.3);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("distribution:5.3|d"));
-        }
-
-        [Test]
-        public void Add_distribution_with_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Distribution, int>("distribution", 5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_distribution_with_sample_rate()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Distribution, int>("distribution", 5, 0.5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d|@0.5"));
-        }
-
-        [Test]
-        public void Add_distribution_with_sample_rate_and_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Distribution, int>("distribution", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("distribution:5|d|@0.5|#tag1:true,tag2"));
         }
 
         // =-=-=-=- SET -=-=-=-=
@@ -767,66 +408,6 @@ namespace StatsdClient.Tests
             Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
             s.Send<Statsd.Set, string>("set", "objectname", sampleRate: 0.1, tags: new[] { "tag1:true", "tag2" });
             Mock.Get(_udp).Verify(x => x.Send("set:objectname|s|@0.1|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_set()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Set, int>("set", 5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("set:5|s"));
-        }
-
-        [Test]
-        public void Add_set_string()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Set, string>("set", "string");
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("set:string|s"));
-        }
-
-        [Test]
-        public void Add_set_with_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Set, int>("set", 5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("set:5|s|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_set_with_sample_rate()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Set, int>("set", 5, sampleRate: 0.5);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("set:5|s|@0.5"));
-        }
-
-        [Test]
-        public void Add_set_with_sample_rate_and_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Set, int>("set", 5, sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("set:5|s|@0.5|#tag1:true,tag2"));
-        }
-
-        [Test]
-        public void Add_set_string_with_sample_rate_and_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add<Statsd.Set, string>("set", "string", sampleRate: 0.5, tags: new[] { "tag1:true", "tag2" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("set:string|s|@0.5|#tag1:true,tag2"));
         }
 
         private static string BuildLongString(int length)
