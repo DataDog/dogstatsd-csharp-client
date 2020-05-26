@@ -8,141 +8,107 @@ namespace StatsdClient.Tests
     [TestFixture]
     public class EventSerializerTests
     {
-        private IStatsdUDP _udp;
-        private IRandomGenerator _randomGenerator;
-        private IStopWatchFactory _stopwatch;
-
-        [SetUp]
-        public void Setup()
-        {
-            _udp = Mock.Of<IStatsdUDP>();
-            _randomGenerator = Mock.Of<IRandomGenerator>();
-            Mock.Get(_randomGenerator).Setup(x => x.ShouldSend(It.IsAny<double>())).Returns(true);
-            _stopwatch = Mock.Of<IStopWatchFactory>();
-        }
-
-        // =-=-=-=- EVENT -=-=-=-=
-        // Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
-
         [Test]
         public void Send_event()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text");
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text"));
+            AssertSerialize("_e{5,4}:title|text", "title", "text");
         }
 
         [Test]
         public void Send_event_with_alertType()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", alertType: "warning");
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|t:warning"));
+            AssertSerialize("_e{5,4}:title|text|t:warning", "title", "text", alertType: "warning");
         }
 
         [Test]
         public void Send_event_with_aggregationKey()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", aggregationKey: "key");
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|k:key"));
+            AssertSerialize("_e{5,4}:title|text|k:key", "title", "text", aggregationKey: "key");
         }
 
         [Test]
         public void Send_event_with_sourceType()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", sourceType: "source");
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|s:source"));
+            AssertSerialize("_e{5,4}:title|text|s:source", "title", "text", sourceType: "source");
         }
 
         [Test]
         public void Send_event_with_dateHappened()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", dateHappened: 123456);
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|d:123456"));
+            AssertSerialize("_e{5,4}:title|text|d:123456", "title", "text", dateHappened: 123456);
         }
 
         [Test]
         public void Send_event_with_priority()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", priority: "low");
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|p:low"));
+            AssertSerialize("_e{5,4}:title|text|p:low", "title", "text", priority: "low");
         }
 
         [Test]
         public void Send_event_with_hostname()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", hostname: "hostname");
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|h:hostname"));
+            AssertSerialize("_e{5,4}:title|text|h:hostname", "title", "text", hostname: "hostname");
         }
 
         [Test]
         public void Send_event_with_tags()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("title", "text", tags: new[] { "tag1", "tag2" });
-            Mock.Get(_udp).Verify(x => x.Send("_e{5,4}:title|text|#tag1,tag2"));
+            AssertSerialize("_e{5,4}:title|text|#tag1,tag2", "title", "text", tags: new[] { "tag1", "tag2" });
         }
 
         [Test]
         public void Send_event_with_message_that_is_too_long()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
             var length = (8 * 1024) - 16; // 16 is the number of characters in the final message that is not the title
             var builder = BuildLongString(length);
             var title = builder;
 
-            var exception = Assert.Throws<Exception>(() => s.Send(title + "x", "text"));
+            var serializer = CreateSerializer();
+            var exception = Assert.Throws<Exception>(
+                () => serializer.Serialize(title + "x", "text", null, null, null, null, null, null, null));
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
         [Test]
         public void Send_event_with_truncation_for_title_that_is_too_long()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
             var length = (8 * 1024) - 16; // 16 is the number of characters in the final message that is not the title
             var builder = BuildLongString(length);
             var title = builder;
 
-            s.Send(title + "x", "text", truncateIfTooLong: true);
-            var expected = string.Format("_e{{{0},4}}:{1}|text", length, title);
-            Mock.Get(_udp).Verify(x => x.Send(expected));
+            AssertSerialize(
+                string.Format("_e{{{0},4}}:{1}|text", length, title),
+                title + "x",
+                "text",
+                truncateIfTooLong: true);
         }
 
         [Test]
         public void Send_event_with_truncation_for_text_that_is_too_long()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
             var length = (8 * 1024) - 17; // 17 is the number of characters in the final message that is not the text
             var builder = BuildLongString(length);
             var text = builder;
 
-            s.Send("title", text + "x", truncateIfTooLong: true);
-            var expected = string.Format("_e{{5,{0}}}:title|{1}", length, text);
-            Mock.Get(_udp).Verify(x => x.Send(expected));
+            AssertSerialize(
+                string.Format("_e{{5,{0}}}:title|{1}", length, text),
+                "title",
+                text + "x",
+                truncateIfTooLong: true);
         }
 
         [Test]
         public void Send_event_with_statsd_truncation()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            // Enable truncation at Statsd level
-            s.TruncateIfTooLong = true;
-
             var length = (8 * 1024) - 17; // 17 is the number of characters in the final message that is not the text
             var builder = BuildLongString(length);
             var text = builder;
 
-            s.Send("title", text + "x");
-            var expected = string.Format("_e{{5,{0}}}:title|{1}", length, text);
-            Mock.Get(_udp).Verify(x => x.Send(expected));
+            AssertSerialize(
+                string.Format("_e{{5,{0}}}:title|{1}", length, text),
+                "title",
+                text + "x",
+                truncateIfTooLong: true);
         }
 
         private static string BuildLongString(int length)
@@ -154,6 +120,39 @@ namespace StatsdClient.Tests
             }
 
             return builder.ToString();
+        }
+
+        private static void AssertSerialize(
+            string expectValue,
+            string title = null,
+            string text = null,
+            string alertType = null,
+            string aggregationKey = null,
+            string sourceType = null,
+            int? dateHappened = null,
+            string priority = null,
+            string hostname = null,
+            string[] tags = null,
+            bool truncateIfTooLong = false)
+        {
+            var serializer = CreateSerializer();
+            var rawMetric = serializer.Serialize(
+                title,
+                text,
+                alertType,
+                aggregationKey,
+                sourceType,
+                dateHappened,
+                priority,
+                hostname,
+                tags,
+                truncateIfTooLong);
+            Assert.AreEqual(expectValue, rawMetric);
+        }
+
+        private static EventSerializer CreateSerializer()
+        {
+            return new EventSerializer(null);
         }
     }
 }
