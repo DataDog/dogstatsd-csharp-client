@@ -9,25 +9,25 @@ namespace StatsdClient.Tests
     public class ServiceCheckSerializerTests
     {
         [Test]
-        public void Send_service_check()
+        public void SendServiceCheck()
         {
             AssertSerialize("_sc|name|0", "name", 0);
         }
 
         [Test]
-        public void Send_service_check_with_timestamp()
+        public void SendServiceCheckWithTimestamp()
         {
             AssertSerialize("_sc|name|0|d:1", "name", 0, timestamp: 1);
         }
 
         [Test]
-        public void Send_service_check_with_hostname()
+        public void SendServiceCheckWithHostname()
         {
             AssertSerialize("_sc|name|0|h:hostname", "name", 0, hostname: "hostname");
         }
 
         [Test]
-        public void Send_service_check_with_tags()
+        public void SendServiceCheckWithTags()
         {
             AssertSerialize(
                 "_sc|name|0|#tag1:value1,tag2,tag3:value3",
@@ -37,13 +37,13 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void Send_service_check_with_message()
+        public void SendServiceCheckWithMessage()
         {
             AssertSerialize("_sc|name|0|m:message", "name", 0, serviceCheckMessage: "message");
         }
 
         [Test]
-        public void Send_service_check_with_pipe_in_name()
+        public void SendServiceCheckWithPipeInName()
         {
             var serializer = CreateSerializer();
             Assert.Throws<ArgumentException>(() => serializer.Serialize("name|", 0, null, null, null, null));
@@ -52,19 +52,19 @@ namespace StatsdClient.Tests
         [Test]
         [TestCase("\r\n")]
         [TestCase("\n")]
-        public void Send_service_check_with_new_line_in_name(string newline)
+        public void SendServiceCheckWithNewLineInName(string newline)
         {
             AssertSerialize("_sc|name\\n|0", "name" + newline, 0);
         }
 
         [Test]
-        public void Send_service_check_with_suffix_in_message()
+        public void SendServiceCheckWithSuffixInMessage()
         {
             AssertSerialize("_sc|name|0|m:m\\:message", "name", 0, serviceCheckMessage: "m:message");
         }
 
         [Test]
-        public void Send_service_check_with_all_optional()
+        public void SendServiceCheckWithAllOptional()
         {
             AssertSerialize(
                 "_sc|name|0|d:1|h:hostname|#tag1:value1,tag2,tag3:value3|m:message",
@@ -77,7 +77,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void Send_service_check_with_message_that_is_too_long()
+        public void SendServiceCheckWithMessageThatIsTooLong()
         {
             var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
@@ -89,7 +89,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void Send_service_check_with_message_that_is_too_long_truncate()
+        public void SendServiceCheckWithMessageThatIsTooLongTruncate()
         {
             var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
@@ -99,7 +99,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void Send_service_check_with_name_that_is_too_long_truncate()
+        public void SendServiceCheckWithNameThatIsTooLongTruncate()
         {
             var length = (8 * 1024) - 6;
             var builder = BuildLongString(length);
