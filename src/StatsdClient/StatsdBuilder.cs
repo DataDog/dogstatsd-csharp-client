@@ -51,8 +51,8 @@ namespace StatsdClient
                 new RandomGenerator(),
                 new StopWatchFactory(),
                 metricSerializer,
-                telemetry);
-            metricsSender.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
+                telemetry,
+                config.StatsdTruncateIfTooLong);
             return new StatsdData(metricsSender, statsBufferize, statsSender, telemetry);
         }
 
