@@ -8,66 +8,45 @@ namespace StatsdClient.Tests
     [TestFixture]
     public class ServiceCheckSerializerTests
     {
-        private IStatsdUDP _udp;
-        private IRandomGenerator _randomGenerator;
-        private IStopWatchFactory _stopwatch;
-
-        [SetUp]
-        public void Setup()
-        {
-            _udp = Mock.Of<IStatsdUDP>();
-            _randomGenerator = Mock.Of<IRandomGenerator>();
-            Mock.Get(_randomGenerator).Setup(x => x.ShouldSend(It.IsAny<double>())).Returns(true);
-            _stopwatch = Mock.Of<IStopWatchFactory>();
-        }
-
-        // =-=-=-=- ServiceCheck -=-=-=-=
         [Test]
         public void Send_service_check()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0);
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0"));
+            AssertSerialize("_sc|name|0", "name", 0);
         }
 
         [Test]
         public void Send_service_check_with_timestamp()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0, timestamp: 1);
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0|d:1"));
+            AssertSerialize("_sc|name|0|d:1", "name", 0, timestamp: 1);
         }
 
         [Test]
         public void Send_service_check_with_hostname()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0, hostname: "hostname");
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0|h:hostname"));
+            AssertSerialize("_sc|name|0|h:hostname", "name", 0, hostname: "hostname");
         }
 
         [Test]
         public void Send_service_check_with_tags()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0, tags: new[] { "tag1:value1", "tag2", "tag3:value3" });
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0|#tag1:value1,tag2,tag3:value3"));
+            AssertSerialize(
+                "_sc|name|0|#tag1:value1,tag2,tag3:value3",
+                "name",
+                0,
+                tags: new[] { "tag1:value1", "tag2", "tag3:value3" });
         }
 
         [Test]
         public void Send_service_check_with_message()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0, serviceCheckMessage: "message");
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0|m:message"));
+            AssertSerialize("_sc|name|0|m:message", "name", 0, serviceCheckMessage: "message");
         }
 
         [Test]
         public void Send_service_check_with_pipe_in_name()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
-            Assert.Throws<ArgumentException>(() => s.Send("name|", 0));
+            var serializer = CreateSerializer();
+            Assert.Throws<ArgumentException>(() => serializer.Serialize("name|", 0, null, null, null, null));
         }
 
         [Test]
@@ -75,181 +54,60 @@ namespace StatsdClient.Tests
         [TestCase("\n")]
         public void Send_service_check_with_new_line_in_name(string newline)
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name" + newline, 0);
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name\\n|0"));
+            AssertSerialize("_sc|name\\n|0", "name" + newline, 0);
         }
 
         [Test]
         public void Send_service_check_with_suffix_in_message()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0, serviceCheckMessage: "m:message");
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0|m:m\\:message"));
+            AssertSerialize("_sc|name|0|m:m\\:message", "name", 0, serviceCheckMessage: "m:message");
         }
 
         [Test]
         public void Send_service_check_with_all_optional()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Send("name", 0, 1, "hostname", new[] { "tag1:value1", "tag2", "tag3:value3" }, "message");
-            Mock.Get(_udp).Verify(x => x.Send("_sc|name|0|d:1|h:hostname|#tag1:value1,tag2,tag3:value3|m:message"));
+            AssertSerialize(
+                "_sc|name|0|d:1|h:hostname|#tag1:value1,tag2,tag3:value3|m:message",
+                "name",
+                0,
+                1,
+                "hostname",
+                new[] { "tag1:value1", "tag2", "tag3:value3" },
+                "message");
         }
 
         [Test]
         public void Send_service_check_with_message_that_is_too_long()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
             var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
             var message = builder;
+            var serializer = CreateSerializer();
 
-            var exception = Assert.Throws<Exception>(() => s.Send("name", 0, serviceCheckMessage: message + "x"));
+            var exception = Assert.Throws<Exception>(() => serializer.Serialize("name", 0, null, null, null, message + "x"));
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
         [Test]
         public void Send_service_check_with_message_that_is_too_long_truncate()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
             var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
             var message = builder;
 
-            s.Send("name", 0, serviceCheckMessage: message + "x", truncateIfTooLong: true);
-
-            var expected = "_sc|name|0|m:" + message;
-            Mock.Get(_udp).Verify(x => x.Send(expected));
+            AssertSerialize("_sc|name|0|m:" + message, "name", 0, serviceCheckMessage: message + "x", truncateIfTooLong: true);
         }
 
         [Test]
         public void Send_service_check_with_name_that_is_too_long_truncate()
         {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
             var length = (8 * 1024) - 6;
             var builder = BuildLongString(length);
             var name = builder;
+            var serializer = CreateSerializer();
 
-            var exception = Assert.Throws<ArgumentException>(() => s.Send(name + "x", 0, truncateIfTooLong: true));
-            Assert.That(exception.Message, Contains.Substring("payload is too big"));
-        }
-
-        [Test]
-        public void Add_service_check()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0"));
-        }
-
-        [Test]
-        public void Add_service_check_with_timestamp()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0, timestamp: 1);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0|d:1"));
-        }
-
-        [Test]
-        public void Add_service_check_with_hostname()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0, hostname: "hostname");
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0|h:hostname"));
-        }
-
-        [Test]
-        public void Add_service_check_with_tags()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0, tags: new[] { "tag1:value1", "tag2", "tag3:value3" });
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0|#tag1:value1,tag2,tag3:value3"));
-        }
-
-        [Test]
-        public void Add_service_check_with_message()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0, serviceCheckMessage: "message");
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0|m:message"));
-        }
-
-        [Test]
-        public void Add_service_check_with_pipe_in_name()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
-            Assert.Throws<ArgumentException>(() => s.Add("name|", 0));
-        }
-
-        [Test]
-        [TestCase("\r\n")]
-        [TestCase("\n")]
-        public void Add_service_check_with_new_line_in_name(string newline)
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name" + newline, 0);
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name\\n|0"));
-        }
-
-        [Test]
-        public void Add_service_check_with_suffix_in_message()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0, serviceCheckMessage: "m:message");
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0|m:m\\:message"));
-        }
-
-        [Test]
-        public void Add_service_check_with_all_optional()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-            s.Add("name", 0, 1, "hostname", new[] { "tag1:value1", "tag2", "tag3:value3" }, "message");
-
-            Assert.That(s.Commands.Count, Is.EqualTo(1));
-            Assert.That(s.Commands[0], Is.EqualTo("_sc|name|0|d:1|h:hostname|#tag1:value1,tag2,tag3:value3|m:message"));
-        }
-
-        [Test]
-        public void Add_service_check_with_message_that_is_too_long()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
-            var length = (8 * 1024) - 13;
-            var builder = BuildLongString(length);
-            var message = builder;
-
-            var exception = Assert.Throws<Exception>(() => s.Add("name", 0, serviceCheckMessage: message + "x"));
-            Assert.That(exception.Message, Contains.Substring("payload is too big"));
-        }
-
-        [Test]
-        public void Add_service_check_with_name_that_is_too_long()
-        {
-            Statsd s = new Statsd(_udp, _randomGenerator, _stopwatch);
-
-            var length = (8 * 1024) - 6;
-            var builder = BuildLongString(length);
-            var name = builder;
-
-            var exception = Assert.Throws<Exception>(() => s.Add(name + "x", 0));
+            var exception = Assert.Throws<ArgumentException>(
+                () => serializer.Serialize(name + "x", 0, null, null, null, null, truncateIfTooLong: true));
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
@@ -262,6 +120,26 @@ namespace StatsdClient.Tests
             }
 
             return builder.ToString();
+        }
+
+        private static void AssertSerialize(
+            string expectValue,
+            string name,
+            int status,
+            int? timestamp = null,
+            string hostname = null,
+            string[] tags = null,
+            string serviceCheckMessage = null,
+            bool truncateIfTooLong = false)
+        {
+            var serializer = CreateSerializer();
+            var rawMetric = serializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
+            Assert.AreEqual(expectValue, rawMetric);
+        }
+
+        private static ServiceCheckSerializer CreateSerializer()
+        {
+            return new ServiceCheckSerializer(null);
         }
     }
 }
