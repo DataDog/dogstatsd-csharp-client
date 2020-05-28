@@ -20,6 +20,7 @@ namespace Tests
             });
         }
 
+#if !OS_WINDOWS
         [Test]
         public void UDSReconnection()
         {
@@ -31,6 +32,7 @@ namespace Tests
                 });
             }
         }
+#endif
 
         private static void CheckReconnection(StatsdConfig config)
         {
