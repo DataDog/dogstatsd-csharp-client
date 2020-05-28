@@ -13,12 +13,12 @@ namespace StatsdClient
             _constantTags = constantTags;
         }
 
-        public string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
+        public SerializedMetric GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
         {
             return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
         }
 
-        public string Serialize(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
+        public SerializedMetric Serialize(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
         {
             string processedTitle = MetricSerializer.EscapeContent(title);
             string processedText = MetricSerializer.EscapeContent(text);
@@ -77,7 +77,7 @@ namespace StatsdClient
                 }
             }
 
-            return result;
+            return new SerializedMetric(result);
         }
     }
 }

@@ -133,8 +133,8 @@ namespace StatsdClient.Tests
             bool truncateIfTooLong = false)
         {
             var serializer = CreateSerializer();
-            var rawMetric = serializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
-            Assert.AreEqual(expectValue, rawMetric);
+            var serializedMetric = serializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
+            Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
         private static ServiceCheckSerializer CreateSerializer()

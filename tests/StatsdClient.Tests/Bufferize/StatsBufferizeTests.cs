@@ -17,7 +17,7 @@ namespace Tests
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
             using (var statsBufferize = new StatsBufferize(new Telemetry(), bufferBuilder, 10, null, TimeSpan.Zero))
             {
-                statsBufferize.Send("1");
+                statsBufferize.Send(new SerializedMetric("1"));
                 while (handler.Buffer == null)
                 {
                     Task.Delay(TimeSpan.FromMilliseconds(1)).Wait();

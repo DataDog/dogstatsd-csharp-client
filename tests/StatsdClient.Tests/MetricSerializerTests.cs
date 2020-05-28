@@ -299,13 +299,13 @@ namespace StatsdClient.Tests
             string prefix = null)
         {
             var serializer = new MetricSerializer(prefix, null);
-            var rawMetric = serializer.Serialize(
+            var serializedMetric = serializer.Serialize(
                 metricType,
                 name,
                 value,
                 sampleRate,
                 tags);
-            Assert.AreEqual(expectValue, rawMetric);
+            Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
     }
 }

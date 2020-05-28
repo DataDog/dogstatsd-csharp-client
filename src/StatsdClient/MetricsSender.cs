@@ -31,14 +31,16 @@ namespace StatsdClient
         public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            _statsBufferize.Send(_serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
+            var serializedMetric = _serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
+            _statsBufferize.Send(serializedMetric);
             _optionalTelemetry?.OnEventSent();
         }
 
         public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            _statsBufferize.Send(_serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
+            var serializedMetric = _serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
+            _statsBufferize.Send(serializedMetric);
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
@@ -46,7 +48,8 @@ namespace StatsdClient
         {
             if (_randomGenerator.ShouldSend(sampleRate))
             {
-                _statsBufferize.Send(_serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags));
+                var serializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
+                _statsBufferize.Send(serializedMetric);
                 _optionalTelemetry?.OnMetricSent();
             }
         }

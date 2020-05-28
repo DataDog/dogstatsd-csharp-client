@@ -36,8 +36,9 @@ namespace StatsdClient.Bufferize
             return _encoding.GetBytes(message);
         }
 
-        public bool Add(string value)
+        public bool Add(SerializedMetric serializedMetric)
         {
+            var value = serializedMetric.ToString();
             var byteCount = _encoding.GetByteCount(value);
 
             if (byteCount > Capacity)

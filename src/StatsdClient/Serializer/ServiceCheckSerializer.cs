@@ -13,12 +13,12 @@ namespace StatsdClient
             _constantTags = constantTags;
         }
 
-        public string GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+        public SerializedMetric GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
         {
             return Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
         }
 
-        public string Serialize(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+        public SerializedMetric Serialize(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
         {
             string processedName = EscapeName(name);
             string processedMessage = EscapeMessage(serviceCheckMessage);
@@ -61,7 +61,7 @@ namespace StatsdClient
                 return GetCommand(name, status, timestamp, hostname, tags, truncMessage, true);
             }
 
-            return result;
+            return new SerializedMetric(result);
         }
 
         // Service check name string, shouldn’t contain any |

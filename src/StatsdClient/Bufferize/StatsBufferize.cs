@@ -9,7 +9,7 @@ namespace StatsdClient.Bufferize
     /// </summary>
     internal class StatsBufferize : IDisposable
     {
-        private readonly AsynchronousWorker<string> _worker;
+        private readonly AsynchronousWorker<SerializedMetric> _worker;
         private readonly Telemetry _telemetry;
 
         public StatsBufferize(
@@ -24,7 +24,7 @@ namespace StatsdClient.Bufferize
             var handler = new WorkerHandler(bufferBuilder, maxIdleWaitBeforeSending);
 
             // `handler` (and also `bufferBuilder`) do not need to be thread safe as long as workerMaxItemCount is 1.
-            this._worker = new AsynchronousWorker<string>(
+            this._worker = new AsynchronousWorker<SerializedMetric>(
                 handler,
                 new Waiter(),
                 1,
@@ -32,9 +32,9 @@ namespace StatsdClient.Bufferize
                 blockingQueueTimeout);
         }
 
-        public void Send(string command)
+        public void Send(SerializedMetric serializedMetric)
         {
-            if (!this._worker.TryEnqueue(command))
+            if (!this._worker.TryEnqueue(serializedMetric))
             {
                 _telemetry.OnPacketsDroppedQueue();
             }
@@ -45,7 +45,7 @@ namespace StatsdClient.Bufferize
             this._worker.Dispose();
         }
 
-        private class WorkerHandler : IAsynchronousWorkerHandler<string>
+        private class WorkerHandler : IAsynchronousWorkerHandler<SerializedMetric>
         {
             private readonly BufferBuilder _bufferBuilder;
             private readonly TimeSpan _maxIdleWaitBeforeSending;
@@ -57,11 +57,11 @@ namespace StatsdClient.Bufferize
                 _maxIdleWaitBeforeSending = maxIdleWaitBeforeSending;
             }
 
-            public void OnNewValue(string metric)
+            public void OnNewValue(SerializedMetric serializedMetric)
             {
-                if (!_bufferBuilder.Add(metric))
+                if (!_bufferBuilder.Add(serializedMetric))
                 {
-                    throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {metric}");
+                    throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {serializedMetric.ToString()}");
                 }
 
                 _stopwatch = null;

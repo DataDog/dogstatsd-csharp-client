@@ -45,9 +45,9 @@ namespace StatsdClient
             return str.Substring(0, str.Length - overage);
         }
 
-        public string Serialize<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
+        public SerializedMetric Serialize<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            return Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags);
+            return new SerializedMetric(Metric.GetCommand(metricType, _prefix, name, value, sampleRate, _constantTags, tags));
         }
 
         public abstract class Metric
