@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StatsdClient
 {
-    internal class SerializedMetric
+    internal class SerializedMetric : IDisposable
     {
         private readonly ConcurrentQueue<SerializedMetric> _pool;
 

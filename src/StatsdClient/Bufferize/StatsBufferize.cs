@@ -60,14 +60,15 @@ namespace StatsdClient.Bufferize
 
             public void OnNewValue(SerializedMetric serializedMetric)
             {
-                var metricAdded = _bufferBuilder.Add(serializedMetric);
-                serializedMetric.Dispose();
-                if (!metricAdded)
+                using (serializedMetric)
                 {
-                    throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {serializedMetric.ToString()}");
-                }
+                    if (!_bufferBuilder.Add(serializedMetric))
+                    {
+                        throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {serializedMetric.ToString()}");
+                    }
 
-                _stopwatch = null;
+                    _stopwatch = null;
+                }
             }
 
             public bool OnIdle()
