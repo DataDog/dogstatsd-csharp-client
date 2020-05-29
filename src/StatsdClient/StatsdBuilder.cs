@@ -62,11 +62,13 @@ namespace StatsdClient
             // copy array to prevent changes, coalesce to empty array
             var notNullConstantTags = constantTags?.ToArray() ?? new string[] { };
 
+            var serializerHelper = new SerializerHelper(constantTags);
+
             return new Serializers
             {
                 MetricSerializer = new MetricSerializer(prefix, notNullConstantTags),
                 ServiceCheckSerializer = new ServiceCheckSerializer(notNullConstantTags),
-                EventSerializer = new EventSerializer(notNullConstantTags),
+                EventSerializer = new EventSerializer(serializerHelper),
             };
         }
 

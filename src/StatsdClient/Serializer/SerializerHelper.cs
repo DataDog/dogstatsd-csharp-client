@@ -4,6 +4,7 @@ namespace StatsdClient
 {
     internal class SerializerHelper
     {
+        private static readonly string[] EmptyArray = new string[0];
         private readonly string _constantTags;
 
         public SerializerHelper(string[] constantTags)
@@ -32,30 +33,40 @@ namespace StatsdClient
             }
         }
 
-        public SerializedMetric GetRawMetric()
+        public SerializedMetric GetSerializedMetric()
         {
             return new SerializedMetric(string.Empty);
         }
 
         public void AppendTags(StringBuilder builder, string[] tags)
         {
-            if (!string.IsNullOrEmpty(_constantTags) || (tags != null && tags.Length > 0))
+            if (tags == null)
             {
-                builder.Append("|#");
-                builder.Append(_constantTags);
-                bool hasTag = !string.IsNullOrEmpty(_constantTags);
-                if (tags != null)
-                {
-                    foreach (var tag in tags)
-                    {
-                        if (hasTag)
-                        {
-                            builder.Append(',');
-                        }
+                tags = EmptyArray;
+            }
 
-                        hasTag = true;
-                        builder.Append(tag);
+            bool hasConstantTags = !string.IsNullOrEmpty(_constantTags);
+
+            if (hasConstantTags || tags.Length > 0)
+            {
+                bool tagAppened = false;
+                builder.Append("|#");
+                if (hasConstantTags)
+                {
+                    builder.Append(_constantTags);
+                    tagAppened = true;
+                }
+
+                // Do not use String.Join to avoid a memory allocation.
+                foreach (var tag in tags)
+                {
+                    if (tagAppened)
+                    {
+                        builder.Append(',');
                     }
+
+                    tagAppened = true;
+                    builder.Append(tag);
                 }
             }
         }
