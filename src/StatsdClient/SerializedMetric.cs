@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Text;
 
@@ -13,6 +14,18 @@ namespace StatsdClient
         }
 
         public StringBuilder Builder { get; } = new StringBuilder();
+
+        public int CopyToChars(char[] charsBuffers)
+        {
+            var length = Builder.Length;
+            if (length > charsBuffers.Length)
+            {
+                return -1;
+            }
+
+            Builder.CopyTo(0, charsBuffers, 0, length);
+            return length;
+        }
 
         public override string ToString()
         {
