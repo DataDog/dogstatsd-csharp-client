@@ -57,7 +57,7 @@ namespace StatsdClient
                     throw new ArgumentException(string.Format("ServiceCheck name is too long to truncate, payload is too big (more than 8Kb) for {0}", name), "name");
                 }
 
-                var truncMessage = MetricSerializer.TruncateOverage(processedMessage, overage);
+                var truncMessage = SerializerHelper.TruncateOverage(processedMessage, overage);
                 return GetCommand(name, status, timestamp, hostname, tags, truncMessage, true);
             }
 
@@ -67,7 +67,7 @@ namespace StatsdClient
         // Service check name string, shouldn’t contain any |
         private static string EscapeName(string name)
         {
-            name = MetricSerializer.EscapeContent(name);
+            name = SerializerHelper.EscapeContent(name);
 
             if (name.Contains("|"))
             {
@@ -81,7 +81,7 @@ namespace StatsdClient
         {
             if (!string.IsNullOrEmpty(message))
             {
-                return MetricSerializer.EscapeContent(message).Replace("m:", "m\\:");
+                return SerializerHelper.EscapeContent(message).Replace("m:", "m\\:");
             }
 
             return message;

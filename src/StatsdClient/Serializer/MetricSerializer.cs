@@ -17,13 +17,6 @@ namespace StatsdClient
             _constantTags = constantTags;
         }
 
-        public static string EscapeContent(string content)
-        {
-            return content
-                .Replace("\r", string.Empty)
-                .Replace("\n", "\\n");
-        }
-
         public static string ConcatTags(string[] constantTags, string[] tags)
         {
             // avoid dealing with null arrays
@@ -38,11 +31,6 @@ namespace StatsdClient
             var allTags = constantTags.Concat(tags);
             string concatenatedTags = string.Join(",", allTags);
             return $"|#{concatenatedTags}";
-        }
-
-        public static string TruncateOverage(string str, int overage)
-        {
-            return str.Substring(0, str.Length - overage);
         }
 
         public SerializedMetric Serialize<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
