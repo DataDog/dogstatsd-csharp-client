@@ -1,6 +1,6 @@
 CHANGELOG
 =========
-# 5.0.2 / 05-XX-2020
+# 5.0.2 / 05-29-2020
 * [BUGFIX] Fix an issue where the client cannot send metrics after the DogStatsd server restart. See [#125][].
 
 # 5.0.1 / 05-19-2020
