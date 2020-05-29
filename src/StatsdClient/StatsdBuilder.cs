@@ -67,7 +67,7 @@ namespace StatsdClient
             return new Serializers
             {
                 MetricSerializer = new MetricSerializer(prefix, notNullConstantTags),
-                ServiceCheckSerializer = new ServiceCheckSerializer(notNullConstantTags),
+                ServiceCheckSerializer = new ServiceCheckSerializer(serializerHelper),
                 EventSerializer = new EventSerializer(serializerHelper),
             };
         }

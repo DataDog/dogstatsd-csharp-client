@@ -139,7 +139,8 @@ namespace StatsdClient.Tests
 
         private static ServiceCheckSerializer CreateSerializer()
         {
-            return new ServiceCheckSerializer(null);
+            var serializerHelper = new SerializerHelper(null);
+            return new ServiceCheckSerializer(serializerHelper);
         }
     }
 }

@@ -1,65 +1,85 @@
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace StatsdClient
 {
     internal class ServiceCheckSerializer
     {
-        private const int MaxSize = 8 * 1024;
-        private readonly string[] _constantTags;
+        private const int ServiceCheckMaxSize = 8 * 1024;
+        private readonly SerializerHelper _serializerHelper;
 
-        public ServiceCheckSerializer(string[] constantTags)
+        public ServiceCheckSerializer(SerializerHelper serializerHelper)
         {
-            _constantTags = constantTags;
+            _serializerHelper = serializerHelper;
         }
-       
-        public SerializedMetric Serialize(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
+
+        public SerializedMetric Serialize(
+            string name,
+            int status,
+            int? timestamp,
+            string hostname,
+            string[] tags,
+            string serviceCheckMessage,
+            bool truncateIfTooLong = false)
         {
+            var serializedMetric = _serializerHelper.GetSerializedMetric();
+            var builder = serializedMetric.Builder;
+
             string processedName = EscapeName(name);
             string processedMessage = EscapeMessage(serviceCheckMessage);
 
-            string result = string.Format(CultureInfo.InvariantCulture, "_sc|{0}|{1}", processedName, status);
+            builder.Append("_sc|");
+            builder.Append(processedName);
+            builder.AppendFormat(CultureInfo.InvariantCulture, "|{0}", status);
 
             if (timestamp != null)
             {
-                result += string.Format(CultureInfo.InvariantCulture, "|d:{0}", timestamp);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "|d:{0}", timestamp.Value);
             }
 
-            if (hostname != null)
-            {
-                result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
-            }
+            SerializerHelper.AppendIfNotNull(builder, "|h:", hostname);
 
-            result += MetricSerializer.ConcatTags(_constantTags, tags);
+            _serializerHelper.AppendTags(builder, tags);
 
             // Note: this must always be appended to the result last.
-            if (processedMessage != null)
+            SerializerHelper.AppendIfNotNull(builder, "|m:", processedMessage);
+
+            var truncatedMessage = TruncateMessageIfRequired(name, builder, truncateIfTooLong, processedMessage);
+            if (truncatedMessage != null)
             {
-                result += string.Format(CultureInfo.InvariantCulture, "|m:{0}", processedMessage);
+                return Serialize(name, status, timestamp, hostname, tags, truncatedMessage, true);
             }
 
-            if (result.Length > MaxSize)
+            return serializedMetric;
+        }
+
+        private static string TruncateMessageIfRequired(
+            string name,
+            StringBuilder builder,
+            bool truncateIfTooLong,
+            string processedMessage)
+        {
+            if (builder.Length > ServiceCheckMaxSize)
             {
                 if (!truncateIfTooLong)
                 {
                     throw new Exception(string.Format("ServiceCheck {0} payload is too big (more than 8kB)", name));
                 }
 
-                var overage = result.Length - MaxSize;
+                var overage = builder.Length - ServiceCheckMaxSize;
 
                 if (processedMessage == null || overage > processedMessage.Length)
                 {
                     throw new ArgumentException(string.Format("ServiceCheck name is too long to truncate, payload is too big (more than 8Kb) for {0}", name), "name");
                 }
 
-                var truncMessage = SerializerHelper.TruncateOverage(processedMessage, overage);
-                return Serialize(name, status, timestamp, hostname, tags, truncMessage, true);
+                return SerializerHelper.TruncateOverage(processedMessage, overage);
             }
 
-            return new SerializedMetric(result);
+            return null;
         }
 
-        // Service check name string, shouldn’t contain any |
         private static string EscapeName(string name)
         {
             name = SerializerHelper.EscapeContent(name);
