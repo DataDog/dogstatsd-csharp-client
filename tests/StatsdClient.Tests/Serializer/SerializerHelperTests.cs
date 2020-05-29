@@ -51,5 +51,20 @@ namespace Tests
             SerializerHelper.AppendIfNotNull(builder, "prefix:", "value");
             Assert.AreEqual("prefix:value", builder.ToString());
         }
+
+        [Test]
+        public void GetSerializedMetric()
+        {
+            var serializerHelper = new SerializerHelper(null);
+
+            var metric = serializerHelper.GetSerializedMetric();
+            metric.Builder.Append("Test");
+            Assert.AreNotEqual(metric, serializerHelper.GetSerializedMetric());
+            metric.Dispose();
+
+            var recycledMetric = serializerHelper.GetSerializedMetric();
+            Assert.AreEqual(metric, recycledMetric);
+            Assert.AreEqual(0, recycledMetric.Builder.Length);
+        }
     }
 }

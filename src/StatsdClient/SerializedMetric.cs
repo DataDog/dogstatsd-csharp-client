@@ -1,12 +1,15 @@
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace StatsdClient
 {
     internal class SerializedMetric
     {
-        public SerializedMetric(string str)
+        private readonly ConcurrentQueue<SerializedMetric> _pool;
+
+        public SerializedMetric(ConcurrentQueue<SerializedMetric> pool)
         {
-            Builder.Append(str);
+            _pool = pool;
         }
 
         public StringBuilder Builder { get; } = new StringBuilder();
@@ -14,6 +17,12 @@ namespace StatsdClient
         public override string ToString()
         {
             return Builder.ToString();
+        }
+
+        public void Dispose()
+        {
+            Builder.Clear();
+            _pool.Enqueue(this);
         }
     }
 }

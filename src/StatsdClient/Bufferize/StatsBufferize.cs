@@ -36,6 +36,7 @@ namespace StatsdClient.Bufferize
         {
             if (!this._worker.TryEnqueue(serializedMetric))
             {
+                serializedMetric.Dispose();
                 _telemetry.OnPacketsDroppedQueue();
             }
         }
@@ -59,7 +60,9 @@ namespace StatsdClient.Bufferize
 
             public void OnNewValue(SerializedMetric serializedMetric)
             {
-                if (!_bufferBuilder.Add(serializedMetric))
+                var metricAdded = _bufferBuilder.Add(serializedMetric);
+                serializedMetric.Dispose();
+                if (!metricAdded)
                 {
                     throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {serializedMetric.ToString()}");
                 }

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace StatsdClient
@@ -5,6 +6,7 @@ namespace StatsdClient
     internal class SerializerHelper
     {
         private static readonly string[] EmptyArray = new string[0];
+        private readonly ConcurrentQueue<SerializedMetric> _pool = new ConcurrentQueue<SerializedMetric>();
         private readonly string _constantTags;
 
         public SerializerHelper(string[] constantTags)
@@ -35,7 +37,12 @@ namespace StatsdClient
 
         public SerializedMetric GetSerializedMetric()
         {
-            return new SerializedMetric(string.Empty);
+            if (!_pool.TryDequeue(out var serializedMetric))
+            {
+                serializedMetric = new SerializedMetric(_pool);
+            }
+
+            return serializedMetric;
         }
 
         public void AppendTags(StringBuilder builder, string[] tags)
