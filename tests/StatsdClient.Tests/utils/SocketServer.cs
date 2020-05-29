@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace Tests.Utils
 
         private volatile bool _shutdown = false;
 
-        public SocketServer(StatsdConfig config)
+        public SocketServer(StatsdConfig config, bool removeUDSFileBeforeStarting = false)
         {
             EndPoint endPoint;
             int bufferSize;
@@ -27,6 +28,11 @@ namespace Tests.Utils
             if (serverName.StartsWith(StatsdBuilder.UnixDomainSocketPrefix))
             {
                 serverName = serverName.Substring(StatsdBuilder.UnixDomainSocketPrefix.Length);
+                if (removeUDSFileBeforeStarting)
+                {
+                    File.Delete(serverName);
+                }
+
                 _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
                 endPoint = new UnixEndPoint(serverName);
                 bufferSize = config.StatsdMaxUnixDomainSocketPacketSize;
