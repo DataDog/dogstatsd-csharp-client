@@ -12,12 +12,7 @@ namespace StatsdClient
         {
             _constantTags = constantTags;
         }
-
-        public SerializedMetric GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
-        {
-            return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
-        }
-
+       
         public SerializedMetric Serialize(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
         {
             string processedTitle = SerializerHelper.EscapeContent(title);
@@ -69,7 +64,7 @@ namespace StatsdClient
                         text = SerializerHelper.TruncateOverage(text, overage);
                     }
 
-                    return GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, true);
+                    return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, true);
                 }
                 else
                 {

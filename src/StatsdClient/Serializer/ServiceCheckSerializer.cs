@@ -12,12 +12,7 @@ namespace StatsdClient
         {
             _constantTags = constantTags;
         }
-
-        public SerializedMetric GetCommand(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
-        {
-            return Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
-        }
-
+       
         public SerializedMetric Serialize(string name, int status, int? timestamp, string hostname, string[] tags, string serviceCheckMessage, bool truncateIfTooLong = false)
         {
             string processedName = EscapeName(name);
@@ -58,7 +53,7 @@ namespace StatsdClient
                 }
 
                 var truncMessage = SerializerHelper.TruncateOverage(processedMessage, overage);
-                return GetCommand(name, status, timestamp, hostname, tags, truncMessage, true);
+                return Serialize(name, status, timestamp, hostname, tags, truncMessage, true);
             }
 
             return new SerializedMetric(result);
