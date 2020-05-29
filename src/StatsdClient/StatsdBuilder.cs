@@ -59,14 +59,11 @@ namespace StatsdClient
 
         private static Serializers CreateSerializers(string prefix, string[] constantTags)
         {
-            // copy array to prevent changes, coalesce to empty array
-            var notNullConstantTags = constantTags?.ToArray() ?? new string[] { };
-
             var serializerHelper = new SerializerHelper(constantTags);
 
             return new Serializers
             {
-                MetricSerializer = new MetricSerializer(prefix, notNullConstantTags),
+                MetricSerializer = new MetricSerializer(serializerHelper, prefix),
                 ServiceCheckSerializer = new ServiceCheckSerializer(serializerHelper),
                 EventSerializer = new EventSerializer(serializerHelper),
             };

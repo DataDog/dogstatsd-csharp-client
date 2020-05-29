@@ -50,6 +50,7 @@ namespace StatsdClient
             SerializerHelper.AppendIfNotNull(builder, "|p:", priority);
             SerializerHelper.AppendIfNotNull(builder, "|s:", sourceType);
             SerializerHelper.AppendIfNotNull(builder, "|t:", alertType);
+
             _serializerHelper.AppendTags(builder, tags);
 
             if (builder.Length > MaxSize)
