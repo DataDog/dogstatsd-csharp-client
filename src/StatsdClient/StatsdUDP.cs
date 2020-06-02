@@ -82,7 +82,7 @@ namespace StatsdClient
             if (!isValidIPAddress)
             {
                 ipAddress = null;
-#if NET451
+#if NET45
                 IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
 #else
                 IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
