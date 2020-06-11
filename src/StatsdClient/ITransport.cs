@@ -8,7 +8,7 @@ namespace StatsdClient
         UDP,
     }
 
-    internal interface IStatsSender : IDisposable
+    internal interface ITransport : IDisposable
     {
         StatsSenderTransportType TransportType { get; }
 

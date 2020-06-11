@@ -14,7 +14,7 @@ namespace StatsdClient
         private static string _telemetryPrefix = "datadog.dogstatsd.client.";
         private readonly Timer _optionalTimer;
         private readonly string[] _optionalTags;
-        private readonly IStatsSender _optionalStatsSender;
+        private readonly ITransport _optionalTransport;
 
         private int _metricsSent;
         private int _eventsSent;
@@ -33,20 +33,20 @@ namespace StatsdClient
         public Telemetry(
             string assemblyVersion,
             TimeSpan flushInterval,
-            IStatsSender statsSender,
+            ITransport transport,
             string[] globalTags)
         {
-            _optionalStatsSender = statsSender;
+            _optionalTransport = transport;
 
-            string transport;
-            switch (statsSender.TransportType)
+            string transportStr;
+            switch (transport.TransportType)
             {
-                case StatsSenderTransportType.UDP: transport = "udp"; break;
-                case StatsSenderTransportType.UDS: transport = "uds"; break;
-                default: transport = statsSender.TransportType.ToString(); break;
+                case StatsSenderTransportType.UDP: transportStr = "udp"; break;
+                case StatsSenderTransportType.UDS: transportStr = "uds"; break;
+                default: transportStr = transport.TransportType.ToString(); break;
             }
 
-            var optionalTags = new List<string> { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transport}" };
+            var optionalTags = new List<string> { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transportStr}" };
             optionalTags.AddRange(globalTags);
             _optionalTags = optionalTags.ToArray();
 
@@ -148,7 +148,7 @@ namespace StatsdClient
 
         private void SendMetric(string metricName, int value)
         {
-            if (_optionalStatsSender != null)
+            if (_optionalTransport != null)
             {
                 var message = Statsd.Metric.GetCommand<Statsd.Counting, int>(
                     string.Empty,
@@ -157,7 +157,7 @@ namespace StatsdClient
                     1.0,
                     _optionalTags);
                 var bytes = BufferBuilder.GetBytes(message);
-                _optionalStatsSender.Send(bytes, bytes.Length);
+                _optionalTransport.Send(bytes, bytes.Length);
             }
         }
     }

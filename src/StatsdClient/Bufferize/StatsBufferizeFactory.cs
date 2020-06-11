@@ -21,21 +21,21 @@ namespace StatsdClient.Bufferize
                 maxIdleWaitBeforeSending);
         }
 
-        public IStatsSender CreateUDPStatsSender(IPEndPoint endPoint)
+        public ITransport CreateUDPStatsSender(IPEndPoint endPoint)
         {
             return new UDPTransport(endPoint);
         }
 
-        public IStatsSender CreateUnixDomainSocketStatsSender(
+        public ITransport CreateUnixDomainSocketStatsSender(
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration)
         {
             return new UnixDomainSocketTransport(endPoint, udsBufferFullBlockDuration);
         }
 
-        public Telemetry CreateTelemetry(string assemblyVersion, TimeSpan flushInterval, IStatsSender statsSender, string[] globalTags)
+        public Telemetry CreateTelemetry(string assemblyVersion, TimeSpan flushInterval, ITransport transport, string[] globalTags)
         {
-            return new Telemetry(assemblyVersion, flushInterval, statsSender, globalTags);
+            return new Telemetry(assemblyVersion, flushInterval, transport, globalTags);
         }
     }
 }
