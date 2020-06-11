@@ -36,7 +36,7 @@ namespace StatsdClient
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            var statsSenderData = CreateStatsSender(config, statsdServerName);
+            var statsSenderData = CreateTransport(config, statsdServerName);
             var transport = statsSenderData.Sender;
             var globalTags = GetGlobalTags(config);
             var telemetry = CreateTelemetry(config, globalTags, statsSenderData.Sender);
@@ -127,26 +127,26 @@ namespace StatsdClient
             return new Telemetry();
         }
 
-        private StatsSenderData CreateStatsSender(StatsdConfig config, string statsdServerName)
+        private TransportData CreateTransport(StatsdConfig config, string statsdServerName)
         {
-            var statsSenderData = new StatsSenderData();
+            var transportData = new TransportData();
 
             if (statsdServerName.StartsWith(UnixDomainSocketPrefix))
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                statsSenderData.Sender = _factory.CreateUnixDomainSocketStatsSender(
+                transportData.Sender = _factory.CreateUnixDomainSocketTransport(
                     endPoint,
                     config.Advanced.UDSBufferFullBlockDuration);
-                statsSenderData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
+                transportData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
             {
-                statsSenderData.Sender = CreateUDPStatsSender(config, statsdServerName);
-                statsSenderData.BufferCapacity = config.StatsdMaxUDPPacketSize;
+                transportData.Sender = CreateUDPTransport(config, statsdServerName);
+                transportData.BufferCapacity = config.StatsdMaxUDPPacketSize;
             }
 
-            return statsSenderData;
+            return transportData;
         }
 
         private StatsBufferize CreateStatsBufferize(
@@ -168,16 +168,16 @@ namespace StatsdClient
             return statsBufferize;
         }
 
-        private ITransport CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
+        private ITransport CreateUDPTransport(StatsdConfig config, string statsdServerName)
         {
             var address = StatsdUDP.GetIpv4Address(statsdServerName);
             var port = GetPort(config);
 
             var endPoint = new IPEndPoint(address, port);
-            return _factory.CreateUDPStatsSender(endPoint);
+            return _factory.CreateUDPTransport(endPoint);
         }
 
-        private class StatsSenderData
+        private class TransportData
         {
             public ITransport Sender { get; set; }
 

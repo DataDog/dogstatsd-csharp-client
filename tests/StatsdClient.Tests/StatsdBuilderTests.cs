@@ -185,7 +185,7 @@ namespace StatsdClient.Tests
         {
             UnixEndPoint endPoint = null;
 
-            _mock.Setup(m => m.CreateUnixDomainSocketStatsSender(
+            _mock.Setup(m => m.CreateUnixDomainSocketTransport(
                 It.IsAny<UnixEndPoint>(),
                 It.IsAny<TimeSpan?>()))
                 .Callback<UnixEndPoint, TimeSpan?>((e, d) => endPoint = e);
@@ -199,7 +199,7 @@ namespace StatsdClient.Tests
         {
             IPEndPoint endPoint = null;
 
-            _mock.Setup(m => m.CreateUDPStatsSender(It.IsAny<IPEndPoint>()))
+            _mock.Setup(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()))
                 .Callback<IPEndPoint>(e => endPoint = e);
             BuildStatsData(config);
 

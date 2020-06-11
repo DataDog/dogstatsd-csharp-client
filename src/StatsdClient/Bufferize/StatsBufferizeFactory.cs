@@ -21,12 +21,12 @@ namespace StatsdClient.Bufferize
                 maxIdleWaitBeforeSending);
         }
 
-        public ITransport CreateUDPStatsSender(IPEndPoint endPoint)
+        public ITransport CreateUDPTransport(IPEndPoint endPoint)
         {
             return new UDPTransport(endPoint);
         }
 
-        public ITransport CreateUnixDomainSocketStatsSender(
+        public ITransport CreateUnixDomainSocketTransport(
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration)
         {
