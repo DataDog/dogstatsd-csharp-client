@@ -36,14 +36,14 @@ namespace StatsdClient
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            var statsSenderData = CreateTransport(config, statsdServerName);
-            var transport = statsSenderData.Sender;
+            var transportData = CreateTransport(config, statsdServerName);
+            var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var telemetry = CreateTelemetry(config, globalTags, statsSenderData.Sender);
+            var telemetry = CreateTelemetry(config, globalTags, transportData.Transport);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
-                statsSenderData.Sender,
-                statsSenderData.BufferCapacity,
+                transportData.Transport,
+                transportData.BufferCapacity,
                 config.Advanced);
 
             var serializers = CreateSerializers(config.Prefix, globalTags);
@@ -135,14 +135,14 @@ namespace StatsdClient
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                transportData.Sender = _factory.CreateUnixDomainSocketTransport(
+                transportData.Transport = _factory.CreateUnixDomainSocketTransport(
                     endPoint,
                     config.Advanced.UDSBufferFullBlockDuration);
                 transportData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
             {
-                transportData.Sender = CreateUDPTransport(config, statsdServerName);
+                transportData.Transport = CreateUDPTransport(config, statsdServerName);
                 transportData.BufferCapacity = config.StatsdMaxUDPPacketSize;
             }
 
@@ -179,7 +179,7 @@ namespace StatsdClient
 
         private class TransportData
         {
-            public ITransport Sender { get; set; }
+            public ITransport Transport { get; set; }
 
             public int BufferCapacity { get; set; }
         }
