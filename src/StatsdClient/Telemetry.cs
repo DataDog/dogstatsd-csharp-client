@@ -41,8 +41,8 @@ namespace StatsdClient
             string transportStr;
             switch (transport.TransportType)
             {
-                case StatsSenderTransportType.UDP: transportStr = "udp"; break;
-                case StatsSenderTransportType.UDS: transportStr = "uds"; break;
+                case TransportType.UDP: transportStr = "udp"; break;
+                case TransportType.UDS: transportStr = "uds"; break;
                 default: transportStr = transport.TransportType.ToString(); break;
             }
 

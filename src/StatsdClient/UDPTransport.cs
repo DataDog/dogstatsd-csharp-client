@@ -10,7 +10,7 @@ namespace StatsdClient
 
         public UDPTransport(IPEndPoint endPoint)
         {
-            TransportType = StatsSenderTransportType.UDP;
+            TransportType = TransportType.UDP;
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
             try
@@ -26,7 +26,7 @@ namespace StatsdClient
             _endPoint = endPoint;
         }
 
-        public StatsSenderTransportType TransportType { get; }
+        public TransportType TransportType { get; }
 
         /// <summary>
         /// Send the buffer.

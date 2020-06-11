@@ -2,7 +2,7 @@ using System;
 
 namespace StatsdClient
 {
-    internal enum StatsSenderTransportType
+    internal enum TransportType
     {
         UDS,
         UDP,
@@ -10,7 +10,7 @@ namespace StatsdClient
 
     internal interface ITransport : IDisposable
     {
-        StatsSenderTransportType TransportType { get; }
+        TransportType TransportType { get; }
 
         bool Send(byte[] buffer, int length);
     }

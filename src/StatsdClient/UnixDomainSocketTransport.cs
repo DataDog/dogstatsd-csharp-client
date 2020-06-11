@@ -16,7 +16,7 @@ namespace StatsdClient
             UnixEndPoint endPoint,
             TimeSpan? bufferFullBlockDuration)
         {
-            TransportType = StatsSenderTransportType.UDS;
+            TransportType = TransportType.UDS;
             if (bufferFullBlockDuration.HasValue)
             {
                 _noBufferSpaceAvailableRetryCount = (int)(bufferFullBlockDuration.Value.TotalMilliseconds
@@ -37,7 +37,7 @@ namespace StatsdClient
             _endPoint = endPoint;
         }
 
-        public StatsSenderTransportType TransportType { get; }
+        public TransportType TransportType { get; }
 
         /// <summary>
         /// Send the buffer.
