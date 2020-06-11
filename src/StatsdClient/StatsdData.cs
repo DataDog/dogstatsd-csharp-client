@@ -5,13 +5,13 @@ namespace StatsdClient
 {
     internal class StatsdData : IDisposable
     {
-        private StatsSender _statsSender;
+        private IStatsSender _statsSender;
         private StatsBufferize _statsBufferize;
 
         public StatsdData(
             MetricsSender metricsSender,
             StatsBufferize statsBufferize,
-            StatsSender statsSender,
+            IStatsSender statsSender,
             Telemetry telemetry)
         {
             MetricsSender = metricsSender;

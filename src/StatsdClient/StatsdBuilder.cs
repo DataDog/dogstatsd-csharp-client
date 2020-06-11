@@ -151,7 +151,7 @@ namespace StatsdClient
 
         private StatsBufferize CreateStatsBufferize(
             Telemetry telemetry,
-            StatsSender statsSender,
+            IStatsSender statsSender,
             int bufferCapacity,
             AdvancedStatsConfig config)
         {
@@ -168,7 +168,7 @@ namespace StatsdClient
             return statsBufferize;
         }
 
-        private StatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
+        private IStatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
         {
             var address = StatsdUDP.GetIpv4Address(statsdServerName);
             var port = GetPort(config);
@@ -179,7 +179,7 @@ namespace StatsdClient
 
         private class StatsSenderData
         {
-            public StatsSender Sender { get; set; }
+            public IStatsSender Sender { get; set; }
 
             public int BufferCapacity { get; set; }
         }

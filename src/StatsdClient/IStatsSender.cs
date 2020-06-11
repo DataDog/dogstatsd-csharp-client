@@ -1,3 +1,5 @@
+using System;
+
 namespace StatsdClient
 {
     internal enum StatsSenderTransportType
@@ -6,7 +8,7 @@ namespace StatsdClient
         UDP,
     }
 
-    internal interface IStatsSender
+    internal interface IStatsSender : IDisposable
     {
         StatsSenderTransportType TransportType { get; }
 

@@ -17,9 +17,9 @@ namespace StatsdClient.Bufferize
           TimeSpan? blockingQueueTimeout,
           TimeSpan maxIdleWaitBeforeSending);
 
-        StatsSender CreateUDPStatsSender(IPEndPoint endPoint);
+        IStatsSender CreateUDPStatsSender(IPEndPoint endPoint);
 
-        StatsSender CreateUnixDomainSocketStatsSender(
+        IStatsSender CreateUnixDomainSocketStatsSender(
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration);
 
