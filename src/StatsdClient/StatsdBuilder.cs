@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using Mono.Unix;
@@ -29,7 +28,7 @@ namespace StatsdClient
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var telemetry = CreateTelemetry(config, globalTags, transportData.Transport);
+            var telemetry = CreateTelemetry(config, globalTags, endPoint, transportData.Transport);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
@@ -117,6 +116,7 @@ namespace StatsdClient
         private Telemetry CreateTelemetry(
             StatsdConfig config,
             string[] globalTags,
+            DogStatsdEndPoint dogStatsdEndPoint,
             ITransport transport)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
@@ -125,8 +125,14 @@ namespace StatsdClient
             {
                 var assembly = typeof(StatsdBuilder).GetTypeInfo().Assembly;
                 var version = assembly.GetName().Version.ToString();
+                var optionalTelemetryEndPoint = config.Advanced.OptionalTelemetryEndPoint;
+                ITransport telemetryTransport = transport;
+                if (optionalTelemetryEndPoint != null && !dogStatsdEndPoint.AreEquals(optionalTelemetryEndPoint))
+                {
+                    telemetryTransport = CreateTransport(optionalTelemetryEndPoint, config);
+                }
 
-                return _factory.CreateTelemetry(version, telemetryFlush.Value, transport, globalTags);
+                return _factory.CreateTelemetry(version, telemetryFlush.Value, telemetryTransport, globalTags);
             }
 
             // Telemetry is not enabled

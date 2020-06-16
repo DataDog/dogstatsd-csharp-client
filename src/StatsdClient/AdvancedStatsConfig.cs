@@ -53,5 +53,10 @@ namespace StatsdClient
         /// When this value is set at null, telemetry is disabled.
         /// </summary>
         public TimeSpan? TelemetryFlushInterval { get; set; } = TimeSpan.FromSeconds(10);
+
+        /// <summary>
+        /// Gets or sets a value defining the telemetry endpoint. INTERNAL USAGE ONLY.
+        /// </summary>
+        public DogStatsdEndPoint OptionalTelemetryEndPoint { get; set; } = null;
     }
 }
