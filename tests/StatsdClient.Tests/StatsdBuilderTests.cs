@@ -22,12 +22,31 @@ namespace StatsdClient.Tests
 
         private Mock<IStatsBufferizeFactory> _mock;
         private StatsdBuilder _statsdBuilder;
+        private UnixEndPoint _unixEndPoint;
+        private IPEndPoint _ipEndPoint;
 
         [SetUp]
         public void Init()
         {
             _mock = new Mock<IStatsBufferizeFactory>(MockBehavior.Loose);
             _statsdBuilder = new StatsdBuilder(_mock.Object);
+            _mock.Setup(m => m.CreateUnixDomainSocketTransport(
+                            It.IsAny<UnixEndPoint>(),
+                            It.IsAny<TimeSpan?>()))
+                            .Returns<UnixEndPoint, TimeSpan?>((e, d) =>
+                            {
+                                _unixEndPoint = e;
+                                return new UnixDomainSocketTransport(e, d);
+                            });
+            _unixEndPoint = null;
+
+            _mock.Setup(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()))
+                        .Returns<IPEndPoint>(e =>
+                        {
+                            _ipEndPoint = e;
+                            return new UDPTransport(e);
+                        });
+            _ipEndPoint = null;
 
             foreach (var key in _envVarsKeyToRestore)
             {
@@ -141,7 +160,7 @@ namespace StatsdClient.Tests
             _mock.Verify(m => m.CreateTelemetry(
                 It.Is<string>(v => !string.IsNullOrEmpty(v)),
                 conf.TelemetryFlushInterval.Value,
-                null,
+                It.IsAny<ITransport>(),
                 It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags))));
         }
 
@@ -183,28 +202,18 @@ namespace StatsdClient.Tests
 
         private string GetUDSStatsdServerName(StatsdConfig config)
         {
-            UnixEndPoint endPoint = null;
-
-            _mock.Setup(m => m.CreateUnixDomainSocketTransport(
-                It.IsAny<UnixEndPoint>(),
-                It.IsAny<TimeSpan?>()))
-                .Callback<UnixEndPoint, TimeSpan?>((e, d) => endPoint = e);
             BuildStatsData(config);
-            Assert.NotNull(endPoint);
+            Assert.NotNull(_unixEndPoint);
 
-            return endPoint.Filename;
+            return _unixEndPoint.Filename;
         }
 
         private IPEndPoint GetUDPIPEndPoint(StatsdConfig config)
         {
-            IPEndPoint endPoint = null;
-
-            _mock.Setup(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()))
-                .Callback<IPEndPoint>(e => endPoint = e);
             BuildStatsData(config);
+            Assert.NotNull(_ipEndPoint);
 
-            Assert.NotNull(endPoint);
-            return endPoint;
+            return _ipEndPoint;
         }
 
         private void BuildStatsData(StatsdConfig config)
