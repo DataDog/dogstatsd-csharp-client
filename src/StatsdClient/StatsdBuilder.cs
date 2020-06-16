@@ -36,7 +36,7 @@ namespace StatsdClient
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            var transportData = CreateTransport(config, statsdServerName);
+            var transportData = CreateTransportData(config, statsdServerName);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
             var telemetry = CreateTelemetry(config, globalTags, transportData.Transport);
@@ -127,7 +127,7 @@ namespace StatsdClient
             return new Telemetry();
         }
 
-        private TransportData CreateTransport(StatsdConfig config, string statsdServerName)
+        private TransportData CreateTransportData(StatsdConfig config, string statsdServerName)
         {
             var transportData = new TransportData();
 
