@@ -93,6 +93,7 @@ namespace StatsdClient.Tests
             Assert.AreEqual(3, GetUDPPort(CreateConfig(statsdPort: 3)));
         }
 
+#if !OS_WINDOWS
         [Test]
         public void UDSStatsdServerName()
         {
@@ -106,6 +107,7 @@ namespace StatsdClient.Tests
 
             Assert.AreEqual("server3", GetUDSStatsdServerName(CreateUDSConfig("server3")));
         }
+#endif
 
         [Test]
         public void CreateStatsBufferizeUDP()
@@ -128,6 +130,7 @@ namespace StatsdClient.Tests
                 conf.DurationBeforeSendingNotFullBuffer));
         }
 
+#if !OS_WINDOWS
         [Test]
         public void CreateStatsBufferizeUDS()
         {
@@ -142,6 +145,7 @@ namespace StatsdClient.Tests
                 null,
                 It.IsAny<TimeSpan>()));
         }
+#endif
 
         [Test]
         public void CreateTelemetry()
