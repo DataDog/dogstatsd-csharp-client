@@ -157,11 +157,24 @@ namespace StatsdClient.Tests
             expectedTags.Add("dd.internal.entity_id:EntityId");
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateTelemetry(
+            _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Once);
+            _mock.Verify(
+                m => m.CreateTelemetry(
                 It.Is<string>(v => !string.IsNullOrEmpty(v)),
                 conf.TelemetryFlushInterval.Value,
                 It.IsAny<ITransport>(),
                 It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags))));
+        }
+
+        [Test]
+        public void TelemetryEndPoint()
+        {
+            var config = new StatsdConfig { };
+            var conf = config.Advanced;
+            conf.OptionalTelemetryEndPoint = new DogStatsdEndPoint { Name = "0.0.0.1", Port = 42 };
+
+            BuildStatsData(config);
+            _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Exactly(2));
         }
 
         private static StatsdConfig CreateUDSConfig(string server = null)
