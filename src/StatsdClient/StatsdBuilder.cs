@@ -25,18 +25,7 @@ namespace StatsdClient
 
         public StatsdData BuildStatsData(StatsdConfig config)
         {
-            var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
-                    ? config.StatsdServerName
-                    : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
-
-            if (string.IsNullOrEmpty(statsdServerName))
-            {
-                throw new ArgumentNullException(
-                    $"{nameof(config)}.{nameof(config.StatsdServerName)} and"
-                    + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
-            }
-
-            var endPoint = new DogStatsdEndPoint { Name = statsdServerName, Port = GetPort(config.StatsdPort) };
+            var endPoint = new DogStatsdEndPoint { Name = GetServerName(config), Port = GetPort(config.StatsdPort) };
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
@@ -56,6 +45,22 @@ namespace StatsdClient
                 telemetry,
                 config.StatsdTruncateIfTooLong);
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
+        }
+
+        private static string GetServerName(StatsdConfig config)
+        {
+            var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
+                            ? config.StatsdServerName
+                            : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+
+            if (string.IsNullOrEmpty(statsdServerName))
+            {
+                throw new ArgumentNullException(
+                    $"{nameof(config)}.{nameof(config.StatsdServerName)} and"
+                    + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
+            }
+
+            return statsdServerName;
         }
 
         private static Serializers CreateSerializers(string prefix, string[] constantTags)
