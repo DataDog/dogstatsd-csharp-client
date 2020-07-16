@@ -23,6 +23,8 @@ namespace StatsdClient.Bufferize
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration);
 
+        ITransport CreateNamedPipeTransport(string pipeName);
+
         Telemetry CreateTelemetry(
             string assemblyVersion,
             TimeSpan flushInterval,
