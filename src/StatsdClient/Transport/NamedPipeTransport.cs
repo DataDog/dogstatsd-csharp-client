@@ -1,3 +1,4 @@
+#if NAMED_PIPE_AVAILABLE
 using System;
 using System.IO;
 using System.IO.Pipes;
@@ -97,3 +98,4 @@ namespace StatsdClient
         }
     }
 }
+#endif
