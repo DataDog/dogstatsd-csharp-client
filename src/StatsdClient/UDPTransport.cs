@@ -27,6 +27,8 @@ namespace StatsdClient
 
         public TransportType TransportType => TransportType.UDP;
 
+        public string TelemetryClientTransport => "udp";
+
         /// <summary>
         /// Send the buffer.
         /// Must be thread safe.

@@ -19,6 +19,7 @@ namespace Tests
             var transport = new Mock<ITransport>();
             transport.Setup(s => s.Send(It.IsAny<byte[]>(), It.IsAny<int>()))
                 .Callback<byte[], int>((bytes, l) => _metrics.Add(Encoding.UTF8.GetString(bytes, 0, l)));
+            transport.SetupGet(s => s.TelemetryClientTransport).Returns("uds");
             _telemetry = new Telemetry(
                 "1.0.0.0",
                 TimeSpan.FromHours(1),

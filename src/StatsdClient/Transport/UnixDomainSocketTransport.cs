@@ -38,6 +38,8 @@ namespace StatsdClient
 
         public TransportType TransportType => TransportType.UDS;
 
+        public string TelemetryClientTransport => "uds";
+
         /// <summary>
         /// Send the buffer.
         /// Must be thread safe.
