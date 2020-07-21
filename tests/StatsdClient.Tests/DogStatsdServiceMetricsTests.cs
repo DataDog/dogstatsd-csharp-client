@@ -77,7 +77,7 @@ namespace Tests
 
         private static void SendAndCheckMetricsAreReceived(AbstractServer server, StatsdConfig config, int metricToSendCount)
         {
-            using (server) 
+            using (server)
             {
                 using (var service = new DogStatsdService())
                 {
