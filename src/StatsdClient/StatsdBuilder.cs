@@ -24,7 +24,7 @@ namespace StatsdClient
 
         public StatsdData BuildStatsData(StatsdConfig config)
         {
-            var endPoint = new DogStatsdEndPoint { Name = GetServerName(config), Port = GetPort(config.StatsdPort) };
+            var endPoint = BuildEndPoint(config);
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
@@ -46,20 +46,27 @@ namespace StatsdClient
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 
-        private static string GetServerName(StatsdConfig config)
+        private static DogStatsdEndPoint BuildEndPoint(StatsdConfig config)
         {
             var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
                             ? config.StatsdServerName
                             : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
 
-            if (string.IsNullOrEmpty(statsdServerName))
+            var pipeName = config.PipeName;
+            if (string.IsNullOrEmpty(statsdServerName) && string.IsNullOrEmpty(pipeName))
             {
+                // Ignore pipe name in the error message as its usage is internal only.
                 throw new ArgumentNullException(
                     $"{nameof(config)}.{nameof(config.StatsdServerName)} and"
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            return statsdServerName;
+            return new DogStatsdEndPoint
+            {
+                ServerName = statsdServerName,
+                PipeName = pipeName,
+                Port = GetPort(config.StatsdPort),
+            };
         }
 
         private static Serializers CreateSerializers(string prefix, string[] constantTags)
@@ -141,17 +148,28 @@ namespace StatsdClient
 
         private ITransport CreateTransport(DogStatsdEndPoint endPoint, StatsdConfig config)
         {
-            var serverName = endPoint.Name;
-            if (serverName.StartsWith(UnixDomainSocketPrefix))
+            var serverName = endPoint.ServerName;
+            if (!string.IsNullOrEmpty(serverName))
             {
-                serverName = serverName.Substring(UnixDomainSocketPrefix.Length);
-                var unixEndPoint = new UnixEndPoint(serverName);
-                return _factory.CreateUnixDomainSocketTransport(
-                    unixEndPoint,
-                    config.Advanced.UDSBufferFullBlockDuration);
+                if (serverName.StartsWith(UnixDomainSocketPrefix))
+                {
+                    serverName = serverName.Substring(UnixDomainSocketPrefix.Length);
+                    var unixEndPoint = new UnixEndPoint(serverName);
+                    return _factory.CreateUnixDomainSocketTransport(
+                        unixEndPoint,
+                        config.Advanced.UDSBufferFullBlockDuration);
+                }
+
+                return CreateUDPTransport(endPoint);
             }
 
-            return CreateUDPTransport(endPoint);
+            var pipeName = endPoint.PipeName;
+            if (string.IsNullOrEmpty(pipeName))
+            {
+                throw new ArgumentException($"Error: empty {nameof(DogStatsdEndPoint)}");
+            }
+
+            return _factory.CreateNamedPipeTransport(pipeName);
         }
 
         private TransportData CreateTransportData(DogStatsdEndPoint endPoint, StatsdConfig config)
@@ -163,6 +181,8 @@ namespace StatsdClient
             {
                 case TransportType.UDP: transportData.BufferCapacity = config.StatsdMaxUDPPacketSize; break;
                 case TransportType.UDS: transportData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize; break;
+                // use StatsdMaxUDPPacketSize for named pipe
+                case TransportType.NamedPipe: transportData.BufferCapacity = config.StatsdMaxUDPPacketSize; break;
                 default: throw new NotSupportedException();
             }
 
@@ -190,7 +210,7 @@ namespace StatsdClient
 
         private ITransport CreateUDPTransport(DogStatsdEndPoint endPoint)
         {
-            var address = StatsdUDP.GetIpv4Address(endPoint.Name);
+            var address = StatsdUDP.GetIpv4Address(endPoint.ServerName);
             var port = endPoint.Port;
 
             var ipEndPoint = new IPEndPoint(address, port);

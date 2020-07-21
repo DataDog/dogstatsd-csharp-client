@@ -175,7 +175,7 @@ namespace StatsdClient.Tests
         {
             var config = new StatsdConfig { };
             var conf = config.Advanced;
-            conf.OptionalTelemetryEndPoint = new DogStatsdEndPoint { Name = "0.0.0.1", Port = 42 };
+            conf.OptionalTelemetryEndPoint = new DogStatsdEndPoint { ServerName = "0.0.0.1", Port = 42 };
 
             BuildStatsData(config);
             _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Exactly(2));
