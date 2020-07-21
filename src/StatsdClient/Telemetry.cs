@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using StatsdClient.Bufferize;
+using StatsdClient.Transport;
 
 namespace StatsdClient
 {

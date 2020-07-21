@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Reflection;
 using Mono.Unix;
 using StatsdClient.Bufferize;
+using StatsdClient.Transport;
 
 namespace StatsdClient
 {
@@ -213,7 +213,7 @@ namespace StatsdClient
             var address = StatsdUDP.GetIpv4Address(endPoint.ServerName);
             var port = endPoint.Port;
 
-            var ipEndPoint = new IPEndPoint(address, port);
+            var ipEndPoint = new System.Net.IPEndPoint(address, port);
             return _factory.CreateUDPTransport(ipEndPoint);
         }
 

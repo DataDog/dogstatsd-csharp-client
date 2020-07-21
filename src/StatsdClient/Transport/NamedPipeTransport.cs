@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 
-namespace StatsdClient
+namespace StatsdClient.Transport
 {
     internal class NamedPipeTransport : ITransport
     {

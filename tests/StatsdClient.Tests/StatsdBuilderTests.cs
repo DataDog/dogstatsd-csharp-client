@@ -6,6 +6,7 @@ using Mono.Unix;
 using Moq;
 using NUnit.Framework;
 using StatsdClient.Bufferize;
+using StatsdClient.Transport;
 
 namespace StatsdClient.Tests
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace StatsdClient
+namespace StatsdClient.Transport
 {
     internal enum TransportType
     {

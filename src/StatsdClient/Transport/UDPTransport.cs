@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace StatsdClient
+namespace StatsdClient.Transport
 {
     internal class UDPTransport : ITransport
     {

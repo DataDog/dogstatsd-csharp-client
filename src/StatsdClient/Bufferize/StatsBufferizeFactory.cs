@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using Mono.Unix;
+using StatsdClient.Transport;
 
 namespace StatsdClient.Bufferize
 {
