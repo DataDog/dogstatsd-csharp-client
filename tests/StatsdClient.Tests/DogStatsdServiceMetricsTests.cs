@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Utils;
@@ -52,6 +53,7 @@ namespace Tests
 #endif
 
         [Test]
+        [Conditional("NAMED_PIPE_AVAILABLE")]
         public void NamedPipe()
         {
 #if !OS_WINDOWS
