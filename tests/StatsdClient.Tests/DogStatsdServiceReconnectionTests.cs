@@ -36,7 +36,7 @@ namespace Tests
                 CheckReconnection(c => new SocketServer(c), config);
             }
         }
-#endif
+#else
 
         [Test]
         public void NamedPipeReconnection()
@@ -48,6 +48,7 @@ namespace Tests
             config.Advanced.TelemetryFlushInterval = null;
             CheckReconnection(c => new NamedPipeServer(c.PipeName, 1000, TimeSpan.FromSeconds(1)), config);
         }
+#endif
 
         private static void CheckReconnection(
             Func<StatsdConfig, AbstractServer> serverFactory,

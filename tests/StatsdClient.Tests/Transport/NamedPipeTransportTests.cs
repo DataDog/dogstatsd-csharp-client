@@ -1,3 +1,4 @@
+#if OS_WINDOWS
 using System;
 using System.IO.Pipes;
 using System.Threading;
@@ -125,3 +126,4 @@ namespace Tests
         }
     }
 }
+#endif

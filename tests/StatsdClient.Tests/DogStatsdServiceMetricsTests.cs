@@ -53,7 +53,6 @@ namespace Tests
 #endif
 
         [Test]
-        [Conditional("NAMED_PIPE_AVAILABLE")]
         public void NamedPipe()
         {
 #if !OS_WINDOWS
@@ -70,7 +69,7 @@ namespace Tests
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
 
             SendAndCheckMetricsAreReceived(
-                new NamedPipeServer(config.PipeName, 1000, TimeSpan.FromSeconds(1)),
+                new NamedPipeServer(config.PipeName, 10000, TimeSpan.FromSeconds(1)),
                 config,
                 metricToSendCount);
         }

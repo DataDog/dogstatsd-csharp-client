@@ -57,6 +57,10 @@ namespace StatsdClient.Transport
                 {
                     Task.Delay(NoBufferSpaceAvailableWait).Wait();
                 }
+                catch (SocketException)
+                {
+                    return false;
+                }
             }
 
             return false;

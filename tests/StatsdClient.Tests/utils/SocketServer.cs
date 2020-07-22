@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Mono.Unix;
@@ -19,6 +20,12 @@ namespace Tests.Utils
             {
                 serverName = serverName.Substring(StatsdBuilder.UnixDomainSocketPrefix.Length);
                 _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
+                
+                if (!string.IsNullOrEmpty(serverName) && serverName == Path.GetFullPath(serverName))
+                {
+                    File.Delete(serverName);
+                }
+
                 endPoint = new UnixEndPoint(serverName);
                 bufferSize = config.StatsdMaxUnixDomainSocketPacketSize;
             }
