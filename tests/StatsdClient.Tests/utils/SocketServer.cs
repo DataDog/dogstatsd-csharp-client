@@ -20,7 +20,7 @@ namespace Tests.Utils
             {
                 serverName = serverName.Substring(StatsdBuilder.UnixDomainSocketPrefix.Length);
                 _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
-                
+
                 if (!string.IsNullOrEmpty(serverName) && serverName == Path.GetFullPath(serverName))
                 {
                     File.Delete(serverName);
