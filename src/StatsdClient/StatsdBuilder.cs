@@ -35,7 +35,7 @@ namespace StatsdClient
                 transportData.BufferCapacity,
                 config.Advanced);
 
-            var serializers = CreateSerializers(config.Prefix, globalTags);
+            var serializers = CreateSerializers(config.Prefix, globalTags, transportData.BufferCapacity);
             var metricsSender = new MetricsSender(
                 statsBufferize,
                 new RandomGenerator(),
@@ -69,9 +69,14 @@ namespace StatsdClient
             };
         }
 
-        private static Serializers CreateSerializers(string prefix, string[] constantTags)
+        private static Serializers CreateSerializers(
+            string prefix,
+            string[] constantTags,
+            int bufferCapacity)
         {
-            var serializerHelper = new SerializerHelper(constantTags);
+            // 100 is an arbitrary value. poolMaxAllocation must be a little greater than bufferCapacity.
+            var poolMaxAllocation = bufferCapacity + 100;
+            var serializerHelper = new SerializerHelper(constantTags, bufferCapacity);
 
             return new Serializers
             {

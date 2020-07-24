@@ -152,7 +152,7 @@ namespace StatsdClient.Tests
 
         private static EventSerializer CreateSerializer()
         {
-            var serializerHelper = new SerializerHelper(null);
+            var serializerHelper = new SerializerHelper(null, 10);
             return new EventSerializer(serializerHelper);
         }
     }

@@ -9,10 +9,10 @@ namespace StatsdClient
         private readonly Pool<SerializedMetric> _pool;
         private readonly string _constantTags;
 
-        public SerializerHelper(string[] constantTags)
+        public SerializerHelper(string[] constantTags, int poolMaxAllocation)
         {
             _constantTags = constantTags != null ? string.Join(",", constantTags) : string.Empty;
-            _pool = new Pool<SerializedMetric>(pool => new SerializedMetric(pool), 100000);
+            _pool = new Pool<SerializedMetric>(pool => new SerializedMetric(pool), poolMaxAllocation);
         }
 
         public static string EscapeContent(string content)
