@@ -16,7 +16,7 @@ namespace Tests
         {
             var handler = new BufferBuilderHandlerMock();
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
-            using (var statsBufferize = new StatsBufferize(new Telemetry(), bufferBuilder, 10, null, TimeSpan.Zero))
+            using (var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, TimeSpan.Zero))
             {
                 var serializedMetric = new SerializedMetric(new ConcurrentQueue<SerializedMetric>());
                 serializedMetric.Builder.Append("1");

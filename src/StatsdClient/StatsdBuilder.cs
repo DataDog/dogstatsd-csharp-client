@@ -199,7 +199,6 @@ namespace StatsdClient
             var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
             var statsBufferize = _factory.CreateStatsBufferize(
-                telemetry,
                 bufferBuilder,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,

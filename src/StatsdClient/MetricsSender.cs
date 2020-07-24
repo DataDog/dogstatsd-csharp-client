@@ -32,16 +32,14 @@ namespace StatsdClient
         {
             truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
             var serializedMetric = _serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
-            _statsBufferize.Send(serializedMetric);
-            _optionalTelemetry?.OnEventSent();
+            Send(serializedMetric, () => _optionalTelemetry?.OnEventSent());
         }
 
         public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
             var serializedMetric = _serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
-            _statsBufferize.Send(serializedMetric);
-            _optionalTelemetry?.OnServiceCheckSent();
+            Send(serializedMetric, () => _optionalTelemetry?.OnServiceCheckSent());
         }
 
         public void SendMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
@@ -49,8 +47,7 @@ namespace StatsdClient
             if (_randomGenerator.ShouldSend(sampleRate))
             {
                 var serializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
-                _statsBufferize.Send(serializedMetric);
-                _optionalTelemetry?.OnMetricSent();
+                Send(serializedMetric, () => _optionalTelemetry?.OnMetricSent());
             }
         }
 
@@ -67,6 +64,18 @@ namespace StatsdClient
             {
                 stopwatch.Stop();
                 SendMetric(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
+            }
+        }
+
+        private void Send(SerializedMetric serializedMetric, Action onSuccess)
+        {
+            if (_statsBufferize.Send(serializedMetric))
+            {
+                onSuccess();
+            }
+            else
+            {
+                _optionalTelemetry?.OnPacketsDroppedQueue();
             }
         }
     }

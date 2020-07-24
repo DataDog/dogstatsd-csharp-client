@@ -29,7 +29,7 @@ namespace StatsdClient.Utils
                     result = default(T);
                     Interlocked.Decrement(ref _allocationCount);
                     return false;
-                }                
+                }
                 result = _factory(this);
             }
 
