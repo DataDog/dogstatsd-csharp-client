@@ -23,7 +23,12 @@ namespace StatsdClient
             string serviceCheckMessage,
             bool truncateIfTooLong = false)
         {
-            var serializedMetric = _serializerHelper.GetSerializedMetric();
+            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
+            if (serializedMetric == null)
+            {
+                return null;
+            }
+
             var builder = serializedMetric.Builder;
 
             string processedName = EscapeName(name);

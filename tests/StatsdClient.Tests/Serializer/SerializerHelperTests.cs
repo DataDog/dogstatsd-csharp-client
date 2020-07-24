@@ -53,16 +53,16 @@ namespace Tests
         }
 
         [Test]
-        public void GetSerializedMetric()
+        public void GetOptionalSerializedMetric()
         {
             var serializerHelper = new SerializerHelper(null);
 
-            var metric = serializerHelper.GetSerializedMetric();
+            var metric = serializerHelper.GetOptionalSerializedMetric();
             metric.Builder.Append("Test");
-            Assert.AreNotEqual(metric, serializerHelper.GetSerializedMetric());
+            Assert.AreNotEqual(metric, serializerHelper.GetOptionalSerializedMetric());
             metric.Dispose();
 
-            var recycledMetric = serializerHelper.GetSerializedMetric();
+            var recycledMetric = serializerHelper.GetOptionalSerializedMetric();
             Assert.AreEqual(metric, recycledMetric);
             Assert.AreEqual(0, recycledMetric.Builder.Length);
         }

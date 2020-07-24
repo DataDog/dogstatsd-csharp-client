@@ -1,16 +1,13 @@
-using System;
-using System.Collections.Concurrent;
 using System.Text;
+using StatsdClient.Utils;
 
 namespace StatsdClient
 {
-    internal class SerializedMetric : IDisposable
+    internal class SerializedMetric : AbstractPoolObject
     {
-        private readonly ConcurrentQueue<SerializedMetric> _pool;
-
-        public SerializedMetric(ConcurrentQueue<SerializedMetric> pool)
+        public SerializedMetric(Pool<SerializedMetric> pool)
+        : base(pool)
         {
-            _pool = pool;
         }
 
         public StringBuilder Builder { get; } = new StringBuilder();
@@ -32,10 +29,9 @@ namespace StatsdClient
             return Builder.ToString();
         }
 
-        public void Dispose()
+        public override void Reset()
         {
             Builder.Clear();
-            _pool.Enqueue(this);
         }
     }
 }

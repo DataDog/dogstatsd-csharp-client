@@ -32,7 +32,12 @@ namespace StatsdClient
             double sampleRate = 1.0,
             string[] tags = null)
         {
-            var serializedMetric = _serializerHelper.GetSerializedMetric();
+            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
+            if (serializedMetric == null)
+            {
+                return null;
+            }
+
             var builder = serializedMetric.Builder;
             var unit = _commandToUnit[metricType];
 

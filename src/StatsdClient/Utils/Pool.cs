@@ -30,6 +30,7 @@ namespace StatsdClient.Utils
                     Interlocked.Decrement(ref _allocationCount);
                     return false;
                 }
+
                 result = _factory(this);
             }
 

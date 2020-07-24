@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Bufferize;
+using StatsdClient.Utils;
 
 namespace Tests
 {
@@ -18,7 +19,7 @@ namespace Tests
             var bufferBuilder = new BufferBuilder(handler, 3, "\n");
             using (var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, TimeSpan.Zero))
             {
-                var serializedMetric = new SerializedMetric(new ConcurrentQueue<SerializedMetric>());
+                var serializedMetric = new SerializedMetric(new Pool<SerializedMetric>(p => new SerializedMetric(p), 10));
                 serializedMetric.Builder.Append("1");
 
                 statsBufferize.Send(serializedMetric);
