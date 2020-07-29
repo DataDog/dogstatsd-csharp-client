@@ -10,13 +10,13 @@ namespace StatsdClient.Tests
         [Test]
         public void SendIncreaseCounterByX()
         {
-            AssertSerialize("counter:5|c", MetricType.Counting, "counter", 5);
+            AssertSerialize("counter:5|c", MetricType.Count, "counter", 5);
         }
 
         [Test]
         public void SendDecreaseCounterByX()
         {
-            AssertSerialize("counter:-5|c", MetricType.Counting, "counter", -5);
+            AssertSerialize("counter:-5|c", MetricType.Count, "counter", -5);
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace StatsdClient.Tests
         {
             AssertSerialize(
                 "counter:5|c|#tag1:true,tag2",
-                MetricType.Counting,
+                MetricType.Count,
                 "counter",
                 5,
                 tags: new[] { "tag1:true", "tag2" });
@@ -33,7 +33,7 @@ namespace StatsdClient.Tests
         [Test]
         public void SendIncreaseCounterByXAndSampleRate()
         {
-            AssertSerialize("counter:5|c|@0.1", MetricType.Counting, "counter", 5, sampleRate: 0.1);
+            AssertSerialize("counter:5|c|@0.1", MetricType.Count, "counter", 5, sampleRate: 0.1);
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace StatsdClient.Tests
         {
             AssertSerialize(
                 "counter:5|c|@0.1|#tag1:true,tag2",
-                MetricType.Counting,
+                MetricType.Count,
                 "counter",
                 5,
                 sampleRate: 0.1,
@@ -146,7 +146,7 @@ namespace StatsdClient.Tests
         [Test]
         public void SetPrefixOnStatsNameWhenCallingSend()
         {
-            AssertSerialize("a.prefix.counter:5|c", MetricType.Counting, "counter", 5, prefix: "a.prefix");
+            AssertSerialize("a.prefix.counter:5|c", MetricType.Count, "counter", 5, prefix: "a.prefix");
         }
 
         // DOGSTATSD-SPECIFIC

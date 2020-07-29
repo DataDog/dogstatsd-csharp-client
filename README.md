@@ -19,7 +19,7 @@ DogStatsD-CSharp-Client supports the following platforms:
 
 ## Configuration
 
-At start of your app, configure the `DogStatsd` class like this:
+At start of your application, configure an instance of `DogStatsdService` class like this:
 
 ```csharp
 // The code is located under the StatsdClient namespace
@@ -33,21 +33,87 @@ var dogstatsdConfig = new StatsdConfig
     StatsdPort = 8125,
 };
 
-StatsdClient.DogStatsd.Configure(dogstatsdConfig);
+using (var service = new DogStatsdService())
+{
+    service.Configure(dogstatsdConfig);
+}
 ```
 
 See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#client-instantiation-parameters).
 
 Supported environment variables:
 
-* The client can use the `DD_AGENT_HOST` and (optionally) the `DD_DOGSTATSD_PORT` environment variables to build the target address if the `addr` parameter is empty.
+* The client can use the `DD_AGENT_HOST` and (optionally) the `DD_DOGSTATSD_PORT` environment variables to build the target address if the `StatsdServerName` and/or `StatsdPort` parameters are empty.
 * If the `DD_ENTITY_ID` enviroment variable is found, its value will be injected as a global `dd.internal.entity_id` tag. This tag will be used by the Datadog Agent to insert container tags to the metrics.
 
 Where `StatsdServerName` is the hostname or address of the StatsD server, `StatsdPort` is the optional DogStatsD port number, and `Prefix` is an optional string that is prepended to all metrics.
 
-## Usage via the static DogStatsd class.
+## Usage via the DogStatsdService class or the static DogStatsd class.
 
 For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#setup).
+
+Here is an example to submit different kinds of metrics with `DogStatsdService`.
+```csharp
+// The code is located under the StatsdClient namespace
+using StatsdClient;
+
+// ...
+
+var dogstatsdConfig = new StatsdConfig
+{
+    StatsdServerName = "127.0.0.1",
+    StatsdPort = 8125,
+};
+
+using (var service = new DogStatsdService())
+{
+    service.Configure(dogstatsdConfig);
+    service.Increment("example_metric.increment", tags: new[] { "environment:dev" });
+    service.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
+    service.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
+
+    var random = new Random(0);
+
+    for (int i = 0; i < 10; i++)
+    {
+        service.Gauge("example_metric.gauge", i, tags: new[] { "environment:dev" });
+        service.Set("example_metric.set", i, tags: new[] { "environment:dev" });
+        service.Histogram("example_metric.histogram", random.Next(20), tags: new[] { "environment:dev" });
+        System.Threading.Thread.Sleep(random.Next(10000));
+    }
+}  
+```
+
+Here is another example to submit different kinds of metrics with `DogStatsd`.
+```csharp
+// The code is located under the StatsdClient namespace
+using StatsdClient;
+
+// ...
+
+var dogstatsdConfig = new StatsdConfig
+{
+    StatsdServerName = "127.0.0.1",
+    StatsdPort = 8125,
+};
+
+DogStatsd.Configure(dogstatsdConfig);
+DogStatsd.Increment("example_metric.increment", tags: new[] { "environment:dev" });
+DogStatsd.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
+DogStatsd.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
+
+var random = new Random(0);
+
+for (int i = 0; i < 10; i++)
+{
+    DogStatsd.Gauge("example_metric.gauge", i, tags: new[] { "environment:dev" });
+    DogStatsd.Set("example_metric.set", i, tags: new[] { "environment:dev" });
+    DogStatsd.Histogram("example_metric.histogram", random.Next(20), tags: new[] { "environment:dev" });
+    System.Threading.Thread.Sleep(random.Next(10000));
+}
+  
+DogStatsd.Dispose(); // Flush all metrics not yet sent
+```
 
 ### Metrics
 
@@ -70,77 +136,9 @@ After the client is created, you can start sending events to your Datadog Event 
 After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?tab=net) to see how to submit a Service Check to Datadog.
 
 
-## Usage via the Statsd class:
+## Usage via the Statsd class
 
-In most cases, the static DogStatsd class is probably better to use. However, the Statsd is useful when you want to queue up a number of metrics/events to be sent in one UDP message (via the `Add` method).
-
-``` C#
-// The code is located under the StatsdClient namespace
-using StatsdClient;
-
-// ...
-
-// NB: StatsdUDP is IDisposable and if not disposed, will leak resources
-StatsdUDP udp = new StatsdUDP(HOSTNAME, PORT);
-using (udp)
-{
-  Statsd s = new Statsd(udp);
-
-  // Incrementing a counter by 1
-  s.Send<Statsd.Counting,int>("stat-name", 1);
-
-  // Recording a gauge
-  s.Send<Statsd.Gauge,double>("stat-name", 5.5);
-
-  // Sampling a histogram
-  s.Send<Statsd.Histogram,int>("stat-name", 1);
-
-  // Measure a distribution of values
-  s.Send<Statsd.Distribution,int>("stat-name", 1);
-
-  // Send elements to a set
-  s.Send<Statsd.Set,int>("stat-name", 1);
-  s.Send<Statsd.Set,string>("stat-name", "stat-value");
-
-  // Send a timer
-  s.Send<Statsd.Timing,double>("stat-name", 3.1337);
-
-  // Time a method
-  s.Send(() => MethodToTime(), "stat-name");
-
-  // See note below on how exceptions in timed methods are handled
-
-  // All types have optional sample rates and tags:
-  s.Send<Statsd.Counting,int>("stat-name", 1, sampleRate: 1/10, tags: new[] {"tag1:true", "tag2"});
-
-  // Send an event
-  s.Send("title", "content");
-
-  // You can add combinations of messages which will be sent in one go:
-  s.Add<Statsd.Counting,int>("stat-name", 1);
-  s.Add<Statsd.Timing,int>("stat-name", 5, sampleRate: 1/10);
-  s.Add("event title", "content", priority: "low");
-  s.Send(); // message will contain counter and will contain timer 10% of the time
-  // All previous commands will be flushed after any Send
-  // Any Adds will be ignored if using a Send directly
-  s.Add<Statsd.Counting,int>("stat-name", 1);
-  s.Send<Statsd.Timing,double>("stat-name", 4.4); // message will only contain Timer
-  s.Send(); // the counter will not be sent by the command
-}
-
-// By default, Statsd will split messages containing multiple metrics/events into
-// UDP messages that are 512 bytes long. To change this limit, create a new
-// instance of StatsUDP
-int maxUDPPacketSize = 4096;
-StatsUDP udpNew = new StatsdUDP(HOSTNAME, PORT, maxUDPPacketSize);
-using (udP)
-{
-  // ...
-}
-// To disable the splitting of UDP messages, set this limit to 0
-```
-
-A note about timing: Statsd will not attempt to handle any exceptions that occur in a timed method. If an unhandled exception is thrown while timing, a timer metric containing the time elapsed before the exception occurred will be sent or added to the send queue (depending on whether Send or Add is being called).
+`Statsd` is marked as obsolete as both `DogStatsdService` and `DogStatsd` methods do not block anymore and batch several metrics automatically in one UDP or UDS message.
 
 ## Unix domain socket support
 
