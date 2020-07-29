@@ -11,6 +11,7 @@ namespace StatsdClient
         private static readonly TimeSpan NoBufferSpaceAvailableWait = TimeSpan.FromMilliseconds(10);
         private readonly Socket _socket;
         private readonly int _noBufferSpaceAvailableRetryCount;
+        private readonly EndPoint _endPoint;
 
         private StatsSender(
             StatsSenderTransportType transport,
@@ -20,6 +21,7 @@ namespace StatsdClient
             TimeSpan? bufferFullBlockDuration)
         {
             TransportType = transport;
+            _endPoint = endPoint;
             if (bufferFullBlockDuration.HasValue)
             {
                 _noBufferSpaceAvailableRetryCount = (int)(bufferFullBlockDuration.Value.TotalMilliseconds
@@ -52,8 +54,6 @@ namespace StatsdClient
             {
                 // It is not supported on Windows for Dgram with UDP.
             }
-
-            _socket.Connect(endPoint);
         }
 
         public StatsSenderTransportType TransportType { get; }
@@ -90,7 +90,7 @@ namespace StatsdClient
             {
                 try
                 {
-                    _socket.Send(buffer, 0, length, SocketFlags.None);
+                    _socket.SendTo(buffer, 0, length, SocketFlags.None, _endPoint);
                     return true;
                 }
                 catch (SocketException e) when (e.SocketErrorCode == SocketError.NoBufferSpaceAvailable)
