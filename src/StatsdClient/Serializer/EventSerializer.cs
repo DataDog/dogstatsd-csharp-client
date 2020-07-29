@@ -6,70 +6,68 @@ namespace StatsdClient
     internal class EventSerializer
     {
         private const int MaxSize = 8 * 1024;
-        private readonly string[] _constantTags;
+        private readonly SerializerHelper _serializerHelper;
 
-        public EventSerializer(string[] constantTags)
+        public EventSerializer(SerializerHelper serializerHelper)
         {
-            _constantTags = constantTags;
+            _serializerHelper = serializerHelper;
         }
 
-        public string GetCommand(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
+        public SerializedMetric Serialize(
+            string title,
+            string text,
+            string alertType,
+            string aggregationKey,
+            string sourceType,
+            int? dateHappened,
+            string priority,
+            string hostname,
+            string[] tags,
+            bool truncateIfTooLong = false)
         {
-            return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
-        }
+            string processedTitle = SerializerHelper.EscapeContent(title);
+            string processedText = SerializerHelper.EscapeContent(text);
 
-        public string Serialize(string title, string text, string alertType, string aggregationKey, string sourceType, int? dateHappened, string priority, string hostname, string[] tags, bool truncateIfTooLong = false)
-        {
-            string processedTitle = MetricSerializer.EscapeContent(title);
-            string processedText = MetricSerializer.EscapeContent(text);
-            string result = string.Format(CultureInfo.InvariantCulture, "_e{{{0},{1}}}:{2}|{3}", processedTitle.Length.ToString(), processedText.Length.ToString(), processedTitle, processedText);
+            var serializedMetric = _serializerHelper.GetSerializedMetric();
+            var builder = serializedMetric.Builder;
+
+            builder.Append("_e{");
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", processedTitle.Length);
+            builder.Append(',');
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", processedText.Length);
+            builder.Append("}:");
+            builder.Append(processedTitle);
+            builder.Append('|');
+            builder.Append(processedText);
+
             if (dateHappened != null)
             {
-                result += string.Format(CultureInfo.InvariantCulture, "|d:{0}", dateHappened);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "|d:{0}", dateHappened.Value);
             }
 
-            if (hostname != null)
-            {
-                result += string.Format(CultureInfo.InvariantCulture, "|h:{0}", hostname);
-            }
+            SerializerHelper.AppendIfNotNull(builder, "|h:", hostname);
+            SerializerHelper.AppendIfNotNull(builder, "|k:", aggregationKey);
+            SerializerHelper.AppendIfNotNull(builder, "|p:", priority);
+            SerializerHelper.AppendIfNotNull(builder, "|s:", sourceType);
+            SerializerHelper.AppendIfNotNull(builder, "|t:", alertType);
 
-            if (aggregationKey != null)
-            {
-                result += string.Format(CultureInfo.InvariantCulture, "|k:{0}", aggregationKey);
-            }
+            _serializerHelper.AppendTags(builder, tags);
 
-            if (priority != null)
-            {
-                result += string.Format(CultureInfo.InvariantCulture, "|p:{0}", priority);
-            }
-
-            if (sourceType != null)
-            {
-                result += string.Format(CultureInfo.InvariantCulture, "|s:{0}", sourceType);
-            }
-
-            if (alertType != null)
-            {
-                result += string.Format(CultureInfo.InvariantCulture, "|t:{0}", alertType);
-            }
-
-            result += MetricSerializer.ConcatTags(_constantTags, tags);
-
-            if (result.Length > MaxSize)
+            if (builder.Length > MaxSize)
             {
                 if (truncateIfTooLong)
                 {
-                    var overage = result.Length - MaxSize;
+                    var overage = builder.Length - MaxSize;
                     if (title.Length > text.Length)
                     {
-                        title = MetricSerializer.TruncateOverage(title, overage);
+                        title = SerializerHelper.TruncateOverage(title, overage);
                     }
                     else
                     {
-                        text = MetricSerializer.TruncateOverage(text, overage);
+                        text = SerializerHelper.TruncateOverage(text, overage);
                     }
 
-                    return GetCommand(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, true);
+                    return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, true);
                 }
                 else
                 {
@@ -77,7 +75,7 @@ namespace StatsdClient
                 }
             }
 
-            return result;
+            return serializedMetric;
         }
     }
 }

@@ -136,7 +136,7 @@ namespace StatsdClient.Tests
             bool truncateIfTooLong = false)
         {
             var serializer = CreateSerializer();
-            var rawMetric = serializer.Serialize(
+            var serializedMetric = serializer.Serialize(
                 title,
                 text,
                 alertType,
@@ -147,12 +147,13 @@ namespace StatsdClient.Tests
                 hostname,
                 tags,
                 truncateIfTooLong);
-            Assert.AreEqual(expectValue, rawMetric);
+            Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
         private static EventSerializer CreateSerializer()
         {
-            return new EventSerializer(null);
+            var serializerHelper = new SerializerHelper(null);
+            return new EventSerializer(serializerHelper);
         }
     }
 }

@@ -12,6 +12,7 @@ namespace StatsdClient.Bufferize
         private readonly IBufferBuilderHandler _handler;
         private readonly byte[] _buffer;
         private readonly byte[] _separator;
+        private readonly char[] _charsBuffers;
 
         public BufferBuilder(
             IBufferBuilderHandler handler,
@@ -19,6 +20,7 @@ namespace StatsdClient.Bufferize
             string separator)
         {
             _buffer = new byte[bufferCapacity];
+            _charsBuffers = new char[bufferCapacity];
             _handler = handler;
             _separator = _encoding.GetBytes(separator);
             if (_separator.Length >= _buffer.Length)
@@ -36,9 +38,16 @@ namespace StatsdClient.Bufferize
             return _encoding.GetBytes(message);
         }
 
-        public bool Add(string value)
+        public bool Add(SerializedMetric serializedMetric)
         {
-            var byteCount = _encoding.GetByteCount(value);
+            var length = serializedMetric.CopyToChars(_charsBuffers);
+
+            if (length < 0)
+            {
+                return false;
+            }
+
+            var byteCount = _encoding.GetByteCount(_charsBuffers, 0, length);
 
             if (byteCount > Capacity)
             {
@@ -62,7 +71,7 @@ namespace StatsdClient.Bufferize
             }
 
             // GetBytes requires the buffer to be big enough otherwise it throws, that is why we use GetByteCount.
-            Length += _encoding.GetBytes(value, 0, value.Length, _buffer, Length);
+            Length += _encoding.GetBytes(_charsBuffers, 0, length, _buffer, Length);
             return true;
         }
 

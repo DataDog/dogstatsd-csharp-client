@@ -298,14 +298,15 @@ namespace StatsdClient.Tests
             string[] tags = null,
             string prefix = null)
         {
-            var serializer = new MetricSerializer(prefix, null);
-            var rawMetric = serializer.Serialize(
+            var serializerHelper = new SerializerHelper(null);
+            var serializer = new MetricSerializer(serializerHelper, prefix);
+            var serializedMetric = serializer.Serialize(
                 metricType,
                 name,
                 value,
                 sampleRate,
                 tags);
-            Assert.AreEqual(expectValue, rawMetric);
+            Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
     }
 }
