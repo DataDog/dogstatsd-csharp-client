@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using Mono.Unix;
@@ -25,21 +24,11 @@ namespace StatsdClient
 
         public StatsdData BuildStatsData(StatsdConfig config)
         {
-            var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
-                    ? config.StatsdServerName
-                    : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
-
-            if (string.IsNullOrEmpty(statsdServerName))
-            {
-                throw new ArgumentNullException(
-                    $"{nameof(config)}.{nameof(config.StatsdServerName)} and"
-                    + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
-            }
-
-            var transportData = CreateTransport(config, statsdServerName);
+            var endPoint = new DogStatsdEndPoint { Name = GetServerName(config), Port = GetPort(config.StatsdPort) };
+            var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var telemetry = CreateTelemetry(config, globalTags, transportData.Transport);
+            var telemetry = CreateTelemetry(config, globalTags, endPoint, transportData.Transport);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
@@ -57,6 +46,22 @@ namespace StatsdClient
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 
+        private static string GetServerName(StatsdConfig config)
+        {
+            var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
+                            ? config.StatsdServerName
+                            : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+
+            if (string.IsNullOrEmpty(statsdServerName))
+            {
+                throw new ArgumentNullException(
+                    $"{nameof(config)}.{nameof(config.StatsdServerName)} and"
+                    + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
+            }
+
+            return statsdServerName;
+        }
+
         private static Serializers CreateSerializers(string prefix, string[] constantTags)
         {
             var serializerHelper = new SerializerHelper(constantTags);
@@ -69,11 +74,11 @@ namespace StatsdClient
             };
         }
 
-        private static int GetPort(StatsdConfig config)
+        private static int GetPort(int statsdPort)
         {
-            if (config.StatsdPort != 0)
+            if (statsdPort != 0)
             {
-                return config.StatsdPort;
+                return statsdPort;
             }
 
             var portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
@@ -111,6 +116,7 @@ namespace StatsdClient
         private Telemetry CreateTelemetry(
             StatsdConfig config,
             string[] globalTags,
+            DogStatsdEndPoint dogStatsdEndPoint,
             ITransport transport)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
@@ -119,31 +125,45 @@ namespace StatsdClient
             {
                 var assembly = typeof(StatsdBuilder).GetTypeInfo().Assembly;
                 var version = assembly.GetName().Version.ToString();
+                var optionalTelemetryEndPoint = config.Advanced.OptionalTelemetryEndPoint;
+                ITransport telemetryTransport = transport;
+                if (optionalTelemetryEndPoint != null && !dogStatsdEndPoint.AreEquals(optionalTelemetryEndPoint))
+                {
+                    telemetryTransport = CreateTransport(optionalTelemetryEndPoint, config);
+                }
 
-                return _factory.CreateTelemetry(version, telemetryFlush.Value, transport, globalTags);
+                return _factory.CreateTelemetry(version, telemetryFlush.Value, telemetryTransport, globalTags);
             }
 
             // Telemetry is not enabled
             return new Telemetry();
         }
 
-        private TransportData CreateTransport(StatsdConfig config, string statsdServerName)
+        private ITransport CreateTransport(DogStatsdEndPoint endPoint, StatsdConfig config)
+        {
+            var serverName = endPoint.Name;
+            if (serverName.StartsWith(UnixDomainSocketPrefix))
+            {
+                serverName = serverName.Substring(UnixDomainSocketPrefix.Length);
+                var unixEndPoint = new UnixEndPoint(serverName);
+                return _factory.CreateUnixDomainSocketTransport(
+                    unixEndPoint,
+                    config.Advanced.UDSBufferFullBlockDuration);
+            }
+
+            return CreateUDPTransport(endPoint);
+        }
+
+        private TransportData CreateTransportData(DogStatsdEndPoint endPoint, StatsdConfig config)
         {
             var transportData = new TransportData();
 
-            if (statsdServerName.StartsWith(UnixDomainSocketPrefix))
+            transportData.Transport = CreateTransport(endPoint, config);
+            switch (transportData.Transport.TransportType)
             {
-                statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
-                var endPoint = new UnixEndPoint(statsdServerName);
-                transportData.Transport = _factory.CreateUnixDomainSocketTransport(
-                    endPoint,
-                    config.Advanced.UDSBufferFullBlockDuration);
-                transportData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
-            }
-            else
-            {
-                transportData.Transport = CreateUDPTransport(config, statsdServerName);
-                transportData.BufferCapacity = config.StatsdMaxUDPPacketSize;
+                case TransportType.UDP: transportData.BufferCapacity = config.StatsdMaxUDPPacketSize; break;
+                case TransportType.UDS: transportData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize; break;
+                default: throw new NotSupportedException();
             }
 
             return transportData;
@@ -168,13 +188,13 @@ namespace StatsdClient
             return statsBufferize;
         }
 
-        private ITransport CreateUDPTransport(StatsdConfig config, string statsdServerName)
+        private ITransport CreateUDPTransport(DogStatsdEndPoint endPoint)
         {
-            var address = StatsdUDP.GetIpv4Address(statsdServerName);
-            var port = GetPort(config);
+            var address = StatsdUDP.GetIpv4Address(endPoint.Name);
+            var port = endPoint.Port;
 
-            var endPoint = new IPEndPoint(address, port);
-            return _factory.CreateUDPTransport(endPoint);
+            var ipEndPoint = new IPEndPoint(address, port);
+            return _factory.CreateUDPTransport(ipEndPoint);
         }
 
         private class TransportData
