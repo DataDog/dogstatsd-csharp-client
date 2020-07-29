@@ -44,15 +44,16 @@ namespace StatsdClient
                 statsSenderData.Sender,
                 statsSenderData.BufferCapacity,
                 config.Advanced);
-            var statsD = new Statsd(
+
+            var metricSerializer = new MetricSerializer(config.Prefix, globalTags);
+            var metricsSender = new MetricsSender(
                 statsBufferize,
                 new RandomGenerator(),
                 new StopWatchFactory(),
-                string.Empty,
-                config.ConstantTags,
-                telemetry);
-            statsD.TruncateIfTooLong = config.StatsdTruncateIfTooLong;
-            return new StatsdData(statsD, statsBufferize, statsSender, telemetry);
+                metricSerializer,
+                telemetry,
+                config.StatsdTruncateIfTooLong);
+            return new StatsdData(metricsSender, statsBufferize, statsSender, telemetry);
         }
 
         private static int GetPort(StatsdConfig config)
