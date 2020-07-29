@@ -7,7 +7,7 @@ namespace StatsdClient
     {
         private readonly Telemetry _optionalTelemetry;
         private readonly StatsBufferize _statsBufferize;
-        private readonly MetricSerializer _metricSerializer;
+        private readonly Serializers _serializers;
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
@@ -16,7 +16,7 @@ namespace StatsdClient
                     StatsBufferize statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
-                    MetricSerializer metricSerializer,
+                    Serializers serializers,
                     Telemetry optionalTelemetry,
                     bool truncateIfTooLong)
         {
@@ -24,21 +24,21 @@ namespace StatsdClient
             _statsBufferize = statsBufferize;
             _randomGenerator = randomGenerator;
             _optionalTelemetry = optionalTelemetry;
-            _metricSerializer = metricSerializer;
+            _serializers = serializers;
             _truncateIfTooLong = truncateIfTooLong;
         }
 
         public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            _statsBufferize.Send(_metricSerializer.SerializeEvent(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
+            _statsBufferize.Send(_serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong));
             _optionalTelemetry?.OnEventSent();
         }
 
         public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
             truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            _statsBufferize.Send(_metricSerializer.SerializeServiceCheck(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
+            _statsBufferize.Send(_serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong));
             _optionalTelemetry?.OnServiceCheckSent();
         }
 
@@ -46,7 +46,7 @@ namespace StatsdClient
         {
             if (_randomGenerator.ShouldSend(sampleRate))
             {
-                _statsBufferize.Send(_metricSerializer.SerializeMetric(metricType, name, value, sampleRate, tags));
+                _statsBufferize.Send(_serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags));
                 _optionalTelemetry?.OnMetricSent();
             }
         }
