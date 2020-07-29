@@ -54,7 +54,7 @@ namespace StatsdClient
         {
             private static readonly Dictionary<MetricType, string> _commandToUnit = new Dictionary<MetricType, string>
                                                                 {
-                                                                    { MetricType.Counting, "c" },
+                                                                    { MetricType.Count, "c" },
                                                                     { MetricType.Timing, "ms" },
                                                                     { MetricType.Gauge, "g" },
                                                                     { MetricType.Histogram, "h" },
