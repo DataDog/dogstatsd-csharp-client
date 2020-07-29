@@ -16,13 +16,13 @@ namespace Tests
         [SetUp]
         public void Init()
         {
-            var statsSender = new Mock<IStatsSender>();
-            statsSender.Setup(s => s.Send(It.IsAny<byte[]>(), It.IsAny<int>()))
+            var transport = new Mock<ITransport>();
+            transport.Setup(s => s.Send(It.IsAny<byte[]>(), It.IsAny<int>()))
                 .Callback<byte[], int>((bytes, l) => _metrics.Add(Encoding.UTF8.GetString(bytes, 0, l)));
             _telemetry = new Telemetry(
                 "1.0.0.0",
                 TimeSpan.FromHours(1),
-                statsSender.Object,
+                transport.Object,
                 new string[] { "globalTagKey:globalTagValue" });
         }
 

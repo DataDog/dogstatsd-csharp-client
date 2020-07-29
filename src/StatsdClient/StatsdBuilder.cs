@@ -36,14 +36,14 @@ namespace StatsdClient
                     + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
             }
 
-            var statsSenderData = CreateStatsSender(config, statsdServerName);
-            var statsSender = statsSenderData.Sender;
+            var transportData = CreateTransport(config, statsdServerName);
+            var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var telemetry = CreateTelemetry(config, globalTags, statsSenderData.Sender);
+            var telemetry = CreateTelemetry(config, globalTags, transportData.Transport);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
-                statsSenderData.Sender,
-                statsSenderData.BufferCapacity,
+                transportData.Transport,
+                transportData.BufferCapacity,
                 config.Advanced);
 
             var serializers = CreateSerializers(config.Prefix, globalTags);
@@ -54,7 +54,7 @@ namespace StatsdClient
                 serializers,
                 telemetry,
                 config.StatsdTruncateIfTooLong);
-            return new StatsdData(metricsSender, statsBufferize, statsSender, telemetry);
+            return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 
         private static Serializers CreateSerializers(string prefix, string[] constantTags)
@@ -111,7 +111,7 @@ namespace StatsdClient
         private Telemetry CreateTelemetry(
             StatsdConfig config,
             string[] globalTags,
-            IStatsSender statsSender)
+            ITransport transport)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
 
@@ -120,42 +120,42 @@ namespace StatsdClient
                 var assembly = typeof(StatsdBuilder).GetTypeInfo().Assembly;
                 var version = assembly.GetName().Version.ToString();
 
-                return _factory.CreateTelemetry(version, telemetryFlush.Value, statsSender, globalTags);
+                return _factory.CreateTelemetry(version, telemetryFlush.Value, transport, globalTags);
             }
 
             // Telemetry is not enabled
             return new Telemetry();
         }
 
-        private StatsSenderData CreateStatsSender(StatsdConfig config, string statsdServerName)
+        private TransportData CreateTransport(StatsdConfig config, string statsdServerName)
         {
-            var statsSenderData = new StatsSenderData();
+            var transportData = new TransportData();
 
             if (statsdServerName.StartsWith(UnixDomainSocketPrefix))
             {
                 statsdServerName = statsdServerName.Substring(UnixDomainSocketPrefix.Length);
                 var endPoint = new UnixEndPoint(statsdServerName);
-                statsSenderData.Sender = _factory.CreateUnixDomainSocketStatsSender(
+                transportData.Transport = _factory.CreateUnixDomainSocketTransport(
                     endPoint,
                     config.Advanced.UDSBufferFullBlockDuration);
-                statsSenderData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
+                transportData.BufferCapacity = config.StatsdMaxUnixDomainSocketPacketSize;
             }
             else
             {
-                statsSenderData.Sender = CreateUDPStatsSender(config, statsdServerName);
-                statsSenderData.BufferCapacity = config.StatsdMaxUDPPacketSize;
+                transportData.Transport = CreateUDPTransport(config, statsdServerName);
+                transportData.BufferCapacity = config.StatsdMaxUDPPacketSize;
             }
 
-            return statsSenderData;
+            return transportData;
         }
 
         private StatsBufferize CreateStatsBufferize(
             Telemetry telemetry,
-            StatsSender statsSender,
+            ITransport transport,
             int bufferCapacity,
             AdvancedStatsConfig config)
         {
-            var bufferHandler = new BufferBuilderHandler(telemetry, statsSender);
+            var bufferHandler = new BufferBuilderHandler(telemetry, transport);
             var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
             var statsBufferize = _factory.CreateStatsBufferize(
@@ -168,18 +168,18 @@ namespace StatsdClient
             return statsBufferize;
         }
 
-        private StatsSender CreateUDPStatsSender(StatsdConfig config, string statsdServerName)
+        private ITransport CreateUDPTransport(StatsdConfig config, string statsdServerName)
         {
             var address = StatsdUDP.GetIpv4Address(statsdServerName);
             var port = GetPort(config);
 
             var endPoint = new IPEndPoint(address, port);
-            return _factory.CreateUDPStatsSender(endPoint);
+            return _factory.CreateUDPTransport(endPoint);
         }
 
-        private class StatsSenderData
+        private class TransportData
         {
-            public StatsSender Sender { get; set; }
+            public ITransport Transport { get; set; }
 
             public int BufferCapacity { get; set; }
         }

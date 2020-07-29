@@ -17,16 +17,16 @@ namespace StatsdClient.Bufferize
           TimeSpan? blockingQueueTimeout,
           TimeSpan maxIdleWaitBeforeSending);
 
-        StatsSender CreateUDPStatsSender(IPEndPoint endPoint);
+        ITransport CreateUDPTransport(IPEndPoint endPoint);
 
-        StatsSender CreateUnixDomainSocketStatsSender(
+        ITransport CreateUnixDomainSocketTransport(
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration);
 
         Telemetry CreateTelemetry(
             string assemblyVersion,
             TimeSpan flushInterval,
-            IStatsSender statsSender,
+            ITransport transport,
             string[] globalTags);
     }
 }

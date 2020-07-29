@@ -5,19 +5,19 @@ namespace StatsdClient
 {
     internal class StatsdData : IDisposable
     {
-        private StatsSender _statsSender;
+        private ITransport _transport;
         private StatsBufferize _statsBufferize;
 
         public StatsdData(
             MetricsSender metricsSender,
             StatsBufferize statsBufferize,
-            StatsSender statsSender,
+            ITransport transport,
             Telemetry telemetry)
         {
             MetricsSender = metricsSender;
             Telemetry = telemetry;
             _statsBufferize = statsBufferize;
-            _statsSender = statsSender;
+            _transport = transport;
         }
 
         public MetricsSender MetricsSender { get; private set; }
@@ -35,8 +35,8 @@ namespace StatsdClient
             _statsBufferize?.Dispose();
             _statsBufferize = null;
 
-            _statsSender?.Dispose();
-            _statsSender = null;
+            _transport?.Dispose();
+            _transport = null;
 
             MetricsSender = null;
         }
