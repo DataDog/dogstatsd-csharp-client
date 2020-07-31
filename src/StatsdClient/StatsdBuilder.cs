@@ -75,7 +75,7 @@ namespace StatsdClient
             int maxMetricsInAsyncQueue)
         {
             // 100 is an arbitrary value. poolMaxAllocation must be a little greater than maxMetricsInAsyncQueue.
-            var poolMaxAllocation = maxMetricsInAsyncQueue + 1000;
+            var poolMaxAllocation = maxMetricsInAsyncQueue + 100;
             var serializerHelper = new SerializerHelper(constantTags, poolMaxAllocation);
 
             return new Serializers
