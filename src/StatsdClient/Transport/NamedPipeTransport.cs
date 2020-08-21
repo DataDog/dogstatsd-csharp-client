@@ -13,8 +13,8 @@ namespace StatsdClient.Transport
         private byte[] _internalbuffer = new byte[0];
 
         // `SpinLock` is a struct. A struct marked as `readonly` is copied each time a mutating function is call.
-        // When calling `_lock.Enter` and `_lock.Exit()` the `SpinLock` instance is copied. Calling `_lock.Exit()` raises an 
-        // error as the instance does not hold the lock (System.Threading.SynchronizationLockException : The calling 
+        // When calling `_lock.Enter` and `_lock.Exit()` the `SpinLock` instance is copied. Calling `_lock.Exit()` raises an
+        // error as the instance does not hold the lock (System.Threading.SynchronizationLockException : The calling
         // thread does not hold the lock.)
         // For this reason, `_lock` is not marked as `readonly`
         private SpinLock _lock = new SpinLock(enableThreadOwnerTracking: true);
