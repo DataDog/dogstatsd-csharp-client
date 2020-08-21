@@ -56,7 +56,9 @@ namespace Tests
         public void NamedPipe()
         {
 #if !OS_WINDOWS
-            // Message are dropped on non Windows platform.
+            // On Windows, named pipe behaves like Unix domain socket. Messages are rarely dropped.
+            // On Unix, named pipe behaves like UDP and messages can be dropped.
+            // On Unix platform, less metrics are sent to not having a failed unit test.
             var metricToSendCount = 1 * 100;
 #else
             var metricToSendCount = 100 * 1000;
