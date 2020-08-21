@@ -1,6 +1,9 @@
 CHANGELOG
 =========
-# 5.0.1 / 05-XX-2020
+# 5.0.2 / 05-29-2020
+* [BUGFIX] Fix an issue where the client cannot send metrics after the DogStatsd server restart. See [#125][].
+
+# 5.0.1 / 05-19-2020
 * [BUGFIX] Fix System.Net.Sockets.SocketException when telemetry is enabled and Statsd server is not up. See [#120][].
 * [BUGFIX] Fix high CPU usage. See [#121][].
 
@@ -153,6 +156,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#114]: https://github.com/DataDog/dogstatsd-csharp-client/issues/114
 [#120]: https://github.com/DataDog/dogstatsd-csharp-client/issues/120
 [#121]: https://github.com/DataDog/dogstatsd-csharp-client/issues/121
+[#125]: https://github.com/DataDog/dogstatsd-csharp-client/issues/125
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair

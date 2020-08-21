@@ -74,7 +74,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Counting, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Counting, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Counting, statName, -value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Count, statName, -value, sampleRate, tags);
         }
 
         /// <summary>
