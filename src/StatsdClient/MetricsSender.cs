@@ -46,8 +46,8 @@ namespace StatsdClient
         {
             if (_randomGenerator.ShouldSend(sampleRate))
             {
-                var optionalSerializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
-                Send(optionalSerializedMetric, () => _optionalTelemetry?.OnMetricSent());
+                // var optionalSerializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
+                // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnMetricSent());
             }
         }
 
