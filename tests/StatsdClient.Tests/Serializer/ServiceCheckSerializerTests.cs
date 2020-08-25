@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
-using Moq;
 using NUnit.Framework;
+using StatsdClient.Statistic;
 
 namespace StatsdClient.Tests
 {
@@ -45,8 +45,7 @@ namespace StatsdClient.Tests
         [Test]
         public void SendServiceCheckWithPipeInName()
         {
-            var serializer = CreateSerializer();
-            Assert.Throws<ArgumentException>(() => serializer.Serialize("name|", 0, null, null, null, null));
+            Assert.Throws<ArgumentException>(() => Serialize("name|", 0, null, null, null, null));
         }
 
         [Test]
@@ -82,9 +81,8 @@ namespace StatsdClient.Tests
             var length = (8 * 1024) - 13;
             var builder = BuildLongString(length);
             var message = builder;
-            var serializer = CreateSerializer();
 
-            var exception = Assert.Throws<Exception>(() => serializer.Serialize("name", 0, null, null, null, message + "x"));
+            var exception = Assert.Throws<Exception>(() => Serialize("name", 0, null, null, null, message + "x"));
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
@@ -104,10 +102,9 @@ namespace StatsdClient.Tests
             var length = (8 * 1024) - 6;
             var builder = BuildLongString(length);
             var name = builder;
-            var serializer = CreateSerializer();
 
             var exception = Assert.Throws<ArgumentException>(
-                () => serializer.Serialize(name + "x", 0, null, null, null, null, truncateIfTooLong: true));
+                () => Serialize(name + "x", 0, null, null, null, null, truncateIfTooLong: true));
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
@@ -132,9 +129,30 @@ namespace StatsdClient.Tests
             string serviceCheckMessage = null,
             bool truncateIfTooLong = false)
         {
-            var serializer = CreateSerializer();
-            var serializedMetric = serializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
+            var serializedMetric = Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
+        }
+
+        private static SerializedMetric Serialize(
+                    string name,
+                    int status,
+                    int? timestamp = null,
+                    string hostname = null,
+                    string[] tags = null,
+                    string serviceCheckMessage = null,
+                    bool truncateIfTooLong = false)
+        {
+            var statsServiceCheck = new StatsServiceCheck
+            {
+                Name = name,
+                Status = status,
+                Timestamp = timestamp,
+                Hostname = hostname,
+                ServiceCheckMessage = serviceCheckMessage,
+                TruncateIfTooLong = truncateIfTooLong,
+            };
+            var serializer = CreateSerializer();
+            return serializer.Serialize(ref statsServiceCheck, tags);
         }
 
         private static ServiceCheckSerializer CreateSerializer()

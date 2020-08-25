@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using StatsdClient.Statistic;
 
 namespace StatsdClient
 {
@@ -14,14 +15,7 @@ namespace StatsdClient
             _serializerHelper = serializerHelper;
         }
 
-        public SerializedMetric Serialize(
-            string name,
-            int status,
-            int? timestamp,
-            string hostname,
-            string[] tags,
-            string serviceCheckMessage,
-            bool truncateIfTooLong = false)
+        public SerializedMetric Serialize(ref StatsServiceCheck sc, string[] tags)
         {
             var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
             if (serializedMetric == null)
@@ -31,29 +25,30 @@ namespace StatsdClient
 
             var builder = serializedMetric.Builder;
 
-            string processedName = EscapeName(name);
-            string processedMessage = EscapeMessage(serviceCheckMessage);
+            string processedName = EscapeName(sc.Name);
+            string processedMessage = EscapeMessage(sc.ServiceCheckMessage);
 
             builder.Append("_sc|");
             builder.Append(processedName);
-            builder.AppendFormat(CultureInfo.InvariantCulture, "|{0}", status);
+            builder.AppendFormat(CultureInfo.InvariantCulture, "|{0}", sc.Status);
 
-            if (timestamp != null)
+            if (sc.Timestamp != null)
             {
-                builder.AppendFormat(CultureInfo.InvariantCulture, "|d:{0}", timestamp.Value);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "|d:{0}", sc.Timestamp.Value);
             }
 
-            SerializerHelper.AppendIfNotNull(builder, "|h:", hostname);
+            SerializerHelper.AppendIfNotNull(builder, "|h:", sc.Hostname);
 
             _serializerHelper.AppendTags(builder, tags);
 
             // Note: this must always be appended to the result last.
             SerializerHelper.AppendIfNotNull(builder, "|m:", processedMessage);
 
-            var truncatedMessage = TruncateMessageIfRequired(name, builder, truncateIfTooLong, processedMessage);
-            if (truncatedMessage != null)
+            sc.ServiceCheckMessage = TruncateMessageIfRequired(sc.Name, builder, sc.TruncateIfTooLong, processedMessage);
+            if (sc.ServiceCheckMessage != null)
             {
-                return Serialize(name, status, timestamp, hostname, tags, truncatedMessage, true);
+                sc.TruncateIfTooLong = true;
+                return Serialize(ref sc, tags);
             }
 
             return serializedMetric;

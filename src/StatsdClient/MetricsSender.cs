@@ -37,9 +37,9 @@ namespace StatsdClient
 
         public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
-            truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            var optionalSerializedMetric = _serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
-            Send(optionalSerializedMetric, () => _optionalTelemetry?.OnServiceCheckSent());
+            // truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
+            // var optionalSerializedMetric = _serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
+            // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnServiceCheckSent());
         }
 
         public void SendMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
