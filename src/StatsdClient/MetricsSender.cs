@@ -30,9 +30,9 @@ namespace StatsdClient
 
         public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
-            truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            var optionalSerializedMetric = _serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
-            Send(optionalSerializedMetric, () => _optionalTelemetry?.OnEventSent());
+            // truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
+            // var optionalSerializedMetric = _serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
+            // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnEventSent());
         }
 
         public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)

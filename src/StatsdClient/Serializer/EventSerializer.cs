@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using StatsdClient.Statistic;
 
 namespace StatsdClient
 {
@@ -13,20 +14,10 @@ namespace StatsdClient
             _serializerHelper = serializerHelper;
         }
 
-        public SerializedMetric Serialize(
-            string title,
-            string text,
-            string alertType,
-            string aggregationKey,
-            string sourceType,
-            int? dateHappened,
-            string priority,
-            string hostname,
-            string[] tags,
-            bool truncateIfTooLong = false)
+        public SerializedMetric Serialize(ref StatsEvent statsEvent, string[] tags)
         {
-            string processedTitle = SerializerHelper.EscapeContent(title);
-            string processedText = SerializerHelper.EscapeContent(text);
+            string processedTitle = SerializerHelper.EscapeContent(statsEvent.Title);
+            string processedText = SerializerHelper.EscapeContent(statsEvent.Text);
 
             var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
             if (serializedMetric == null)
@@ -45,38 +36,39 @@ namespace StatsdClient
             builder.Append('|');
             builder.Append(processedText);
 
-            if (dateHappened != null)
+            if (statsEvent.DateHappened != null)
             {
-                builder.AppendFormat(CultureInfo.InvariantCulture, "|d:{0}", dateHappened.Value);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "|d:{0}", statsEvent.DateHappened.Value);
             }
 
-            SerializerHelper.AppendIfNotNull(builder, "|h:", hostname);
-            SerializerHelper.AppendIfNotNull(builder, "|k:", aggregationKey);
-            SerializerHelper.AppendIfNotNull(builder, "|p:", priority);
-            SerializerHelper.AppendIfNotNull(builder, "|s:", sourceType);
-            SerializerHelper.AppendIfNotNull(builder, "|t:", alertType);
+            SerializerHelper.AppendIfNotNull(builder, "|h:", statsEvent.Hostname);
+            SerializerHelper.AppendIfNotNull(builder, "|k:", statsEvent.AggregationKey);
+            SerializerHelper.AppendIfNotNull(builder, "|p:", statsEvent.Priority);
+            SerializerHelper.AppendIfNotNull(builder, "|s:", statsEvent.SourceType);
+            SerializerHelper.AppendIfNotNull(builder, "|t:", statsEvent.AlertType);
 
             _serializerHelper.AppendTags(builder, tags);
 
             if (builder.Length > MaxSize)
             {
-                if (truncateIfTooLong)
+                if (statsEvent.TruncateIfTooLong)
                 {
                     var overage = builder.Length - MaxSize;
-                    if (title.Length > text.Length)
+                    if (statsEvent.Title.Length > statsEvent.Text.Length)
                     {
-                        title = SerializerHelper.TruncateOverage(title, overage);
+                        statsEvent.Title = SerializerHelper.TruncateOverage(statsEvent.Title, overage);
                     }
                     else
                     {
-                        text = SerializerHelper.TruncateOverage(text, overage);
+                        statsEvent.Text = SerializerHelper.TruncateOverage(statsEvent.Text, overage);
                     }
 
-                    return Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, true);
+                    statsEvent.TruncateIfTooLong = true;
+                    return Serialize(ref statsEvent, tags);
                 }
                 else
                 {
-                    throw new Exception(string.Format("Event {0} payload is too big (more than 8kB)", title));
+                    throw new Exception(string.Format("Event {0} payload is too big (more than 8kB)", statsEvent.Title));
                 }
             }
 
