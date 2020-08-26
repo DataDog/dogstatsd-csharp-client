@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Mono.Unix;
+using StatsdClient.Aggregator;
 using StatsdClient.Bufferize;
 using StatsdClient.Transport;
 
@@ -29,13 +30,14 @@ namespace StatsdClient
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
             var telemetry = CreateTelemetry(config, globalTags, endPoint, transportData.Transport);
+            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
                 transportData.BufferCapacity,
-                config.Advanced);
+                config.Advanced,
+                serializers);
 
-            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
             var metricsSender = new MetricsSender(
                 statsBufferize,
                 new RandomGenerator(),
@@ -198,13 +200,16 @@ namespace StatsdClient
             Telemetry telemetry,
             ITransport transport,
             int bufferCapacity,
-            AdvancedStatsConfig config)
+            AdvancedStatsConfig config,
+            Serializers serializers)
         {
             var bufferHandler = new BufferBuilderHandler(telemetry, transport);
             var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
+            var statsRouter = _factory.CreateStatsRouter(serializers, bufferBuilder);
+
             var statsBufferize = _factory.CreateStatsBufferize(
-                bufferBuilder,
+                statsRouter,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,
                 config.DurationBeforeSendingNotFullBuffer);

@@ -12,10 +12,14 @@ namespace StatsdClient.Bufferize
     internal interface IStatsBufferizeFactory
     {
         StatsBufferize CreateStatsBufferize(
-          BufferBuilder bufferBuilder,
+          StatsRouter statsRouter,
           int workerMaxItemCount,
           TimeSpan? blockingQueueTimeout,
           TimeSpan maxIdleWaitBeforeSending);
+
+        StatsRouter CreateStatsRouter(
+            Serializers serializers,
+            BufferBuilder bufferBuilder);
 
         ITransport CreateUDPTransport(IPEndPoint endPoint);
 
