@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Mono.Unix;
-using StatsdClient.Aggregator;
 using StatsdClient.Bufferize;
 using StatsdClient.Transport;
 
