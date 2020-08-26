@@ -42,7 +42,21 @@ namespace StatsdClient
             // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnServiceCheckSent());
         }
 
-        public void SendMetric<T>(MetricType metricType, string name, T value, double sampleRate = 1.0, string[] tags = null)
+        public void SendMetric(MetricType metricType, string name, double value, double sampleRate = 1.0, string[] tags = null)
+        {
+            if (metricType == MetricType.Set)
+            {
+                throw new ArgumentException($"{nameof(SendMetric)} does not support `MetricType.Set`.");
+            }
+
+            if (_randomGenerator.ShouldSend(sampleRate))
+            {
+                // var optionalSerializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
+                // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnMetricSent());
+            }
+        }
+
+        public void SendSetMetric(string name, string value, double sampleRate = 1.0, string[] tags = null)
         {
             if (_randomGenerator.ShouldSend(sampleRate))
             {

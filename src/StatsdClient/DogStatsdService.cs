@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using StatsdClient.Bufferize;
 
 namespace StatsdClient
@@ -71,8 +72,7 @@ namespace StatsdClient
         /// <param name="value">A given delta.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        /// <typeparam name="T">The type of the value.</typeparam>
-        public void Counter<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        public void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
             _metricsSender?.SendMetric(MetricType.Counting, statName, value, sampleRate, tags);
         }
@@ -108,8 +108,7 @@ namespace StatsdClient
         /// <param name="value">The value of the gauge.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        /// <typeparam name="T">The type of the value.</typeparam>
-        public void Gauge<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        public void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
             _metricsSender?.SendMetric(MetricType.Gauge, statName, value, sampleRate, tags);
         }
@@ -121,8 +120,7 @@ namespace StatsdClient
         /// <param name="value">The value of the histogram.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        /// <typeparam name="T">The type of the value.</typeparam>
-        public void Histogram<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        public void Histogram(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
             _metricsSender?.SendMetric(MetricType.Histogram, statName, value, sampleRate, tags);
         }
@@ -134,8 +132,7 @@ namespace StatsdClient
         /// <param name="value">The value of the distribution.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        /// <typeparam name="T">The type of the value.</typeparam>
-        public void Distribution<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        public void Distribution(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
             _metricsSender?.SendMetric(MetricType.Distribution, statName, value, sampleRate, tags);
         }
@@ -150,7 +147,20 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Set, statName, value, sampleRate, tags);
+            var strValue = string.Format(CultureInfo.InvariantCulture, "{0}", value);
+            _metricsSender?.SendSetMetric(statName, strValue, sampleRate, tags);
+        }
+
+        /// <summary>
+        /// Records a value for the specified set.
+        /// </summary>
+        /// <param name="statName">The name of the metric.</param>
+        /// <param name="value">The value to set.</param>
+        /// <param name="sampleRate">Percentage of metric to be sent.</param>
+        /// <param name="tags">Array of tags to be added to the data.</param>
+        public void Set(string statName, string value, double sampleRate = 1.0, string[] tags = null)
+        {
+            _metricsSender?.SendSetMetric(statName, value, sampleRate, tags);
         }
 
         /// <summary>
@@ -160,8 +170,7 @@ namespace StatsdClient
         /// <param name="value">The time in millisecond.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        /// <typeparam name="T">The type of value parameter.</typeparam>
-        public void Timer<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        public void Timer(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
             _metricsSender?.SendMetric(MetricType.Timing, statName, value, sampleRate, tags);
         }
