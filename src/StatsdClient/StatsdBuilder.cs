@@ -42,7 +42,6 @@ namespace StatsdClient
                 statsBufferize,
                 new RandomGenerator(),
                 new StopWatchFactory(),
-                serializers,
                 telemetry,
                 config.StatsdTruncateIfTooLong);
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);

@@ -1,5 +1,6 @@
 ﻿using System;
 using StatsdClient.Bufferize;
+using StatsdClient.Statistic;
 
 namespace StatsdClient
 {
@@ -7,7 +8,6 @@ namespace StatsdClient
     {
         private readonly Telemetry _optionalTelemetry;
         private readonly StatsBufferize _statsBufferize;
-        private readonly Serializers _serializers;
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
@@ -16,7 +16,6 @@ namespace StatsdClient
                     StatsBufferize statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
-                    Serializers serializers,
                     Telemetry optionalTelemetry,
                     bool truncateIfTooLong)
         {
@@ -24,22 +23,39 @@ namespace StatsdClient
             _statsBufferize = statsBufferize;
             _randomGenerator = randomGenerator;
             _optionalTelemetry = optionalTelemetry;
-            _serializers = serializers;
             _truncateIfTooLong = truncateIfTooLong;
         }
 
         public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
         {
-            // truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            // var optionalSerializedMetric = _serializers.EventSerializer.Serialize(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, truncateIfTooLong);
-            // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnEventSent());
+            var m = new Stats();
+            m.Kind = StatsKind.Event;
+            m.Tags = tags;
+            m.Event.Title = title;
+            m.Event.Text = text;
+            m.Event.AlertType = alertType;
+            m.Event.AggregationKey = aggregationKey;
+            m.Event.SourceType = sourceType;
+            m.Event.DateHappened = dateHappened;
+            m.Event.Priority = priority;
+            m.Event.Hostname = hostname;
+            m.Event.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
+
+            Send(m, () => _optionalTelemetry?.OnEventSent());
         }
 
         public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
         {
-            // truncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-            // var optionalSerializedMetric = _serializers.ServiceCheckSerializer.Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong);
-            // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnServiceCheckSent());
+            var m = new Stats();
+            m.Kind = StatsKind.ServiceCheck;
+            m.Tags = tags;
+            m.ServiceCheck.Name = name;
+            m.ServiceCheck.Status = status;
+            m.ServiceCheck.Timestamp = timestamp;
+            m.ServiceCheck.Hostname = hostname;
+            m.ServiceCheck.ServiceCheckMessage = serviceCheckMessage;
+            m.ServiceCheck.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
+            Send(m, () => _optionalTelemetry?.OnServiceCheckSent());
         }
 
         public void SendMetric(MetricType metricType, string name, double value, double sampleRate = 1.0, string[] tags = null)
@@ -51,8 +67,15 @@ namespace StatsdClient
 
             if (_randomGenerator.ShouldSend(sampleRate))
             {
-                // var optionalSerializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
-                // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnMetricSent());
+                var m = new Stats();
+                m.Kind = StatsKind.Metric;
+                m.Tags = tags;
+                m.Metric.MetricType = metricType;
+                m.Metric.StatName = name;
+                m.Metric.SampleRate = sampleRate;
+                m.Metric.NumericValue = value;
+
+                Send(m, () => _optionalTelemetry?.OnMetricSent());
             }
         }
 
@@ -60,8 +83,15 @@ namespace StatsdClient
         {
             if (_randomGenerator.ShouldSend(sampleRate))
             {
-                // var optionalSerializedMetric = _serializers.MetricSerializer.Serialize(metricType, name, value, sampleRate, tags);
-                // Send(optionalSerializedMetric, () => _optionalTelemetry?.OnMetricSent());
+                var m = new Stats();
+                m.Kind = StatsKind.Metric;
+                m.Tags = tags;
+                m.Metric.MetricType = MetricType.Set;
+                m.Metric.StatName = name;
+                m.Metric.SampleRate = sampleRate;
+                m.Metric.StringValue = value;
+
+                Send(m, () => _optionalTelemetry?.OnMetricSent());
             }
         }
 
@@ -81,9 +111,9 @@ namespace StatsdClient
             }
         }
 
-        private void Send(SerializedMetric optionalSerializedMetric, Action onSuccess)
+        private void Send(Stats optionalMetricFields, Action onSuccess)
         {
-            if (optionalSerializedMetric != null && _statsBufferize.Send(optionalSerializedMetric))
+            if (optionalMetricFields != null && _statsBufferize.Send(optionalMetricFields))
             {
                 onSuccess();
             }
