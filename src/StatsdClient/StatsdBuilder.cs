@@ -43,7 +43,8 @@ namespace StatsdClient
                 new RandomGenerator(),
                 new StopWatchFactory(),
                 telemetry,
-                config.StatsdTruncateIfTooLong);
+                config.StatsdTruncateIfTooLong,
+                config.Advanced.MaxMetricsInAsyncQueue * 2);
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 
