@@ -27,13 +27,9 @@ namespace StatsdClient
             _prefix = string.IsNullOrEmpty(prefix) ? string.Empty : prefix + ".";
         }
 
-        public SerializedMetric Serialize(ref StatsMetric metricStats, string[] tags)
+        public void SerializeTo(ref StatsMetric metricStats, string[] tags, SerializedMetric serializedMetric)
         {
-            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
-            if (serializedMetric == null)
-            {
-                return null;
-            }
+            serializedMetric.Reset();
 
             var builder = serializedMetric.Builder;
             var unit = _commandToUnit[metricStats.MetricType];
@@ -56,7 +52,6 @@ namespace StatsdClient
             }
 
             _serializerHelper.AppendTags(builder, tags);
-            return serializedMetric;
         }
     }
 }

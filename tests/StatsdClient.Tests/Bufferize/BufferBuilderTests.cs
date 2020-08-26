@@ -57,7 +57,7 @@ namespace Tests
 
         private static SerializedMetric CreateSerializedMetric(char c, int count)
         {
-            var serializedMetric = new SerializedMetric(null);
+            var serializedMetric = new SerializedMetric();
             serializedMetric.Builder.Append(new string(c, count));
 
             return serializedMetric;

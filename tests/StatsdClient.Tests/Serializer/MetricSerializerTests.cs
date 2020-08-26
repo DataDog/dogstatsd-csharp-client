@@ -332,10 +332,10 @@ namespace StatsdClient.Tests
            string[] tags,
            string prefix)
         {
-            var serializerHelper = new SerializerHelper(null, 10);
+            var serializerHelper = new SerializerHelper(null);
             var serializer = new MetricSerializer(serializerHelper, prefix);
-
-            var serializedMetric = serializer.Serialize(ref statsMetric, tags);
+            var serializedMetric = new SerializedMetric();
+            serializer.SerializeTo(ref statsMetric, tags, serializedMetric);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
     }

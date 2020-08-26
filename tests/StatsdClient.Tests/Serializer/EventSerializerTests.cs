@@ -69,7 +69,7 @@ namespace StatsdClient.Tests
                 () =>
                 {
                     var statsEvent = new StatsEvent { Title = title + "x", Text = "Text" };
-                    serializer.Serialize(ref statsEvent, null);
+                    serializer.SerializeTo(ref statsEvent, null, new SerializedMetric());
                 });
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
@@ -154,13 +154,14 @@ namespace StatsdClient.Tests
                 TruncateIfTooLong = truncateIfTooLong,
             };
 
-            var serializedMetric = serializer.Serialize(ref statsEvent, tags);
+            var serializedMetric = new SerializedMetric();
+            serializer.SerializeTo(ref statsEvent, tags, serializedMetric);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
         private static EventSerializer CreateSerializer()
         {
-            var serializerHelper = new SerializerHelper(null, 10);
+            var serializerHelper = new SerializerHelper(null);
             return new EventSerializer(serializerHelper);
         }
     }

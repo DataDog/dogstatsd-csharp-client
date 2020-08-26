@@ -14,17 +14,11 @@ namespace StatsdClient
             _serializerHelper = serializerHelper;
         }
 
-        public SerializedMetric Serialize(ref StatsEvent statsEvent, string[] tags)
+        public void SerializeTo(ref StatsEvent statsEvent, string[] tags, SerializedMetric serializedMetric)
         {
+            serializedMetric.Reset();
             string processedTitle = SerializerHelper.EscapeContent(statsEvent.Title);
             string processedText = SerializerHelper.EscapeContent(statsEvent.Text);
-
-            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
-            if (serializedMetric == null)
-            {
-                return null;
-            }
-
             var builder = serializedMetric.Builder;
 
             builder.Append("_e{");
@@ -64,15 +58,13 @@ namespace StatsdClient
                     }
 
                     statsEvent.TruncateIfTooLong = true;
-                    return Serialize(ref statsEvent, tags);
+                    SerializeTo(ref statsEvent, tags, serializedMetric);
                 }
                 else
                 {
                     throw new Exception(string.Format("Event {0} payload is too big (more than 8kB)", statsEvent.Title));
                 }
             }
-
-            return serializedMetric;
         }
     }
 }

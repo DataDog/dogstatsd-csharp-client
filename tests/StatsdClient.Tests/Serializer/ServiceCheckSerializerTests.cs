@@ -152,12 +152,14 @@ namespace StatsdClient.Tests
                 TruncateIfTooLong = truncateIfTooLong,
             };
             var serializer = CreateSerializer();
-            return serializer.Serialize(ref statsServiceCheck, tags);
+            var serializedMetric = new SerializedMetric();
+            serializer.SerializeTo(ref statsServiceCheck, tags, serializedMetric);
+            return serializedMetric;
         }
 
         private static ServiceCheckSerializer CreateSerializer()
         {
-            var serializerHelper = new SerializerHelper(null, 10);
+            var serializerHelper = new SerializerHelper(null);
             return new ServiceCheckSerializer(serializerHelper);
         }
     }

@@ -12,6 +12,7 @@ namespace StatsdClient
     {
         private readonly Serializers _serializers;
         private readonly BufferBuilder _bufferBuilder;
+        private SerializedMetric _serializedMetric = new SerializedMetric();
 
         public StatsRouter(
             Serializers serializers,
@@ -23,29 +24,24 @@ namespace StatsdClient
 
         public void Route(Stats stats)
         {
-            SerializedMetric serializedMetric = null;
-
             switch (stats.Kind)
             {
                 case StatsKind.Event:
-                    serializedMetric = this._serializers.EventSerializer.Serialize(ref stats.Event, stats.Tags);
+                    this._serializers.EventSerializer.SerializeTo(ref stats.Event, stats.Tags, _serializedMetric);
                     break;
                 case StatsKind.Metric:
-                    serializedMetric = this._serializers.MetricSerializer.Serialize(ref stats.Metric, stats.Tags);
+                    this._serializers.MetricSerializer.SerializeTo(ref stats.Metric, stats.Tags, _serializedMetric);
                     break;
                 case StatsKind.ServiceCheck:
-                    serializedMetric = this._serializers.ServiceCheckSerializer.Serialize(ref stats.ServiceCheck, stats.Tags);
+                    this._serializers.ServiceCheckSerializer.SerializeTo(ref stats.ServiceCheck, stats.Tags, _serializedMetric);
                     break;
                 default:
                     throw new ArgumentException($"{stats.Kind} is not supported");
             }
 
-            if (serializedMetric != null)
+            if (!_bufferBuilder.Add(_serializedMetric))
             {
-                if (!_bufferBuilder.Add(serializedMetric))
-                {
-                    throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {serializedMetric.ToString()}");
-                }
+                throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {_serializedMetric.ToString()}");
             }
         }
 

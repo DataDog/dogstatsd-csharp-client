@@ -20,7 +20,7 @@ namespace Tests
             var bufferBuilder = new BufferBuilder(handler, 30, "\n");
             var serializers = new Serializers
             {
-                EventSerializer = new EventSerializer(new SerializerHelper(null, 10)),
+                EventSerializer = new EventSerializer(new SerializerHelper(null)),
             };
             var statsRouter = new StatsRouter(serializers, bufferBuilder);
             using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero))

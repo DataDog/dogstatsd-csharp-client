@@ -15,13 +15,9 @@ namespace StatsdClient
             _serializerHelper = serializerHelper;
         }
 
-        public SerializedMetric Serialize(ref StatsServiceCheck sc, string[] tags)
+        public void SerializeTo(ref StatsServiceCheck sc, string[] tags, SerializedMetric serializedMetric)
         {
-            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
-            if (serializedMetric == null)
-            {
-                return null;
-            }
+            serializedMetric.Reset();
 
             var builder = serializedMetric.Builder;
 
@@ -48,10 +44,8 @@ namespace StatsdClient
             if (sc.ServiceCheckMessage != null)
             {
                 sc.TruncateIfTooLong = true;
-                return Serialize(ref sc, tags);
+                SerializeTo(ref sc, tags, serializedMetric);
             }
-
-            return serializedMetric;
         }
 
         private static string TruncateMessageIfRequired(
