@@ -47,7 +47,7 @@ namespace StatsdClient.Aggregator
         {
             if (force
             || _stopWatch.ElapsedMilliseconds > _flushIntervalMilliseconds
-            || _values.Count > _maxUniqueStatsBeforeFlush)
+            || _values.Count >= _maxUniqueStatsBeforeFlush)
             {
                 addSerializedMetric(_values);
                 _bufferBuilder.HandleBufferAndReset();

@@ -18,7 +18,7 @@ namespace StatsdClient.Tests.Aggregator
             var parameters = MetricAggregatorParametersFactory.Create(
                 handler.Object,
                 TimeSpan.FromMinutes(1),
-                maxUniqueStatsBeforeFlush: 2);
+                maxUniqueStatsBeforeFlush: 3);
 
             var aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Counting);
             Add(aggregator, "key1", new StatsMetric { });
