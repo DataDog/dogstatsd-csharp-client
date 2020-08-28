@@ -14,6 +14,7 @@ namespace Tests
     public class StatsBufferizeTests
     {
         [Test]
+        [Timeout(10000)]
         public void StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
@@ -25,7 +26,8 @@ namespace Tests
             var statsRouter = new StatsRouter(serializers, bufferBuilder);
             using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero))
             {
-                var stats = new Stats(null) { Kind = StatsKind.Event };
+                var pool = new Pool<Stats>(p => new Stats(p), 1);
+                var stats = new Stats(pool) { Kind = StatsKind.Event };
                 stats.Event.Text = "test";
                 stats.Event.Title = "title";
 
