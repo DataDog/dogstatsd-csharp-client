@@ -14,7 +14,7 @@ namespace StatsdClient
             _serializerHelper = serializerHelper;
         }
 
-        public void SerializeTo(ref StatsEvent statsEvent, string[] tags, SerializedMetric serializedMetric)
+        public void SerializeTo(ref StatsEvent statsEvent, SerializedMetric serializedMetric)
         {
             serializedMetric.Reset();
             string processedTitle = SerializerHelper.EscapeContent(statsEvent.Title);
@@ -41,7 +41,7 @@ namespace StatsdClient
             SerializerHelper.AppendIfNotNull(builder, "|s:", statsEvent.SourceType);
             SerializerHelper.AppendIfNotNull(builder, "|t:", statsEvent.AlertType);
 
-            _serializerHelper.AppendTags(builder, tags);
+            _serializerHelper.AppendTags(builder, statsEvent.Tags);
 
             if (builder.Length > MaxSize)
             {
@@ -58,7 +58,7 @@ namespace StatsdClient
                     }
 
                     statsEvent.TruncateIfTooLong = true;
-                    SerializeTo(ref statsEvent, tags, serializedMetric);
+                    SerializeTo(ref statsEvent, serializedMetric);
                 }
                 else
                 {

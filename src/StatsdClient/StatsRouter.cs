@@ -27,13 +27,13 @@ namespace StatsdClient
             switch (stats.Kind)
             {
                 case StatsKind.Event:
-                    this._serializers.EventSerializer.SerializeTo(ref stats.Event, stats.Tags, _serializedMetric);
+                    this._serializers.EventSerializer.SerializeTo(ref stats.Event, _serializedMetric);
                     break;
                 case StatsKind.Metric:
-                    this._serializers.MetricSerializer.SerializeTo(ref stats.Metric, stats.Tags, _serializedMetric);
+                    this._serializers.MetricSerializer.SerializeTo(ref stats.Metric, _serializedMetric);
                     break;
                 case StatsKind.ServiceCheck:
-                    this._serializers.ServiceCheckSerializer.SerializeTo(ref stats.ServiceCheck, stats.Tags, _serializedMetric);
+                    this._serializers.ServiceCheckSerializer.SerializeTo(ref stats.ServiceCheck, _serializedMetric);
                     break;
                 default:
                     throw new ArgumentException($"{stats.Kind} is not supported");

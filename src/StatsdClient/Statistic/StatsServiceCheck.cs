@@ -19,6 +19,8 @@ namespace StatsdClient.Statistic
 
         public bool TruncateIfTooLong { get; set; }
 
+        public string[] Tags { get; set; }
+
         public override bool Equals(object obj)
         {
             throw new NotSupportedException("The default implementation has performance issues.");

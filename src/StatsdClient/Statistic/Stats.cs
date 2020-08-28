@@ -26,8 +26,6 @@ namespace StatsdClient.Statistic
         {
         }
 
-        public string[] Tags { get; set; }
-
         public StatsKind Kind { get; set; }
 
         public override void Reset()

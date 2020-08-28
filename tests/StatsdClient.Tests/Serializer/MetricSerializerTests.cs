@@ -304,8 +304,9 @@ namespace StatsdClient.Tests
                 StatName = name,
                 SampleRate = sampleRate,
                 NumericValue = value,
+                Tags = tags,
             };
-            AssertSerialize(expectValue, ref statsMetric, tags, prefix);
+            AssertSerialize(expectValue, ref statsMetric, prefix);
         }
 
         private static void AssertSetSerialize(
@@ -322,20 +323,20 @@ namespace StatsdClient.Tests
                 StatName = name,
                 SampleRate = sampleRate,
                 StringValue = value.ToString(),
+                Tags = tags,
             };
-            AssertSerialize(expectValue, ref statsMetric, tags, prefix);
+            AssertSerialize(expectValue, ref statsMetric, prefix);
         }
 
         private static void AssertSerialize(
            string expectValue,
            ref StatsMetric statsMetric,
-           string[] tags,
            string prefix)
         {
             var serializerHelper = new SerializerHelper(null);
             var serializer = new MetricSerializer(serializerHelper, prefix);
             var serializedMetric = new SerializedMetric();
-            serializer.SerializeTo(ref statsMetric, tags, serializedMetric);
+            serializer.SerializeTo(ref statsMetric, serializedMetric);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
     }

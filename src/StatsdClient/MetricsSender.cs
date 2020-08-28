@@ -35,7 +35,7 @@ namespace StatsdClient
             if (TryDequeueStats(out var stats))
             {
                 stats.Kind = StatsKind.Event;
-                stats.Tags = tags;
+                stats.Event.Tags = tags;
                 stats.Event.Title = title;
                 stats.Event.Text = text;
                 stats.Event.AlertType = alertType;
@@ -55,7 +55,7 @@ namespace StatsdClient
             if (TryDequeueStats(out var stats))
             {
                 stats.Kind = StatsKind.ServiceCheck;
-                stats.Tags = tags;
+                stats.ServiceCheck.Tags = tags;
                 stats.ServiceCheck.Name = name;
                 stats.ServiceCheck.Status = status;
                 stats.ServiceCheck.Timestamp = timestamp;
@@ -78,7 +78,7 @@ namespace StatsdClient
                 if (TryDequeueStats(out var stats))
                 {
                     stats.Kind = StatsKind.Metric;
-                    stats.Tags = tags;
+                    stats.Metric.Tags = tags;
                     stats.Metric.MetricType = metricType;
                     stats.Metric.StatName = name;
                     stats.Metric.SampleRate = sampleRate;
@@ -96,7 +96,7 @@ namespace StatsdClient
                 if (TryDequeueStats(out var stats))
                 {
                     stats.Kind = StatsKind.Metric;
-                    stats.Tags = tags;
+                    stats.Metric.Tags = tags;
                     stats.Metric.MetricType = MetricType.Set;
                     stats.Metric.StatName = name;
                     stats.Metric.SampleRate = sampleRate;

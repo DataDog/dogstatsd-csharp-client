@@ -15,7 +15,7 @@ namespace StatsdClient
             _serializerHelper = serializerHelper;
         }
 
-        public void SerializeTo(ref StatsServiceCheck sc, string[] tags, SerializedMetric serializedMetric)
+        public void SerializeTo(ref StatsServiceCheck sc, SerializedMetric serializedMetric)
         {
             serializedMetric.Reset();
 
@@ -35,7 +35,7 @@ namespace StatsdClient
 
             SerializerHelper.AppendIfNotNull(builder, "|h:", sc.Hostname);
 
-            _serializerHelper.AppendTags(builder, tags);
+            _serializerHelper.AppendTags(builder, sc.Tags);
 
             // Note: this must always be appended to the result last.
             SerializerHelper.AppendIfNotNull(builder, "|m:", processedMessage);
@@ -44,7 +44,7 @@ namespace StatsdClient
             if (sc.ServiceCheckMessage != null)
             {
                 sc.TruncateIfTooLong = true;
-                SerializeTo(ref sc, tags, serializedMetric);
+                SerializeTo(ref sc, serializedMetric);
             }
         }
 

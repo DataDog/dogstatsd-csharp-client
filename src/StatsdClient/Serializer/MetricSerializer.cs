@@ -27,7 +27,7 @@ namespace StatsdClient
             _prefix = string.IsNullOrEmpty(prefix) ? string.Empty : prefix + ".";
         }
 
-        public void SerializeTo(ref StatsMetric metricStats, string[] tags, SerializedMetric serializedMetric)
+        public void SerializeTo(ref StatsMetric metricStats, SerializedMetric serializedMetric)
         {
             serializedMetric.Reset();
 
@@ -51,7 +51,7 @@ namespace StatsdClient
                 builder.AppendFormat(CultureInfo.InvariantCulture, "|@{0}", metricStats.SampleRate);
             }
 
-            _serializerHelper.AppendTags(builder, tags);
+            _serializerHelper.AppendTags(builder, metricStats.Tags);
         }
     }
 }

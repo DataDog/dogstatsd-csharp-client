@@ -150,10 +150,11 @@ namespace StatsdClient.Tests
                 Hostname = hostname,
                 ServiceCheckMessage = serviceCheckMessage,
                 TruncateIfTooLong = truncateIfTooLong,
+                Tags = tags,
             };
             var serializer = CreateSerializer();
             var serializedMetric = new SerializedMetric();
-            serializer.SerializeTo(ref statsServiceCheck, tags, serializedMetric);
+            serializer.SerializeTo(ref statsServiceCheck, serializedMetric);
             return serializedMetric;
         }
 
