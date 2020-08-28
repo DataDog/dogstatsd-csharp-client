@@ -52,7 +52,10 @@ namespace StatsdClient
                             ? config.StatsdServerName
                             : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
 
-            var pipeName = config.PipeName;
+            var pipeName = !string.IsNullOrEmpty(config.PipeName)
+                            ? config.PipeName
+                            : Environment.GetEnvironmentVariable(StatsdConfig.AgentPipeNameEnvVar);
+
             if (string.IsNullOrEmpty(statsdServerName) && string.IsNullOrEmpty(pipeName))
             {
                 // Ignore pipe name in the error message as its usage is internal only.
