@@ -19,7 +19,7 @@ namespace StatsdClient.Tests
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
             StatsdConfig.DD_AGENT_HOST_ENV_VAR,
             StatsdConfig.EntityIdEnvVar,
-            StatsdConfig.AgentPipeNameEnvVar
+            StatsdConfig.AgentPipeNameEnvVar,
         };
 
         private Mock<IStatsBufferizeFactory> _mock;
