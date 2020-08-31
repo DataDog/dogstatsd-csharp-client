@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Mono.Unix;
+using StatsdClient.Aggregator;
 using StatsdClient.Bufferize;
 using StatsdClient.Transport;
 
@@ -35,7 +36,8 @@ namespace StatsdClient
                 transportData.Transport,
                 transportData.BufferCapacity,
                 config.Advanced,
-                serializers);
+                serializers,
+                config.ClientSideAggregation);
 
             var metricsSender = new MetricsSender(
                 statsBufferize,
@@ -198,12 +200,30 @@ namespace StatsdClient
             ITransport transport,
             int bufferCapacity,
             AdvancedStatsConfig config,
-            Serializers serializers)
+            Serializers serializers,
+            ClientSideAggregationConfig optionalClientSideAggregationConfig)
         {
             var bufferHandler = new BufferBuilderHandler(telemetry, transport);
             var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
-            var statsRouter = _factory.CreateStatsRouter(serializers, bufferBuilder);
+            Aggregators optionalAggregators = null;
+            if (optionalClientSideAggregationConfig != null)
+            {
+                var parameters = new MetricAggregatorParameters(
+                    serializers.MetricSerializer,
+                    bufferBuilder,
+                    optionalClientSideAggregationConfig.MaxUniqueStatsBeforeFlush,
+                    optionalClientSideAggregationConfig.FlushInternal);
+
+                optionalAggregators = new Aggregators
+                {
+                    OptionalCounting = new CountingAggregator(parameters),
+                    OptionalGauge = new GaugeAggregator(parameters),
+                    OptionalSet = new SetAggregator(parameters, telemetry),
+                };
+            }
+
+            var statsRouter = _factory.CreateStatsRouter(serializers, bufferBuilder, optionalAggregators);
 
             var statsBufferize = _factory.CreateStatsBufferize(
                 statsRouter,

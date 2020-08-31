@@ -75,7 +75,7 @@ namespace StatsdClient.Bufferize
 
                 if (_stopwatch.ElapsedMilliseconds > _maxIdleWaitBeforeSending.TotalMilliseconds)
                 {
-                    this._statsRouter.TryFlush();
+                    this._statsRouter.OnIdle();
 
                     return true;
                 }
@@ -85,7 +85,7 @@ namespace StatsdClient.Bufferize
 
             public void OnShutdown()
             {
-                this._statsRouter.TryFlush();
+                this._statsRouter.Flush();
             }
         }
     }
