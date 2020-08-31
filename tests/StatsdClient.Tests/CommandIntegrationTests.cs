@@ -1,37 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
 
 namespace Tests
 {
-    [TestFixture]
+    [TestFixture(false)]
+    [TestFixture(true)] // Use client side aggregation.
     public class CommandIntegrationTests
     {
         private readonly int _serverPort = Convert.ToInt32("8126");
+        private readonly ClientSideAggregationConfig _optionalClientSideAggregationConfig = null;
         private UdpListener _udpListener;
         private Thread _listenThread;
         private string serverName = "127.0.0.1";
         private DogStatsdService _dogStatsdService;
 
-        [OneTimeSetUp]
-        public void SetUpUdpListener()
+        public CommandIntegrationTests(bool useClientSideAggregation)
         {
+            if (useClientSideAggregation)
+            {
+                _optionalClientSideAggregationConfig = new ClientSideAggregationConfig();
+            }
+
             _udpListener = new UdpListener(serverName, _serverPort);
-            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort };
-            metricsConfig.Advanced.TelemetryFlushInterval = TimeSpan.FromDays(1);
-            _dogStatsdService = new DogStatsdService();
-            _dogStatsdService.Configure(metricsConfig);
         }
 
         [OneTimeTearDown]
         public void TearDownUdpListener()
         {
             _udpListener.Dispose();
-            _dogStatsdService.Dispose();
         }
 
         [SetUp]
@@ -39,12 +38,18 @@ namespace Tests
         {
             _listenThread = new Thread(new ParameterizedThreadStart(_udpListener.Listen));
             _listenThread.Start();
+            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort };
+            metricsConfig.ClientSideAggregation = _optionalClientSideAggregationConfig;
+            metricsConfig.Advanced.TelemetryFlushInterval = TimeSpan.FromDays(1);
+            _dogStatsdService = new DogStatsdService();
+            _dogStatsdService.Configure(metricsConfig);
         }
 
         [TearDown]
         public void ClearUdpListenerMessages()
         {
             _udpListener.GetAndClearLastMessages(); // just to be sure that nothing is left over
+            _dogStatsdService.Dispose();
         }
 
         [Test]
@@ -638,6 +643,7 @@ namespace Tests
         private void AssertWasReceived(string shouldBe, int index = 0)
         {
             // Stall until the the listener receives a message or times out
+            _dogStatsdService.Dispose();
             while (_listenThread.IsAlive)
             {
             }
