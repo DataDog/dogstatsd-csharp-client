@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace StatsdClient
+namespace StatsdClient.Transport
 {
     internal class UDPTransport : ITransport
     {
@@ -26,6 +26,8 @@ namespace StatsdClient
         }
 
         public TransportType TransportType => TransportType.UDP;
+
+        public string TelemetryClientTransport => "udp";
 
         /// <summary>
         /// Send the buffer.

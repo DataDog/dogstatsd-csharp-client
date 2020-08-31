@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Utils;
@@ -21,7 +22,10 @@ namespace Tests
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
 
-            SendAndCheckMetricsAreReceived(config, metricToSendCount);
+            SendAndCheckMetricsAreReceived(
+                new SocketServer(config),
+                config,
+                metricToSendCount);
         }
 
 #if !OS_WINDOWS
@@ -40,16 +44,43 @@ namespace Tests
                 config.Advanced.UDSBufferFullBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
 
-                SendAndCheckMetricsAreReceived(config, metricToSendCount);
+                SendAndCheckMetricsAreReceived(
+                    new SocketServer(config),
+                    config,
+                    metricToSendCount);
             }
         }
 #endif
 
-        private static void SendAndCheckMetricsAreReceived(StatsdConfig config, int metricToSendCount)
+        [Test]
+        public void NamedPipe()
         {
-            using (var service = new DogStatsdService())
+#if !OS_WINDOWS
+            // On Windows, named pipe behaves like Unix domain socket. Messages are rarely dropped.
+            // On Unix, named pipe behaves like UDP and messages can be dropped.
+            // On Unix platform, less metrics are sent to not having a failed unit test.
+            var metricToSendCount = 1 * 100;
+#else
+            var metricToSendCount = 100 * 1000;
+#endif
+            var config = new StatsdConfig
             {
-                using (var server = new SocketServer(config))
+                PipeName = "TestPipe",
+            };
+            config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
+            config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
+
+            SendAndCheckMetricsAreReceived(
+                new NamedPipeServer(config.PipeName, 10000, TimeSpan.FromSeconds(1)),
+                config,
+                metricToSendCount);
+        }
+
+        private static void SendAndCheckMetricsAreReceived(AbstractServer server, StatsdConfig config, int metricToSendCount)
+        {
+            using (server)
+            {
+                using (var service = new DogStatsdService())
                 {
                     service.Configure(config);
                     for (int i = 0; i < metricToSendCount; ++i)

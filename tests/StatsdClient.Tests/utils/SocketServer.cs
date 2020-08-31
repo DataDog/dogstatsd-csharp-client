@@ -1,25 +1,16 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Mono.Unix;
 using StatsdClient;
 
 namespace Tests.Utils
 {
-    internal class SocketServer : IDisposable
+    internal class SocketServer : AbstractServer
     {
         private readonly Socket _server;
-        private readonly Task _receiver;
-        private readonly ManualResetEventSlim _serverStop = new ManualResetEventSlim(false);
-        private readonly List<string> _messagesReceived = new List<string>();
 
-        private volatile bool _shutdown = false;
-
-        public SocketServer(StatsdConfig config, bool removeUDSFileBeforeStarting = false)
+        public SocketServer(StatsdConfig config)
         {
             EndPoint endPoint;
             int bufferSize;
@@ -28,12 +19,13 @@ namespace Tests.Utils
             if (serverName.StartsWith(StatsdBuilder.UnixDomainSocketPrefix))
             {
                 serverName = serverName.Substring(StatsdBuilder.UnixDomainSocketPrefix.Length);
-                if (removeUDSFileBeforeStarting)
+                _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
+
+                if (!string.IsNullOrEmpty(serverName) && serverName == Path.GetFullPath(serverName))
                 {
                     File.Delete(serverName);
                 }
 
-                _server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified);
                 endPoint = new UnixEndPoint(serverName);
                 bufferSize = config.StatsdMaxUnixDomainSocketPacketSize;
             }
@@ -46,46 +38,24 @@ namespace Tests.Utils
 
             _server.ReceiveTimeout = 1000;
             _server.Bind(endPoint);
-            _receiver = Task.Run(() => ReadFromServer(bufferSize));
+            Start(bufferSize);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            Stop();
+            base.Dispose();
             _server.Dispose();
         }
 
-        public List<string> Stop()
+        protected override int? Read(byte[] buffer)
         {
-            if (!_shutdown)
+            try
             {
-                _shutdown = true;
-                _serverStop.Wait();
+                return _server.Receive(buffer);
             }
-
-            return _messagesReceived;
-        }
-
-        private void ReadFromServer(int bufferSize)
-        {
-            var buffer = new byte[bufferSize];
-
-            while (true)
+            catch (SocketException e) when (e.SocketErrorCode == SocketError.TimedOut)
             {
-                try
-                {
-                    var count = _server.Receive(buffer);
-                    var message = System.Text.Encoding.UTF8.GetString(buffer, 0, count);
-                    _messagesReceived.AddRange(message.Split("\n", StringSplitOptions.RemoveEmptyEntries));
-                }
-                catch (SocketException e) when (e.SocketErrorCode == SocketError.TimedOut)
-                {
-                    if (_shutdown)
-                    {
-                        _serverStop.Set();
-                        return;
-                    }
-                }
+                return null;
             }
         }
     }

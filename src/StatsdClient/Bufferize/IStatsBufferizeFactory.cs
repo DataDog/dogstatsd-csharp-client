@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using Mono.Unix;
+using StatsdClient.Transport;
 
 namespace StatsdClient.Bufferize
 {
@@ -22,6 +23,8 @@ namespace StatsdClient.Bufferize
         ITransport CreateUnixDomainSocketTransport(
             UnixEndPoint endPoint,
             TimeSpan? udsBufferFullBlockDuration);
+
+        ITransport CreateNamedPipeTransport(string pipeName);
 
         Telemetry CreateTelemetry(
             string assemblyVersion,

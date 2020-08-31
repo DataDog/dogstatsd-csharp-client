@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Mono.Unix;
 
-namespace StatsdClient
+namespace StatsdClient.Transport
 {
     internal class UnixDomainSocketTransport : ITransport
     {
@@ -38,6 +38,8 @@ namespace StatsdClient
 
         public TransportType TransportType => TransportType.UDS;
 
+        public string TelemetryClientTransport => "uds";
+
         /// <summary>
         /// Send the buffer.
         /// Must be thread safe.
@@ -54,6 +56,10 @@ namespace StatsdClient
                 catch (SocketException e) when (e.SocketErrorCode == SocketError.NoBufferSpaceAvailable)
                 {
                     Task.Delay(NoBufferSpaceAvailableWait).Wait();
+                }
+                catch (SocketException)
+                {
+                    return false;
                 }
             }
 

@@ -1,5 +1,6 @@
 using System;
 using StatsdClient.Bufferize;
+using StatsdClient.Transport;
 
 namespace StatsdClient
 {

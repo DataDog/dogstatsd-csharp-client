@@ -4,8 +4,8 @@
     <PackageId>DogStatsD-CSharp-Client</PackageId>
     <Description>A DogStatsD client for C#. DogStatsD is an extension of the StatsD metric server for use with Datadog. For more information visit http://datadoghq.com.</Description>
     <Authors>Datadog</Authors>
-    <PackageVersion>5.0.2</PackageVersion>
     <TargetFrameworks>netstandard1.3;netstandard2.0;net45;net461</TargetFrameworks>
+    <PackageVersion>5.1.0-beta</PackageVersion>
     <Version>5.0.0</Version>
     <PackageLicenseUrl>https://github.com/DataDog/dogstatsd-csharp-client/blob/master/MIT-LICENCE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/DataDog/dogstatsd-csharp-client</PackageProjectUrl>
@@ -16,8 +16,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <DefineConstants>OS_WINDOWS</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.3' ">
+    <DefineConstants>NAMED_PIPE_AVAILABLE</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net45' AND '$(TargetFramework)' != 'net461'">
     <PackageReference Include="System.Net.NameResolution">

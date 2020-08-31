@@ -1,3 +1,5 @@
+using StatsdClient.Transport;
+
 namespace StatsdClient.Bufferize
 {
     /// <summary>

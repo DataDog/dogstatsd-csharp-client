@@ -13,11 +13,13 @@ namespace Tests
         [Test]
         public void UDPReconnection()
         {
-            CheckReconnection(new StatsdConfig
+            var config = new StatsdConfig
             {
                 StatsdServerName = "127.0.0.1",
                 StatsdPort = 1234,
-            });
+            };
+
+            CheckReconnection(c => new SocketServer(c), config);
         }
 
 #if !OS_WINDOWS
@@ -26,21 +28,37 @@ namespace Tests
         {
             using (var temporaryPath = new TemporaryPath())
             {
-                CheckReconnection(new StatsdConfig
+                var config = new StatsdConfig
                 {
                     StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path,
-                });
+                };
+
+                CheckReconnection(c => new SocketServer(c), config);
             }
+        }
+#else
+
+        [Test]
+        public void NamedPipeReconnection()
+        {
+            var config = new StatsdConfig
+            {
+                PipeName = "TestPipe",
+            };
+            config.Advanced.TelemetryFlushInterval = null;
+            CheckReconnection(c => new NamedPipeServer(c.PipeName, 1000, TimeSpan.FromSeconds(1)), config);
         }
 #endif
 
-        private static void CheckReconnection(StatsdConfig config)
+        private static void CheckReconnection(
+            Func<StatsdConfig, AbstractServer> serverFactory,
+            StatsdConfig config)
         {
-            SocketServer server = null;
+            AbstractServer server = null;
 
             try
             {
-                server = new SocketServer(config);
+                server = serverFactory(config);
                 using (var service = new DogStatsdService())
                 {
                     service.Configure(config);
@@ -53,7 +71,7 @@ namespace Tests
                     Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
 
                     // Restart the server
-                    server = new SocketServer(config, removeUDSFileBeforeStarting: true);
+                    server = serverFactory(config);
                     service.Increment("test3");
                     service.Dispose();
                     Assert.AreEqual("test3:1|c", server.Stop().Last());

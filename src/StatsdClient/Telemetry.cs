@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using StatsdClient.Bufferize;
+using StatsdClient.Transport;
 
 namespace StatsdClient
 {
@@ -38,14 +39,7 @@ namespace StatsdClient
         {
             _optionalTransport = transport;
 
-            string transportStr;
-            switch (transport.TransportType)
-            {
-                case TransportType.UDP: transportStr = "udp"; break;
-                case TransportType.UDS: transportStr = "uds"; break;
-                default: transportStr = transport.TransportType.ToString(); break;
-            }
-
+            var transportStr = transport.TelemetryClientTransport;
             var optionalTags = new List<string> { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transportStr}" };
             optionalTags.AddRange(globalTags);
             _optionalTags = optionalTags.ToArray();
