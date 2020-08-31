@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using StatsdClient.Utils;
 
@@ -18,6 +19,19 @@ namespace Tests
             v.Dispose();
             Assert.True(pool.TryDequeue(out v));
             Assert.AreEqual(0, v.Value);
+        }
+
+        [Test]
+        public void AbstractPoolObjectFinalizer()
+        {
+            var pool = new Pool<PoolObject>(p => new PoolObject(p), 1);
+
+            Assert.True(pool.TryDequeue(out var _));
+            Assert.False(pool.TryDequeue(out var _));
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Assert.True(pool.TryDequeue(out var _));
         }
 
         private class PoolObject : AbstractPoolObject

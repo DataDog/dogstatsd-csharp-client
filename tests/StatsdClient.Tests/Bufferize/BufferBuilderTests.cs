@@ -2,6 +2,7 @@ using System.Text;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Bufferize;
+using StatsdClient.Utils;
 
 namespace Tests
 {
@@ -57,7 +58,7 @@ namespace Tests
 
         private static SerializedMetric CreateSerializedMetric(char c, int count)
         {
-            var serializedMetric = new SerializedMetric(null);
+            var serializedMetric = new SerializedMetric(new Pool<SerializedMetric>(p => new SerializedMetric(p), 10));
             serializedMetric.Builder.Append(new string(c, count));
 
             return serializedMetric;
