@@ -5,7 +5,7 @@ namespace StatsdClient.Aggregator
     /// </summary>
     internal class Aggregators
     {
-        public CountingAggregator OptionalCounting { get; set; }
+        public CountAggregator OptionalCount { get; set; }
 
         public GaugeAggregator OptionalGauge { get; set; }
 

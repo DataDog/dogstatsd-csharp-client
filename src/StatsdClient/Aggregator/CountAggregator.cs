@@ -3,13 +3,14 @@ using StatsdClient.Statistic;
 namespace StatsdClient.Aggregator
 {
     /// <summary>
-    /// Aggregate `StatsMetric` instances of type `Counting` by summing the value by `MetricStatsKey`.
+    /// Aggregate <see cref="StatsMetric"/> instances of type <see cref="MetricType.Count"/>
+    /// by summing the value by <see cref="MetricStatsKey"/>.
     /// </summary>
-    internal class CountingAggregator
+    internal class CountAggregator
     {
         private readonly AggregatorFlusher<StatsMetric> _aggregator;
 
-        public CountingAggregator(MetricAggregatorParameters parameters)
+        public CountAggregator(MetricAggregatorParameters parameters)
         {
             _aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Count);
         }

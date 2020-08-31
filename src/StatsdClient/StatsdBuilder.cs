@@ -220,7 +220,7 @@ namespace StatsdClient
 
                 optionalAggregators = new Aggregators
                 {
-                    OptionalCounting = new CountingAggregator(parameters),
+                    OptionalCount = new CountAggregator(parameters),
                     OptionalGauge = new GaugeAggregator(parameters),
                     OptionalSet = new SetAggregator(parameters, telemetry),
                 };

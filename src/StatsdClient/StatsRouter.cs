@@ -8,7 +8,7 @@ namespace StatsdClient
     /// <summary>
     /// Route `Stats` instances.
     /// Route a metric of type <see cref="MetricType.Count"/>, <see cref="MetricType.Gauge"/>
-    /// and <see cref="MetricType.Set"/> respectively to <see cref="CountingAggregator"/>,
+    /// and <see cref="MetricType.Set"/> respectively to <see cref="CountAggregator"/>,
     /// <see cref="GaugeAggregator"/> and <see cref="SetAggregator"/>.
     /// Others stats are routed to <see cref="BufferBuilder"/>.
     /// </summary>
@@ -16,7 +16,7 @@ namespace StatsdClient
     {
         private readonly Serializers _serializers;
         private readonly BufferBuilder _bufferBuilder;
-        private readonly CountingAggregator _optionalCountingAggregator;
+        private readonly CountAggregator _optionalCountAggregator;
         private readonly GaugeAggregator _optionalGaugeAggregator;
         private readonly SetAggregator _optionalSetAggregator;
 
@@ -31,7 +31,7 @@ namespace StatsdClient
             _bufferBuilder = bufferBuilder;
             if (optionalAggregators != null)
             {
-                _optionalCountingAggregator = optionalAggregators.OptionalCounting;
+                _optionalCountAggregator = optionalAggregators.OptionalCount;
                 _optionalGaugeAggregator = optionalAggregators.OptionalGauge;
                 _optionalSetAggregator = optionalAggregators.OptionalSet;
             }
@@ -74,7 +74,7 @@ namespace StatsdClient
         private void TryFlush(bool force)
         {
             _bufferBuilder.HandleBufferAndReset();
-            _optionalCountingAggregator?.TryFlush(force);
+            _optionalCountAggregator?.TryFlush(force);
             _optionalGaugeAggregator?.TryFlush(force);
             _optionalSetAggregator?.TryFlush(force);
         }
@@ -84,9 +84,9 @@ namespace StatsdClient
             switch (metric.MetricType)
             {
                 case MetricType.Count:
-                    if (_optionalCountingAggregator != null)
+                    if (_optionalCountAggregator != null)
                     {
-                        _optionalCountingAggregator.OnNewValue(ref metric);
+                        _optionalCountAggregator.OnNewValue(ref metric);
                         return false;
                     }
 
