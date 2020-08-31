@@ -12,9 +12,11 @@ namespace StatsdClient.Transport
         private readonly TimeSpan _timeout;
         private byte[] _internalbuffer = new byte[0];
 
-        // As SpinLock is a struct, if it is marked as `readonly`, each time it is used
-        // a new copy is created which leads to the error:
-        // System.Threading.SynchronizationLockException : The calling thread does not hold the lock.
+        // `SpinLock` is a struct. A struct marked as `readonly` is copied each time a mutating function is called.
+        // When calling `_lock.Enter` and `_lock.Exit()` the `SpinLock` instance is copied. Calling `_lock.Exit()` raises an
+        // error as the instance does not hold the lock (System.Threading.SynchronizationLockException : The calling
+        // thread does not hold the lock.)
+        // For this reason, `_lock` is not marked as `readonly`
         private SpinLock _lock = new SpinLock(enableThreadOwnerTracking: true);
 
         public NamedPipeTransport(string pipeName, TimeSpan? timeout = null)
