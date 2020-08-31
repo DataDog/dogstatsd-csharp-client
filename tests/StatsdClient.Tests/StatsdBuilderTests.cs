@@ -191,6 +191,27 @@ namespace StatsdClient.Tests
             _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Exactly(2));
         }
 
+        [Test]
+        public void ClientSideAggregation()
+        {
+            var config = new StatsdConfig { };
+
+            BuildStatsData(config);
+            _mock.Verify(
+                m => m.CreateStatsRouter(
+                It.IsAny<Serializers>(),
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
+                null));
+
+            config.ClientSideAggregation = new ClientSideAggregationConfig();
+            BuildStatsData(config);
+            _mock.Verify(
+                m => m.CreateStatsRouter(
+                It.IsAny<Serializers>(),
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
+                It.IsNotNull<Aggregators>()));
+        }
+
         private static StatsdConfig CreateUDSConfig(string server = null)
         {
             var config = new StatsdConfig();
