@@ -58,10 +58,7 @@ namespace StatsdClient
                     throw new ArgumentException($"{stats.Kind} is not supported");
             }
 
-            if (!_bufferBuilder.Add(_serializedMetric))
-            {
-                throw new InvalidOperationException($"The metric size exceeds the buffer capacity: {_serializedMetric.ToString()}");
-            }
+            _bufferBuilder.Add(_serializedMetric);
         }
 
         public void OnIdle()
