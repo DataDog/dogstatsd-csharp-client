@@ -7,7 +7,7 @@ namespace StatsdClient
 {
     /// <summary>
     /// Route `Stats` instances.
-    /// Route a metric of type <see cref="MetricType.Counting"/>, <see cref="MetricType.Gauge"/>
+    /// Route a metric of type <see cref="MetricType.Count"/>, <see cref="MetricType.Gauge"/>
     /// and <see cref="MetricType.Set"/> respectively to <see cref="CountingAggregator"/>,
     /// <see cref="GaugeAggregator"/> and <see cref="SetAggregator"/>.
     /// Others stats are routed to <see cref="BufferBuilder"/>.
@@ -83,7 +83,7 @@ namespace StatsdClient
         {
             switch (metric.MetricType)
             {
-                case MetricType.Counting:
+                case MetricType.Count:
                     if (_optionalCountingAggregator != null)
                     {
                         _optionalCountingAggregator.OnNewValue(ref metric);

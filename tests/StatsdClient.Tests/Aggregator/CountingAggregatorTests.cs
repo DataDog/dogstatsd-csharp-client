@@ -27,7 +27,7 @@ namespace StatsdClient.Tests.Aggregator
         {
             var statsMetric = new StatsMetric
             {
-                MetricType = MetricType.Counting,
+                MetricType = MetricType.Count,
                 StatName = statName,
                 NumericValue = value,
             };

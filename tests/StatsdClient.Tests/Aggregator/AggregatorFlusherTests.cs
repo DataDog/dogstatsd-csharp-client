@@ -20,7 +20,7 @@ namespace StatsdClient.Tests.Aggregator
                 TimeSpan.FromMinutes(1),
                 maxUniqueStatsBeforeFlush: 3);
 
-            var aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Counting);
+            var aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Count);
             Add(aggregator, "key1", new StatsMetric { });
             Add(aggregator, "key2", new StatsMetric { });
             Flush(aggregator);
@@ -48,7 +48,7 @@ namespace StatsdClient.Tests.Aggregator
                 TimeSpan.FromMilliseconds(500),
                 maxUniqueStatsBeforeFlush: 100);
 
-            var aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Counting);
+            var aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Count);
             Add(aggregator, "key", new StatsMetric { });
             Flush(aggregator);
             handler.Verify(h => h.Handle(It.IsAny<byte[]>(), It.IsAny<int>()), Times.Never());

@@ -78,7 +78,7 @@ namespace StatsdClient.Aggregator
 
             public HashSet<string> Values { get; } = new HashSet<string>();
 
-            public override void Reset()
+            protected override void DoReset()
             {
                 Values.Clear();
             }

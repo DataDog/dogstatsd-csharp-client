@@ -11,7 +11,7 @@ namespace StatsdClient.Aggregator
 
         public CountingAggregator(MetricAggregatorParameters parameters)
         {
-            _aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Counting);
+            _aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Count);
         }
 
         public void OnNewValue(ref StatsMetric metric)
