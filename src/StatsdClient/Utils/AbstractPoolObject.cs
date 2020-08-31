@@ -1,18 +1,29 @@
 using System;
+using System.Diagnostics;
 
 namespace StatsdClient.Utils
 {
     internal abstract class AbstractPoolObject : IDisposable
     {
         private readonly IPool _pool;
-        private bool _disposed = false;
+        private bool _enqueue = false;
 
         public AbstractPoolObject(IPool pool)
         {
             _pool = pool;
         }
 
-        ~AbstractPoolObject() => Dispose(false);
+        ~AbstractPoolObject()
+        {
+            try
+            {
+                Dispose(false);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+        }
 
         public void Dispose()
         {
@@ -20,16 +31,22 @@ namespace StatsdClient.Utils
             GC.SuppressFinalize(this);
         }
 
-        public abstract void Reset();
+        public void Reset()
+        {
+            _enqueue = false;
+            DoReset();
+        }
+
+        protected abstract void DoReset();
 
         protected void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_enqueue)
             {
                 _pool.Enqueue(this);
             }
 
-            _disposed = true;
+            _enqueue = true;
         }
     }
 }

@@ -33,6 +33,10 @@ namespace StatsdClient.Utils
 
                 result = _factory(this);
             }
+            else
+            {
+                result.Reset();
+            }
 
             return true;
         }
@@ -45,7 +49,6 @@ namespace StatsdClient.Utils
                 throw new ArgumentException($"{obj} is not a valid argument");
             }
 
-            v.Reset();
             _pool.Enqueue(v);
         }
     }

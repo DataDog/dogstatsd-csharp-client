@@ -43,7 +43,7 @@ namespace Tests
 
             public int Value { get; set; }
 
-            public override void Reset()
+            protected override void DoReset()
             {
                 Value = 0;
             }

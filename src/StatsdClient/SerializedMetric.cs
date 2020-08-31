@@ -29,7 +29,7 @@ namespace StatsdClient
             return Builder.ToString();
         }
 
-        public override void Reset()
+        protected override void DoReset()
         {
             Builder.Clear();
         }
