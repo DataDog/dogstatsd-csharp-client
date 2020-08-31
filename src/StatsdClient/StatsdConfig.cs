@@ -55,6 +55,11 @@ namespace StatsdClient
         public const string AgentHostEnvVar = "DD_AGENT_HOST";
 
         /// <summary>
+        /// The name of the environment variable defining the name of the pipe. INTERNAL USAGE ONLY.
+        /// </summary>
+        public const string AgentPipeNameEnvVar = "DD_AGENT_PIPE_NAME";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="StatsdConfig"/> class.
         /// </summary>
         public StatsdConfig()

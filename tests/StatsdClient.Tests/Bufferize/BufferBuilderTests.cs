@@ -3,6 +3,7 @@ using System.Text;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Bufferize;
+using StatsdClient.Utils;
 
 namespace Tests
 {
