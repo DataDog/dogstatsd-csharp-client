@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using StatsdClient.Utils;
 
@@ -20,6 +21,19 @@ namespace Tests
             Assert.AreEqual(0, v.Value);
         }
 
+        [Test]
+        public void AbstractPoolObjectFinalizer()
+        {
+            var pool = new Pool<PoolObject>(p => new PoolObject(p), 1);
+
+            Assert.True(pool.TryDequeue(out var _));
+            Assert.False(pool.TryDequeue(out var _));
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Assert.True(pool.TryDequeue(out var _));
+        }
+
         private class PoolObject : AbstractPoolObject
         {
             public PoolObject(IPool p)
@@ -29,7 +43,7 @@ namespace Tests
 
             public int Value { get; set; }
 
-            public override void Reset()
+            protected override void DoReset()
             {
                 Value = 0;
             }

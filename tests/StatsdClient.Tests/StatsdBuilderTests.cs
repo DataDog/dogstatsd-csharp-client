@@ -19,6 +19,7 @@ namespace StatsdClient.Tests
             StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
             StatsdConfig.DD_AGENT_HOST_ENV_VAR,
             StatsdConfig.EntityIdEnvVar,
+            StatsdConfig.AgentPipeNameEnvVar,
         };
 
         private Mock<IStatsBufferizeFactory> _mock;
@@ -184,6 +185,24 @@ namespace StatsdClient.Tests
 
             BuildStatsData(config);
             _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void PipeName()
+        {
+            var config = new StatsdConfig { };
+            config.StatsdServerName = string.Empty;
+            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, string.Empty);
+
+            _mock.Setup(m => m.CreateNamedPipeTransport(It.IsAny<string>())).Returns(new NamedPipeTransport("pipename"));
+
+            Environment.SetEnvironmentVariable(StatsdConfig.AgentPipeNameEnvVar, "TestEnv");
+            BuildStatsData(config);
+            _mock.Verify(m => m.CreateNamedPipeTransport("TestEnv"));
+
+            config.PipeName = "Test";
+            BuildStatsData(config);
+            _mock.Verify(m => m.CreateNamedPipeTransport(config.PipeName));
         }
 
         private static StatsdConfig CreateUDSConfig(string server = null)

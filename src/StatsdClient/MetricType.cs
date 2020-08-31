@@ -2,7 +2,7 @@ namespace StatsdClient
 {
     internal enum MetricType
     {
-        Counting,
+        Count,
         Timing,
         Gauge,
         Histogram,
