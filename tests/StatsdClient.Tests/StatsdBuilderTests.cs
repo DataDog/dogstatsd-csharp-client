@@ -125,7 +125,6 @@ namespace StatsdClient.Tests
 
             BuildStatsData(config);
             _mock.Verify(m => m.CreateStatsBufferize(
-                It.IsAny<Telemetry>(),
                 It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
                 conf.MaxMetricsInAsyncQueue,
                 conf.MaxBlockDuration,
@@ -141,7 +140,6 @@ namespace StatsdClient.Tests
 
             BuildStatsData(config);
             _mock.Verify(m => m.CreateStatsBufferize(
-                It.IsAny<Telemetry>(),
                 It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize),
                 It.IsAny<int>(),
                 null,

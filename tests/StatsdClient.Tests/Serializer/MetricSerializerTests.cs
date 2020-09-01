@@ -298,7 +298,7 @@ namespace StatsdClient.Tests
             string[] tags = null,
             string prefix = null)
         {
-            var serializerHelper = new SerializerHelper(null);
+            var serializerHelper = new SerializerHelper(null, 10);
             var serializer = new MetricSerializer(serializerHelper, prefix);
             var serializedMetric = serializer.Serialize(
                 metricType,

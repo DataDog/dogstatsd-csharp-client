@@ -10,17 +10,13 @@ namespace StatsdClient.Bufferize
     internal class StatsBufferize : IDisposable
     {
         private readonly AsynchronousWorker<SerializedMetric> _worker;
-        private readonly Telemetry _telemetry;
 
         public StatsBufferize(
-            Telemetry telemetry,
             BufferBuilder bufferBuilder,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending)
         {
-            _telemetry = telemetry;
-
             var handler = new WorkerHandler(bufferBuilder, maxIdleWaitBeforeSending);
 
             // `handler` (and also `bufferBuilder`) do not need to be thread safe as long as workerMaxItemCount is 1.
@@ -32,13 +28,15 @@ namespace StatsdClient.Bufferize
                 blockingQueueTimeout);
         }
 
-        public void Send(SerializedMetric serializedMetric)
+        public bool Send(SerializedMetric serializedMetric)
         {
             if (!this._worker.TryEnqueue(serializedMetric))
             {
                 serializedMetric.Dispose();
-                _telemetry.OnPacketsDroppedQueue();
+                return false;
             }
+
+            return true;
         }
 
         public void Dispose()

@@ -1,17 +1,18 @@
-using System.Collections.Concurrent;
 using System.Text;
+using StatsdClient.Utils;
 
 namespace StatsdClient
 {
     internal class SerializerHelper
     {
         private static readonly string[] EmptyArray = new string[0];
-        private readonly ConcurrentQueue<SerializedMetric> _pool = new ConcurrentQueue<SerializedMetric>();
+        private readonly Pool<SerializedMetric> _pool;
         private readonly string _constantTags;
 
-        public SerializerHelper(string[] constantTags)
+        public SerializerHelper(string[] constantTags, int poolMaxAllocation)
         {
             _constantTags = constantTags != null ? string.Join(",", constantTags) : string.Empty;
+            _pool = new Pool<SerializedMetric>(pool => new SerializedMetric(pool), poolMaxAllocation);
         }
 
         public static string EscapeContent(string content)
@@ -35,13 +36,9 @@ namespace StatsdClient
             }
         }
 
-        public SerializedMetric GetSerializedMetric()
+        public SerializedMetric GetOptionalSerializedMetric()
         {
-            if (!_pool.TryDequeue(out var serializedMetric))
-            {
-                serializedMetric = new SerializedMetric(_pool);
-            }
-
+            _pool.TryDequeue(out var serializedMetric);
             return serializedMetric;
         }
 

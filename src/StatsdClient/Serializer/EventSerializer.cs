@@ -28,7 +28,12 @@ namespace StatsdClient
             string processedTitle = SerializerHelper.EscapeContent(title);
             string processedText = SerializerHelper.EscapeContent(text);
 
-            var serializedMetric = _serializerHelper.GetSerializedMetric();
+            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
+            if (serializedMetric == null)
+            {
+                return null;
+            }
+
             var builder = serializedMetric.Builder;
 
             builder.Append("_e{");

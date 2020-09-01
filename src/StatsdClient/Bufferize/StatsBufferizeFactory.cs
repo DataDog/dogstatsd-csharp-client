@@ -8,14 +8,12 @@ namespace StatsdClient.Bufferize
     internal class StatsBufferizeFactory : IStatsBufferizeFactory
     {
         public StatsBufferize CreateStatsBufferize(
-            Telemetry telemetry,
             BufferBuilder bufferBuilder,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending)
         {
             return new StatsBufferize(
-                telemetry,
                 bufferBuilder,
                 workerMaxItemCount,
                 blockingQueueTimeout,

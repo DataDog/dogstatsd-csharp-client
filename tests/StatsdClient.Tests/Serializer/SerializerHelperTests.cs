@@ -10,7 +10,7 @@ namespace Tests
         [Test]
         public void AppendTags()
         {
-            var helper = new SerializerHelper(null);
+            var helper = new SerializerHelper(null, 10);
             var builder = new StringBuilder();
 
             helper.AppendTags(builder, new string[0]);
@@ -23,7 +23,7 @@ namespace Tests
         [Test]
         public void AppendTagsWithConstantTags()
         {
-            var helper = new SerializerHelper(new[] { "ctag1", "ctag2" });
+            var helper = new SerializerHelper(new[] { "ctag1", "ctag2" }, 10);
             var builder = new StringBuilder();
 
             helper.AppendTags(builder, new string[0]);
@@ -53,16 +53,16 @@ namespace Tests
         }
 
         [Test]
-        public void GetSerializedMetric()
+        public void GetOptionalSerializedMetric()
         {
-            var serializerHelper = new SerializerHelper(null);
+            var serializerHelper = new SerializerHelper(null, 10);
 
-            var metric = serializerHelper.GetSerializedMetric();
+            var metric = serializerHelper.GetOptionalSerializedMetric();
             metric.Builder.Append("Test");
-            Assert.AreNotEqual(metric, serializerHelper.GetSerializedMetric());
+            Assert.AreNotEqual(metric, serializerHelper.GetOptionalSerializedMetric());
             metric.Dispose();
 
-            var recycledMetric = serializerHelper.GetSerializedMetric();
+            var recycledMetric = serializerHelper.GetOptionalSerializedMetric();
             Assert.AreEqual(metric, recycledMetric);
             Assert.AreEqual(0, recycledMetric.Builder.Length);
         }
