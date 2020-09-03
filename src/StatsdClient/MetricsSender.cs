@@ -14,7 +14,8 @@ namespace StatsdClient
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
         private readonly Pool<Stats> _pool;
-
+        private readonly Action onMetricSent;
+        
         internal MetricsSender(
                     Func<StatsBufferize> statsBufferize,
                     IRandomGenerator randomGenerator,
@@ -34,6 +35,7 @@ namespace StatsdClient
             _optionalTelemetry = optionalTelemetry;
             _truncateIfTooLong = truncateIfTooLong;
             _pool = new Pool<Stats>(pool => new Stats(pool), poolMaxAllocation);
+            onMetricSent = () => _optionalTelemetry?.OnMetricSent();
         }
 
         public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
@@ -90,11 +92,11 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.NumericValue = value;
 
-                    Send(stats, () => _optionalTelemetry?.OnMetricSent());
+                    Send(stats, onMetricSent);
                 }
             }
         }
-
+        
         public void SendSetMetric(string name, string value, double sampleRate = 1.0, string[] tags = null)
         {
             if (_randomGenerator.ShouldSend(sampleRate))

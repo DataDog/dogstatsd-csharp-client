@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using StatsdClient.Statistic;
 
 namespace StatsdClient.Aggregator
 {
@@ -6,15 +7,15 @@ namespace StatsdClient.Aggregator
     /// Dictionary Key for `MetricStats`.
     /// It is more efficient to use `MetricStatsKey` than creating a string from metric name and tags.
     /// </summary>
-    internal struct MetricStatsKey
+    internal class MetricStatsKey
     {
-        private readonly string _metricName;
-        private readonly string[] _tags;
+        private string _metricName => _metric.StatName;
+        private string[] _tags => _metric.Tags;
+        private readonly StatsMetric _metric;
 
-        public MetricStatsKey(string metricName, string[] tags)
-        {
-            _metricName = metricName;
-            _tags = tags;
+        public MetricStatsKey(StatsMetric metric)
+        {            
+            _metric = metric;
         }
 
         // This code was auto generated

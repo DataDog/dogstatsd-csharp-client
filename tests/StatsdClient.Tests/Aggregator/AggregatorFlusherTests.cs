@@ -60,8 +60,8 @@ namespace StatsdClient.Tests.Aggregator
 
         private static void Add(AggregatorFlusher<StatsMetric> aggregator, string key, StatsMetric value)
         {
-            var statsKey = new MetricStatsKey(key, null);
-            aggregator.Add(ref statsKey, value);
+            // var statsKey = new MetricStatsKey(key, null);
+            // aggregator.Add(ref statsKey, value);
         }
 
         private static void Flush(AggregatorFlusher<StatsMetric> aggregator, bool force = false)

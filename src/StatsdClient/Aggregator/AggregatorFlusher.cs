@@ -64,12 +64,13 @@ namespace StatsdClient.Aggregator
 
         public MetricStatsKey CreateKey(StatsMetric metric)
         {
-            if (metric.MetricType != _expectedMetricType)
-            {
-                throw new ArgumentException($"Metric type is {metric.MetricType} instead of {_expectedMetricType}.");
-            }
+            return metric.Key;
+            // if (metric.MetricType != _expectedMetricType)
+            // {
+            //     throw new ArgumentException($"Metric type is {metric.MetricType} instead of {_expectedMetricType}.");
+            // }
 
-            return new MetricStatsKey(metric.StatName, metric.Tags);
+            // return new MetricStatsKey(metric.StatName, metric.Tags);
         }
     }
 }

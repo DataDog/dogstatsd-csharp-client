@@ -13,7 +13,7 @@ namespace StatsdClient.Statistic
     {
         // The next 3 fields are not properties because we want to take a reference on them to avoid a copy.
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Take a reference on struct")]
-        public StatsMetric Metric;
+        public StatsMetric Metric = new StatsMetric();
 
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Take a reference on struct")]
         public StatsServiceCheck ServiceCheck;

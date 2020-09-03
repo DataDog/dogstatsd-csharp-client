@@ -1,12 +1,20 @@
 using System;
+using StatsdClient.Aggregator;
 
 namespace StatsdClient.Statistic
 {
     /// <summary>
     /// Store the data for a metric.
     /// </summary>
-    internal struct StatsMetric
+    internal class StatsMetric
     {
+        public StatsMetric()
+        {
+            Key = new MetricStatsKey(this);
+        }
+        public MetricStatsKey Key  {get; set;}
+        
+
         public MetricType MetricType { get; set; }
 
         public string StatName { get; set; }
