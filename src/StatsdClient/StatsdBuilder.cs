@@ -25,6 +25,10 @@ namespace StatsdClient
 
         public StatsdData BuildStatsData(StatsdConfig config)
         {
+             var statsBufferizes = new List<StatsBufferize> ();
+            var transports = new List<ITransport> ();
+
+            Func<StatsBufferize> factory = () => {
             var endPoint = BuildEndPoint(config);
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
@@ -38,15 +42,19 @@ namespace StatsdClient
                 config.Advanced,
                 serializers,
                 config.ClientSideAggregation);
+                statsBufferizes.Add(statsBufferize);
+                transports.Add(transport);
+                return statsBufferize;
+            };
 
             var metricsSender = new MetricsSender(
-                statsBufferize,
+                factory,
                 new RandomGenerator(),
                 new StopWatchFactory(),
-                telemetry,
+                null,
                 config.StatsdTruncateIfTooLong,
                 config.Advanced.MaxMetricsInAsyncQueue * 2);
-            return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
+            return new StatsdData(metricsSender, statsBufferizes, transports, null);
         }
 
         private static DogStatsdEndPoint BuildEndPoint(StatsdConfig config)

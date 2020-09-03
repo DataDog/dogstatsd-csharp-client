@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using StatsdClient.Bufferize;
 using StatsdClient.Transport;
 
@@ -6,13 +7,13 @@ namespace StatsdClient
 {
     internal class StatsdData : IDisposable
     {
-        private ITransport _transport;
-        private StatsBufferize _statsBufferize;
+        private List<ITransport> _transport;
+        private List<StatsBufferize> _statsBufferize;
 
         public StatsdData(
             MetricsSender metricsSender,
-            StatsBufferize statsBufferize,
-            ITransport transport,
+            List<StatsBufferize> statsBufferize,
+            List<ITransport> transport,
             Telemetry telemetry)
         {
             MetricsSender = metricsSender;
@@ -33,11 +34,22 @@ namespace StatsdClient
             Telemetry?.Dispose();
             Telemetry = null;
 
-            _statsBufferize?.Dispose();
-            _statsBufferize = null;
+            foreach (var d in _statsBufferize)
+            {
+                d.Dispose();
+            }
+            _statsBufferize.Clear();
+            // _statsBufferize?.Dispose();
+            // _statsBufferize = null;
 
-            _transport?.Dispose();
-            _transport = null;
+            foreach (var d in _transport)
+            {
+                d.Dispose();
+            }
+            _transport.Clear();
+
+            // _transport?.Dispose();
+            // _transport = null;
 
             MetricsSender = null;
         }

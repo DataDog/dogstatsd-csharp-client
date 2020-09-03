@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using StatsdClient.Bufferize;
 using StatsdClient.Statistic;
 using StatsdClient.Utils;
@@ -8,14 +9,14 @@ namespace StatsdClient
     internal class MetricsSender
     {
         private readonly Telemetry _optionalTelemetry;
-        private readonly StatsBufferize _statsBufferize;
+        private readonly StatsBufferize[] _statsBufferizes;
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
         private readonly Pool<Stats> _pool;
 
         internal MetricsSender(
-                    StatsBufferize statsBufferize,
+                    Func<StatsBufferize> statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
                     Telemetry optionalTelemetry,
@@ -23,7 +24,12 @@ namespace StatsdClient
                     int poolMaxAllocation)
         {
             _stopwatchFactory = stopwatchFactory;
-            _statsBufferize = statsBufferize;
+            _statsBufferizes = new StatsBufferize[4];
+            for (int i = 0; i < _statsBufferizes.Length; ++i)
+            {
+                _statsBufferizes[i] = statsBufferize();
+            }
+
             _randomGenerator = randomGenerator;
             _optionalTelemetry = optionalTelemetry;
             _truncateIfTooLong = truncateIfTooLong;
@@ -134,9 +140,13 @@ namespace StatsdClient
             return false;
         }
 
+int i = 0;
+
         private void Send(Stats metricFields, Action onSuccess)
         {
-            if (_statsBufferize.Send(metricFields))
+            var index = Interlocked.Increment(ref i) % _statsBufferizes.Length;
+
+            if (_statsBufferizes[index].Send(metricFields))
             {
                 onSuccess();
             }
