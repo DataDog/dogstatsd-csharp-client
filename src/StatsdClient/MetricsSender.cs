@@ -89,7 +89,7 @@ namespace StatsdClient
                 throw new ArgumentException($"{nameof(SendMetric)} does not support `MetricType.Set`.");
             }
 
-            if (_randomGenerator.ShouldSend(sampleRate))
+            if (sampleRate == 1.0 || _randomGenerator.ShouldSend(sampleRate))
             {
                 var data = GetData();
                 if (TryDequeueStats(data, out var stats))
