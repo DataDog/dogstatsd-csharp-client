@@ -5,7 +5,7 @@ namespace StatsdClient.Statistic
     /// <summary>
     /// Store the data for a service check.
     /// </summary>
-    internal struct StatsServiceCheck
+    internal class StatsServiceCheck
     {
         public string Name { get; set; }
 

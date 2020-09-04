@@ -28,17 +28,17 @@ namespace StatsdClient.Aggregator
             _expectedMetricType = expectedMetricType;
         }
 
-        public bool TryGetValue(ref MetricStatsKey key, out T v)
+        public bool TryGetValue(MetricStatsKey key, out T v)
         {
             return this._values.TryGetValue(key, out v);
         }
 
-        public void Add(ref MetricStatsKey key, T v)
+        public void Add(MetricStatsKey key, T v)
         {
             this._values.Add(key, v);
         }
 
-        public void Update(ref MetricStatsKey key, T v)
+        public void Update(MetricStatsKey key, T v)
         {
             this._values[key] = v;
         }
@@ -58,7 +58,7 @@ namespace StatsdClient.Aggregator
 
         public void FlushStatsMetric(StatsMetric metric)
         {
-            _serializer.SerializeTo(ref metric, _serializedMetric);
+            _serializer.SerializeTo(metric, _serializedMetric);
             _bufferBuilder.Add(_serializedMetric);
         }
 

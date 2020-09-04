@@ -5,7 +5,7 @@ namespace StatsdClient.Statistic
     /// <summary>
     /// Store the data for an event.
     /// </summary>
-    internal struct StatsEvent
+    internal class StatsEvent
     {
         public string Title { get; set; }
 

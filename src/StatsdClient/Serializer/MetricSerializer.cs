@@ -27,7 +27,7 @@ namespace StatsdClient
             _prefix = string.IsNullOrEmpty(prefix) ? string.Empty : prefix + ".";
         }
 
-        public void SerializeTo(ref StatsMetric metricStats, SerializedMetric serializedMetric)
+        public void SerializeTo(StatsMetric metricStats, SerializedMetric serializedMetric)
         {
             serializedMetric.Reset();
 

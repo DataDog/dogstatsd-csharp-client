@@ -45,7 +45,7 @@ namespace StatsdClient
                     this._serializers.EventSerializer.SerializeTo(ref stats.Event, _serializedMetric);
                     break;
                 case StatsKind.Metric:
-                    if (!RouteMetric(ref stats.Metric))
+                    if (!RouteMetric(stats.Metric))
                     {
                         return;
                     }
@@ -79,14 +79,14 @@ namespace StatsdClient
             _optionalSetAggregator?.TryFlush(force);
         }
 
-        private bool RouteMetric(ref StatsMetric metric)
+        private bool RouteMetric(StatsMetric metric)
         {
             switch (metric.MetricType)
             {
                 case MetricType.Count:
                     if (_optionalCountAggregator != null)
                     {
-                        _optionalCountAggregator.OnNewValue(ref metric);
+                        _optionalCountAggregator.OnNewValue(metric);
                         return false;
                     }
 
@@ -94,7 +94,7 @@ namespace StatsdClient
                 case MetricType.Gauge:
                     if (_optionalGaugeAggregator != null)
                     {
-                        _optionalGaugeAggregator.OnNewValue(ref metric);
+                        _optionalGaugeAggregator.OnNewValue(metric);
                         return false;
                     }
 
@@ -102,7 +102,7 @@ namespace StatsdClient
                 case MetricType.Set:
                     if (_optionalSetAggregator != null)
                     {
-                        _optionalSetAggregator.OnNewValue(ref metric);
+                        _optionalSetAggregator.OnNewValue(metric);
                         return false;
                     }
 
@@ -111,7 +111,7 @@ namespace StatsdClient
                     break;
             }
 
-            this._serializers.MetricSerializer.SerializeTo(ref metric, _serializedMetric);
+            this._serializers.MetricSerializer.SerializeTo(metric, _serializedMetric);
             return true;
         }
     }

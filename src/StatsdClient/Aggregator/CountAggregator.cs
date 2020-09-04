@@ -27,17 +27,17 @@ namespace StatsdClient.Aggregator
 
         // Perf: MEtricStatsKey  make implement Equals and GetHashCode for StatsMetric so there are no allocations
         //
-        public void OnNewValue(ref StatsMetric metric)
+        public void OnNewValue(StatsMetric metric)
         {
             var key = _aggregator.CreateKey(metric);
-            if (_aggregator.TryGetValue(ref key, out var v))
+            if (_aggregator.TryGetValue(key, out var v))
             {
                 v.NumericValue += metric.NumericValue;
                 //_aggregator.Update(ref key, v); // Comment this line and make StatsMetric a class and compare perf.
             }
             else
             {
-                _aggregator.Add(ref key, metric);
+                _aggregator.Add(key, metric);
             }
 
             this.TryFlush();
