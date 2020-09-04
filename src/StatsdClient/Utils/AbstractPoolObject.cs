@@ -34,10 +34,10 @@ namespace StatsdClient.Utils
         public void Reset()
         {
             _enqueue = false;
-            DoReset();
+         //   DoReset();
         }
 
-        protected abstract void DoReset();
+   //     protected abstract void DoReset();
 
         protected void Dispose(bool disposing)
         {

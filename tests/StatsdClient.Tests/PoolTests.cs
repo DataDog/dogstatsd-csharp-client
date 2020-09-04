@@ -43,10 +43,10 @@ namespace Tests
 
             public int Value { get; set; }
 
-            protected override void DoReset()
-            {
-                Value = 0;
-            }
+            // protected override void DoReset()
+            // {
+            //     Value = 0;
+            // }
         }
     }
 }

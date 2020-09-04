@@ -78,10 +78,10 @@ namespace StatsdClient.Aggregator
 
             public HashSet<string> Values { get; } = new HashSet<string>();
 
-            protected override void DoReset()
-            {
-                Values.Clear();
-            }
+            // protected override void DoReset()
+            // {
+            //     Values.Clear();
+            // }
         }
     }
 }

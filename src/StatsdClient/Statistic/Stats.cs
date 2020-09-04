@@ -28,9 +28,9 @@ namespace StatsdClient.Statistic
 
         public StatsKind Kind { get; set; }
 
-        protected override void DoReset()
-        {
-            // Nothing
-        }
+        // protected override void DoReset()
+        // {
+        //     // Nothing
+        // }
     }
 }
