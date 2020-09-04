@@ -10,7 +10,7 @@ namespace StatsdClient
     class Data
     {
         public StatsBufferize _statsBufferizes;
-        public Pool<Stats> _pool;
+        //public Pool<Stats> _pool;
     }
     internal class MetricsSender
     {
@@ -36,7 +36,7 @@ namespace StatsdClient
                 _data.Add(new Data
                 {
                     _statsBufferizes = statsBufferize(),
-                    _pool = new Pool<Stats>(pool => new Stats(pool), poolMaxAllocation)
+                  //  _pool = new Pool<Stats>(pool => new Stats(pool), poolMaxAllocation)
                 });
             }
 
@@ -62,7 +62,7 @@ namespace StatsdClient
                 stats.Event.Hostname = hostname;
                 stats.Event.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
 
-                Send(stats, () => _optionalTelemetry?.OnEventSent(), null);
+                Send(ref stats, () => _optionalTelemetry?.OnEventSent(), null);
             }
         }
 
@@ -78,7 +78,7 @@ namespace StatsdClient
                 stats.ServiceCheck.Hostname = hostname;
                 stats.ServiceCheck.ServiceCheckMessage = serviceCheckMessage;
                 stats.ServiceCheck.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-                Send(stats, () => _optionalTelemetry?.OnServiceCheckSent(), null);
+                Send(ref stats, () => _optionalTelemetry?.OnServiceCheckSent(), null);
             }
         }
 
@@ -92,7 +92,8 @@ namespace StatsdClient
             if (sampleRate == 1.0 || _randomGenerator.ShouldSend(sampleRate))
             {
                 var data = GetData();
-                if (TryDequeueStats(data, out var stats))
+                var stats = new Stats();
+            //    if (TryDequeueStats(data, out var stats))
                 {
                     stats.Kind = StatsKind.Metric;
                     stats.Metric.Tags = tags;
@@ -101,7 +102,7 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.NumericValue = value;
 
-                    Send(stats, onMetricSent, data._statsBufferizes);
+                    Send(ref stats, onMetricSent, data._statsBufferizes);
                 }
             }
         }
@@ -120,7 +121,7 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.StringValue = value;
 
-                    Send(stats, () => _optionalTelemetry?.OnMetricSent(), data._statsBufferizes
+                    Send(ref stats, () => _optionalTelemetry?.OnMetricSent(), data._statsBufferizes
                     );
                 }
             }
@@ -144,12 +145,13 @@ namespace StatsdClient
 
         private bool TryDequeueStats(Data data, out Stats stats)
         {
-            if (data._pool.TryDequeue(out stats))
-            {
-                return true;
-            }
+            stats = new Stats();
+            // if (data._pool.TryDequeue(out stats))
+            // {
+            //     return true;
+            // }
 
-            _optionalTelemetry?.OnPacketsDroppedQueue();
+            // _optionalTelemetry?.OnPacketsDroppedQueue();
             return false;
         }
 
@@ -162,9 +164,9 @@ namespace StatsdClient
             return _data[index];
         }
 
-        private void Send(Stats metricFields, Action onSuccess, StatsBufferize statsBufferizes)
+        private void Send(ref Stats metricFields, Action onSuccess, StatsBufferize statsBufferizes)
         {
-            if (statsBufferizes.Send(metricFields))
+            if (statsBufferizes.Send(ref metricFields))
             {
                 onSuccess();
             }

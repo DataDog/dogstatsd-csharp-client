@@ -37,7 +37,7 @@ namespace StatsdClient
             }
         }
 
-        public void Route(Stats stats)
+        public void Route(ref Stats stats)
         {
             switch (stats.Kind)
             {
@@ -45,7 +45,7 @@ namespace StatsdClient
                     this._serializers.EventSerializer.SerializeTo(ref stats.Event, _serializedMetric);
                     break;
                 case StatsKind.Metric:
-                    if (!RouteMetric(stats.Metric))
+                    if (!RouteMetric(ref stats.Metric))
                     {
                         return;
                     }
@@ -79,14 +79,14 @@ namespace StatsdClient
             _optionalSetAggregator?.TryFlush(force);
         }
 
-        private bool RouteMetric(StatsMetric metric)
+        private bool RouteMetric(ref StatsMetric metric)
         {
             switch (metric.MetricType)
             {
                 case MetricType.Count:
                     if (_optionalCountAggregator != null)
                     {
-                        _optionalCountAggregator.OnNewValue(metric);
+                        _optionalCountAggregator.OnNewValue(ref metric);
                         return false;
                     }
 
@@ -94,7 +94,7 @@ namespace StatsdClient
                 case MetricType.Gauge:
                     if (_optionalGaugeAggregator != null)
                     {
-                        _optionalGaugeAggregator.OnNewValue(metric);
+                        _optionalGaugeAggregator.OnNewValue(ref metric);
                         return false;
                     }
 
@@ -102,7 +102,7 @@ namespace StatsdClient
                 case MetricType.Set:
                     if (_optionalSetAggregator != null)
                     {
-                        _optionalSetAggregator.OnNewValue(metric);
+                        _optionalSetAggregator.OnNewValue(ref metric);
                         return false;
                     }
 
@@ -111,7 +111,7 @@ namespace StatsdClient
                     break;
             }
 
-            this._serializers.MetricSerializer.SerializeTo(metric, _serializedMetric);
+            this._serializers.MetricSerializer.SerializeTo(ref metric, _serializedMetric);
             return true;
         }
     }

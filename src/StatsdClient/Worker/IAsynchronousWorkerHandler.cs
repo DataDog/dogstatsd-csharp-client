@@ -5,7 +5,7 @@ namespace StatsdClient.Worker
         /// <summary>
         /// Called when a new value is ready to be handled by the worker.
         /// </summary>
-        void OnNewValue(T v);
+        void OnNewValue(ref T v);
 
         /// <summary>
         /// Called when the worker is waiting for new value to handle.

@@ -89,7 +89,7 @@ namespace StatsdClient.Worker
                 {
                     if (_queue.TryDequeue(out var v))
                     {
-                        _handler.OnNewValue(v);
+                        _handler.OnNewValue(ref v);
                         waitDuration = MinWaitDuration;
                     }
                     else

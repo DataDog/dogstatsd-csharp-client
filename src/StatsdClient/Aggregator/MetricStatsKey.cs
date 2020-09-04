@@ -7,15 +7,15 @@ namespace StatsdClient.Aggregator
     /// Dictionary Key for `MetricStats`.
     /// It is more efficient to use `MetricStatsKey` than creating a string from metric name and tags.
     /// </summary>
-    internal class MetricStatsKey
+    internal struct MetricStatsKey
     {
-        private string _metricName => _metric.StatName;
-        private string[] _tags => _metric.Tags;
-        private readonly StatsMetric _metric;
-
-        public MetricStatsKey(StatsMetric metric)
+        private string _metricName;
+        private string[] _tags;
+        
+        public MetricStatsKey(string metricName, string[] tags)
         {            
-            _metric = metric;
+            _metricName = metricName;
+            _tags = tags;
         }
 
         // This code was auto generated

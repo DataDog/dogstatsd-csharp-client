@@ -20,14 +20,14 @@ namespace StatsdClient.Aggregator
             _optionalTelemetry = optionalTelemetry;
         }
 
-        public void OnNewValue(StatsMetric metric)
+        public void OnNewValue(ref StatsMetric metric)
         {
             string value = metric.StringValue;
             var key = _aggregator.CreateKey(metric);
-            if (_aggregator.TryGetValue(key, out var v))
+            if (_aggregator.TryGetValue(ref key, out var v))
             {
                 v.Values.Add(value);
-                _aggregator.Update(key, v);
+                _aggregator.Update(ref key, v);
             }
             else
             {
@@ -35,7 +35,7 @@ namespace StatsdClient.Aggregator
                 {
                     metricFieldsMetricSet.StatsMetric = metric;
                     metricFieldsMetricSet.Values.Add(value);
-                    _aggregator.Add(key, metricFieldsMetricSet);
+                    _aggregator.Add(ref key, metricFieldsMetricSet);
                 }
                 else
                 {

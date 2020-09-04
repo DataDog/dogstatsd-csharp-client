@@ -14,16 +14,16 @@ namespace StatsdClient.Aggregator
             _aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Gauge);
         }
 
-        public void OnNewValue(StatsMetric metric)
+        public void OnNewValue(ref StatsMetric metric)
         {
             var key = _aggregator.CreateKey(metric);
-            if (_aggregator.TryGetValue(key, out var _))
+            if (_aggregator.TryGetValue(ref key, out var _))
             {
-                _aggregator.Update(key, metric);
+                _aggregator.Update(ref key, metric);
             }
             else
             {
-                _aggregator.Add(key, metric);
+                _aggregator.Add(ref key, metric);
             }
 
             this.TryFlush();

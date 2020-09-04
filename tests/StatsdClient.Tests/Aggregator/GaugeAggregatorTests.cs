@@ -29,7 +29,7 @@ namespace StatsdClient.Tests.Aggregator
                 NumericValue = value,
             };
 
-            aggregator.OnNewValue(statsMetric);
+            aggregator.OnNewValue(ref statsMetric);
         }
     }
 }

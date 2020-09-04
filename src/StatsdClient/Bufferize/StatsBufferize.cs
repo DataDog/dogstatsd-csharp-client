@@ -29,11 +29,11 @@ namespace StatsdClient.Bufferize
                 blockingQueueTimeout);
         }
 
-        public bool Send(Stats serializedMetric)
+        public bool Send(ref Stats serializedMetric)
         {
             if (!this._worker.TryEnqueue(serializedMetric))
             {
-                serializedMetric.Dispose();
+             //   serializedMetric.Dispose();
                 return false;
             }
 
@@ -57,11 +57,11 @@ namespace StatsdClient.Bufferize
                 _maxIdleWaitBeforeSending = maxIdleWaitBeforeSending;
             }
 
-            public void OnNewValue(Stats stats)
+            public void OnNewValue(ref Stats stats)
             {
-                using (stats)
+             //   using (stats)
                 {
-                    _statsRouter.Route(stats);
+                    _statsRouter.Route(ref stats);
                     _stopwatch = null;
                 }
             }

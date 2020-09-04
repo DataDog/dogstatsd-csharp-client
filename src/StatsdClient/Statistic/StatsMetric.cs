@@ -6,15 +6,8 @@ namespace StatsdClient.Statistic
     /// <summary>
     /// Store the data for a metric.
     /// </summary>
-    internal class StatsMetric
-    {
-        public StatsMetric()
-        {
-            Key = new MetricStatsKey(this);
-        }
-        public MetricStatsKey Key  {get; set;}
-        
-
+    internal struct StatsMetric
+    {    
         public MetricType MetricType { get; set; }
 
         public string StatName { get; set; }

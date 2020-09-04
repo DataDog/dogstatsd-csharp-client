@@ -50,7 +50,7 @@ namespace StatsdClient.Tests.Aggregator
                 StringValue = value,
             };
 
-            aggregator.OnNewValue(statsMetric);
+            aggregator.OnNewValue(ref statsMetric);
         }
     }
 }
