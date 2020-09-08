@@ -1,5 +1,10 @@
 CHANGELOG
 =========
+# 5.1.0 / 09-07-2020
+* [IMPROVEMENT] Reduce the memory allocations. See [#123][], [#124][], [#127][] and [#132][].
+* [IMPROVEMENT] Add a telemetry end point. See [#130][].
+* [IMPROVEMENT] Add the support for .NET framework 4.5.0. See [#128][].
+
 # 5.0.2 / 05-29-2020
 * [BUGFIX] Fix an issue where the client cannot send metrics after the DogStatsd server restart. See [#125][].
 
@@ -156,7 +161,13 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#114]: https://github.com/DataDog/dogstatsd-csharp-client/issues/114
 [#120]: https://github.com/DataDog/dogstatsd-csharp-client/issues/120
 [#121]: https://github.com/DataDog/dogstatsd-csharp-client/issues/121
+[#123]: https://github.com/DataDog/dogstatsd-csharp-client/issues/123
+[#124]: https://github.com/DataDog/dogstatsd-csharp-client/issues/124
 [#125]: https://github.com/DataDog/dogstatsd-csharp-client/issues/125
+[#127]: https://github.com/DataDog/dogstatsd-csharp-client/issues/127
+[#128]: https://github.com/DataDog/dogstatsd-csharp-client/issues/128
+[#130]: https://github.com/DataDog/dogstatsd-csharp-client/issues/130
+[#132]: https://github.com/DataDog/dogstatsd-csharp-client/issues/132
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
