@@ -7,6 +7,8 @@ namespace Tests.Utils
 {
     internal abstract class AbstractServer : IDisposable
     {
+        private static readonly char[] MessageSplitChars = new[] { '\n' };
+
         private readonly ManualResetEventSlim _serverStop = new ManualResetEventSlim(false);
         private readonly List<string> _messagesReceived = new List<string>();
         private Task _receiver;
@@ -52,7 +54,7 @@ namespace Tests.Utils
                 if (count.HasValue && count.Value > 0)
                 {
                     var message = System.Text.Encoding.UTF8.GetString(buffer, 0, count.Value);
-                    _messagesReceived.AddRange(message.Split("\n", StringSplitOptions.RemoveEmptyEntries));
+                    _messagesReceived.AddRange(message.Split(MessageSplitChars, StringSplitOptions.RemoveEmptyEntries));
                 }
                 else
                 {

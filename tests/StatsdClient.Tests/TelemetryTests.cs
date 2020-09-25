@@ -113,8 +113,8 @@ namespace Tests
             _telemetry.Flush();
             foreach (var m in _metrics)
             {
-                var nameWithoutTags = m.Split("|")[0];
-                var part = nameWithoutTags.Split(":");
+                var nameWithoutTags = m.Split('|')[0];
+                var part = nameWithoutTags.Split(':');
                 var metricName = part[0];
                 var metricValue = int.Parse(part[1]);
 
