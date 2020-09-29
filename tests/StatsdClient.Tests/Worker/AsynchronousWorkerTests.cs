@@ -98,7 +98,21 @@ namespace Tests
 
             Assert.DoesNotThrow(() => AppDomain.Unload(domain));
         }
+#endif
 
+        private AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
+        {
+            var worker = new AsynchronousWorker<int>(
+                _handler.Object,
+                _waiter.Object,
+                workerThreadCount,
+                10,
+                null);
+            _workers.Add(worker);
+            return worker;
+        }
+
+#if NETFRAMEWORK
         private class AppDomainDelegate : MarshalByRefObject
         {
             public void Execute()
@@ -114,17 +128,5 @@ namespace Tests
             }
         }
 #endif
-
-        private AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
-        {
-            var worker = new AsynchronousWorker<int>(
-                _handler.Object,
-                _waiter.Object,
-                workerThreadCount,
-                10,
-                null);
-            _workers.Add(worker);
-            return worker;
-        }
     }
 }
