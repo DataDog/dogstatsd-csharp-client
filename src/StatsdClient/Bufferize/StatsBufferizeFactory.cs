@@ -8,16 +8,23 @@ namespace StatsdClient.Bufferize
     internal class StatsBufferizeFactory : IStatsBufferizeFactory
     {
         public StatsBufferize CreateStatsBufferize(
-            BufferBuilder bufferBuilder,
+            StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending)
         {
             return new StatsBufferize(
-                bufferBuilder,
+                statsRouter,
                 workerMaxItemCount,
                 blockingQueueTimeout,
                 maxIdleWaitBeforeSending);
+        }
+
+        public StatsRouter CreateStatsRouter(
+            Serializers serializers,
+            BufferBuilder bufferBuilder)
+        {
+            return new StatsRouter(serializers, bufferBuilder);
         }
 
         public ITransport CreateUDPTransport(IPEndPoint endPoint)

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Bufferize;
+using StatsdClient.Statistic;
 using StatsdClient.Utils;
 
 namespace Tests
@@ -13,23 +14,31 @@ namespace Tests
     public class StatsBufferizeTests
     {
         [Test]
+        [Timeout(10000)]
         public void StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
-            var bufferBuilder = new BufferBuilder(handler, 3, "\n");
-            using (var statsBufferize = new StatsBufferize(bufferBuilder, 10, null, TimeSpan.Zero))
+            var bufferBuilder = new BufferBuilder(handler, 30, "\n");
+            var serializers = new Serializers
             {
-                var serializedMetric = new SerializedMetric(new Pool<SerializedMetric>(p => new SerializedMetric(p), 10));
-                serializedMetric.Builder.Append("1");
+                EventSerializer = new EventSerializer(new SerializerHelper(null)),
+            };
+            var statsRouter = new StatsRouter(serializers, bufferBuilder);
+            using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero))
+            {
+                var pool = new Pool<Stats>(p => new Stats(p), 1);
+                var stats = new Stats(pool) { Kind = StatsKind.Event };
+                stats.Event.Text = "test";
+                stats.Event.Title = "title";
 
-                statsBufferize.Send(serializedMetric);
+                statsBufferize.Send(stats);
                 while (handler.Buffer == null)
                 {
                     Task.Delay(TimeSpan.FromMilliseconds(1)).Wait();
                 }
 
                 // Sent because buffer is full.
-                Assert.AreEqual("1", Encoding.UTF8.GetString(handler.Buffer));
+                Assert.AreEqual("_e{5,4}:title|test", Encoding.UTF8.GetString(handler.Buffer));
             }
         }
     }

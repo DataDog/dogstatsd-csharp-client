@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
+using StatsdClient.Statistic;
 
 namespace StatsdClient.Tests
 {
@@ -244,33 +246,32 @@ namespace StatsdClient.Tests
         [Test]
         public void SendSet()
         {
-            AssertSerialize("set:5|s", MetricType.Set, "set", 5);
+            AssertSetSerialize("set:5|s", "set", 5);
         }
 
         [Test]
         public void SendSetString()
         {
-            AssertSerialize("set:objectname|s", MetricType.Set, "set", "objectname");
+            AssertSetSerialize("set:objectname|s", "set", "objectname");
         }
 
         [Test]
         public void SendSetWithTags()
         {
-            AssertSerialize("set:5|s|#tag1:true,tag2", MetricType.Set, "set", 5, tags: new[] { "tag1:true", "tag2" });
+            AssertSetSerialize("set:5|s|#tag1:true,tag2", "set", 5, tags: new[] { "tag1:true", "tag2" });
         }
 
         [Test]
         public void SendSetWithSampleRate()
         {
-            AssertSerialize("set:5|s|@0.1", MetricType.Set, "set", 5, sampleRate: 0.1);
+            AssertSetSerialize("set:5|s|@0.1", "set", 5, sampleRate: 0.1);
         }
 
         [Test]
         public void SendSetWithSampleRateAndTags()
         {
-            AssertSerialize(
+            AssertSetSerialize(
                 "set:5|s|@0.1|#tag1:true,tag2",
-                MetricType.Set,
                 "set",
                 5,
                 sampleRate: 0.1,
@@ -280,32 +281,62 @@ namespace StatsdClient.Tests
         [Test]
         public void SendSetStringWithSampleRateAndTags()
         {
-            AssertSerialize(
+            AssertSetSerialize(
                 "set:objectname|s|@0.1|#tag1:true,tag2",
-                MetricType.Set,
                 "set",
                 "objectname",
                 sampleRate: 0.1,
                 tags: new[] { "tag1:true", "tag2" });
         }
 
-        private static void AssertSerialize<T>(
+        private static void AssertSerialize(
             string expectValue,
             MetricType metricType,
             string name,
-            T value,
+            double value,
             double sampleRate = 1.0,
             string[] tags = null,
             string prefix = null)
         {
-            var serializerHelper = new SerializerHelper(null, 10);
+            var statsMetric = new StatsMetric
+            {
+                MetricType = metricType,
+                StatName = name,
+                SampleRate = sampleRate,
+                NumericValue = value,
+                Tags = tags,
+            };
+            AssertSerialize(expectValue, ref statsMetric, prefix);
+        }
+
+        private static void AssertSetSerialize(
+           string expectValue,
+           string name,
+           object value,
+           double sampleRate = 1.0,
+           string[] tags = null,
+           string prefix = null)
+        {
+            var statsMetric = new StatsMetric
+            {
+                MetricType = MetricType.Set,
+                StatName = name,
+                SampleRate = sampleRate,
+                StringValue = value.ToString(),
+                Tags = tags,
+            };
+            AssertSerialize(expectValue, ref statsMetric, prefix);
+        }
+
+        private static void AssertSerialize(
+           string expectValue,
+           ref StatsMetric statsMetric,
+           string prefix)
+        {
+            var serializerHelper = new SerializerHelper(null);
             var serializer = new MetricSerializer(serializerHelper, prefix);
-            var serializedMetric = serializer.Serialize(
-                metricType,
-                name,
-                value,
-                sampleRate,
-                tags);
+            var serializedMetric = new SerializedMetric();
+            serializer.SerializeTo(ref statsMetric, serializedMetric);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
     }

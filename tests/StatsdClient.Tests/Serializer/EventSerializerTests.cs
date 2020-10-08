@@ -2,6 +2,7 @@
 using System.Text;
 using Moq;
 using NUnit.Framework;
+using StatsdClient.Statistic;
 
 namespace StatsdClient.Tests
 {
@@ -65,7 +66,11 @@ namespace StatsdClient.Tests
 
             var serializer = CreateSerializer();
             var exception = Assert.Throws<Exception>(
-                () => serializer.Serialize(title + "x", "text", null, null, null, null, null, null, null));
+                () =>
+                {
+                    var statsEvent = new StatsEvent { Title = title + "x", Text = "Text" };
+                    serializer.SerializeTo(ref statsEvent, new SerializedMetric());
+                });
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
@@ -136,23 +141,28 @@ namespace StatsdClient.Tests
             bool truncateIfTooLong = false)
         {
             var serializer = CreateSerializer();
-            var serializedMetric = serializer.Serialize(
-                title,
-                text,
-                alertType,
-                aggregationKey,
-                sourceType,
-                dateHappened,
-                priority,
-                hostname,
-                tags,
-                truncateIfTooLong);
+            var statsEvent = new StatsEvent
+            {
+                Title = title,
+                Text = text,
+                AlertType = alertType,
+                AggregationKey = aggregationKey,
+                SourceType = sourceType,
+                DateHappened = dateHappened,
+                Priority = priority,
+                Hostname = hostname,
+                TruncateIfTooLong = truncateIfTooLong,
+                Tags = tags,
+            };
+
+            var serializedMetric = new SerializedMetric();
+            serializer.SerializeTo(ref statsEvent, serializedMetric);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
         private static EventSerializer CreateSerializer()
         {
-            var serializerHelper = new SerializerHelper(null, 10);
+            var serializerHelper = new SerializerHelper(null);
             return new EventSerializer(serializerHelper);
         }
     }

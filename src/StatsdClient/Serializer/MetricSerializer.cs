@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using StatsdClient.Statistic;
 
 namespace StatsdClient
 {
@@ -25,36 +27,31 @@ namespace StatsdClient
             _prefix = string.IsNullOrEmpty(prefix) ? string.Empty : prefix + ".";
         }
 
-        public SerializedMetric Serialize<T>(
-            MetricType metricType,
-            string name,
-            T value,
-            double sampleRate = 1.0,
-            string[] tags = null)
+        public void SerializeTo(ref StatsMetric metricStats, SerializedMetric serializedMetric)
         {
-            var serializedMetric = _serializerHelper.GetOptionalSerializedMetric();
-            if (serializedMetric == null)
-            {
-                return null;
-            }
+            serializedMetric.Reset();
 
             var builder = serializedMetric.Builder;
-            var unit = _commandToUnit[metricType];
+            var unit = _commandToUnit[metricStats.MetricType];
 
             builder.Append(_prefix);
-            builder.Append(name);
+            builder.Append(metricStats.StatName);
             builder.Append(':');
-            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", value);
+            switch (metricStats.MetricType)
+            {
+                case MetricType.Set: builder.Append(metricStats.StringValue); break;
+                default: builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", metricStats.NumericValue); break;
+            }
+
             builder.Append('|');
             builder.Append(unit);
 
-            if (sampleRate != 1.0)
+            if (metricStats.SampleRate != 1.0)
             {
-                builder.AppendFormat(CultureInfo.InvariantCulture, "|@{0}", sampleRate);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "|@{0}", metricStats.SampleRate);
             }
 
-            _serializerHelper.AppendTags(builder, tags);
-            return serializedMetric;
+            _serializerHelper.AppendTags(builder, metricStats.Tags);
         }
     }
 }

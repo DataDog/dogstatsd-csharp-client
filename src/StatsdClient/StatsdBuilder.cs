@@ -29,20 +29,21 @@ namespace StatsdClient
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
             var telemetry = CreateTelemetry(config, globalTags, endPoint, transportData.Transport);
+            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
                 transportData.BufferCapacity,
-                config.Advanced);
+                config.Advanced,
+                serializers);
 
-            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
             var metricsSender = new MetricsSender(
                 statsBufferize,
                 new RandomGenerator(),
                 new StopWatchFactory(),
-                serializers,
                 telemetry,
-                config.StatsdTruncateIfTooLong);
+                config.StatsdTruncateIfTooLong,
+                config.Advanced.MaxMetricsInAsyncQueue * 2);
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 
@@ -77,9 +78,7 @@ namespace StatsdClient
             string[] constantTags,
             int maxMetricsInAsyncQueue)
         {
-            // poolMaxAllocation must be greater than maxMetricsInAsyncQueue.
-            var poolMaxAllocation = maxMetricsInAsyncQueue * 2;
-            var serializerHelper = new SerializerHelper(constantTags, poolMaxAllocation);
+            var serializerHelper = new SerializerHelper(constantTags);
 
             return new Serializers
             {
@@ -201,13 +200,16 @@ namespace StatsdClient
             Telemetry telemetry,
             ITransport transport,
             int bufferCapacity,
-            AdvancedStatsConfig config)
+            AdvancedStatsConfig config,
+            Serializers serializers)
         {
             var bufferHandler = new BufferBuilderHandler(telemetry, transport);
             var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
 
+            var statsRouter = _factory.CreateStatsRouter(serializers, bufferBuilder);
+
             var statsBufferize = _factory.CreateStatsBufferize(
-                bufferBuilder,
+                statsRouter,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,
                 config.DurationBeforeSendingNotFullBuffer);

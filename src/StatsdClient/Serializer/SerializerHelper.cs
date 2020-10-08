@@ -6,13 +6,11 @@ namespace StatsdClient
     internal class SerializerHelper
     {
         private static readonly string[] EmptyArray = new string[0];
-        private readonly Pool<SerializedMetric> _pool;
         private readonly string _constantTags;
 
-        public SerializerHelper(string[] constantTags, int poolMaxAllocation)
+        public SerializerHelper(string[] constantTags)
         {
             _constantTags = constantTags != null ? string.Join(",", constantTags) : string.Empty;
-            _pool = new Pool<SerializedMetric>(pool => new SerializedMetric(pool), poolMaxAllocation);
         }
 
         public static string EscapeContent(string content)
@@ -34,12 +32,6 @@ namespace StatsdClient
                 builder.Append(prefix);
                 builder.Append(value);
             }
-        }
-
-        public SerializedMetric GetOptionalSerializedMetric()
-        {
-            _pool.TryDequeue(out var serializedMetric);
-            return serializedMetric;
         }
 
         public void AppendTags(StringBuilder builder, string[] tags)

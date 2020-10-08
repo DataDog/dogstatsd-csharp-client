@@ -1,15 +1,9 @@
 using System.Text;
-using StatsdClient.Utils;
 
 namespace StatsdClient
 {
-    internal class SerializedMetric : AbstractPoolObject
+    internal class SerializedMetric
     {
-        public SerializedMetric(Pool<SerializedMetric> pool)
-        : base(pool)
-        {
-        }
-
         public StringBuilder Builder { get; } = new StringBuilder();
 
         public int CopyToChars(char[] charsBuffers)
@@ -29,7 +23,7 @@ namespace StatsdClient
             return Builder.ToString();
         }
 
-        protected override void DoReset()
+        public void Reset()
         {
             Builder.Clear();
         }
