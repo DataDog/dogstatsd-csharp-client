@@ -23,7 +23,7 @@ namespace StatsdClient.Aggregator
         {
             _serializer = parameters.Serializer;
             _bufferBuilder = parameters.BufferBuilder;
-            _flushIntervalMilliseconds = (long)parameters.FlushInternal.TotalMilliseconds;
+            _flushIntervalMilliseconds = (long)parameters.FlushInterval.TotalMilliseconds;
             _maxUniqueStatsBeforeFlush = parameters.MaxUniqueStatsBeforeFlush;
             _expectedMetricType = expectedMetricType;
         }

@@ -16,7 +16,7 @@ namespace StatsdClient.Tests.Aggregator
 
         public static MetricAggregatorParameters Create(
             IBufferBuilderHandler handler,
-            TimeSpan flushInternal,
+            TimeSpan flushInterval,
             int maxUniqueStatsBeforeFlush)
         {
             var serializer = new MetricSerializer(new SerializerHelper(null), string.Empty);
@@ -26,7 +26,7 @@ namespace StatsdClient.Tests.Aggregator
                 serializer,
                 bufferBuilder,
                 maxUniqueStatsBeforeFlush,
-                flushInternal);
+                flushInterval);
         }
     }
 }

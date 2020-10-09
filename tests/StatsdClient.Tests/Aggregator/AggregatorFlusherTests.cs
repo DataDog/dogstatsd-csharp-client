@@ -40,7 +40,7 @@ namespace StatsdClient.Tests.Aggregator
         }
 
         [Test]
-        public void TryFlushFlushInternal()
+        public void TryFlushFlushInterval()
         {
             var handler = new Mock<IBufferBuilderHandler>();
             var parameters = MetricAggregatorParametersFactory.Create(
