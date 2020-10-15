@@ -5,6 +5,7 @@ using System.Net;
 using Mono.Unix;
 using Moq;
 using NUnit.Framework;
+using StatsdClient.Aggregator;
 using StatsdClient.Bufferize;
 using StatsdClient.Transport;
 
@@ -129,9 +130,11 @@ namespace StatsdClient.Tests
                 conf.MaxMetricsInAsyncQueue,
                 conf.MaxBlockDuration,
                 conf.DurationBeforeSendingNotFullBuffer));
-            _mock.Verify(m => m.CreateStatsRouter(
+            _mock.Verify(
+                m => m.CreateStatsRouter(
                 It.IsAny<Serializers>(),
-                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize)));
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
+                It.IsAny<Aggregators>()));
         }
 
 #if !OS_WINDOWS
@@ -147,9 +150,11 @@ namespace StatsdClient.Tests
                 It.IsAny<int>(),
                 null,
                 It.IsAny<TimeSpan>()));
-            _mock.Verify(m => m.CreateStatsRouter(
+            _mock.Verify(
+                m => m.CreateStatsRouter(
                 It.IsAny<Serializers>(),
-                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize)));
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize),
+                It.IsAny<Aggregators>()));
         }
 #endif
 
@@ -185,6 +190,27 @@ namespace StatsdClient.Tests
 
             BuildStatsData(config);
             _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void ClientSideAggregation()
+        {
+            var config = new StatsdConfig { };
+
+            BuildStatsData(config);
+            _mock.Verify(
+                m => m.CreateStatsRouter(
+                It.IsAny<Serializers>(),
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
+                null));
+
+            config.ClientSideAggregation = new ClientSideAggregationConfig();
+            BuildStatsData(config);
+            _mock.Verify(
+                m => m.CreateStatsRouter(
+                It.IsAny<Serializers>(),
+                It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
+                It.IsNotNull<Aggregators>()));
         }
 
         [Test]

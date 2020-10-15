@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using Mono.Unix;
+using StatsdClient.Aggregator;
 using StatsdClient.Transport;
 
 namespace StatsdClient.Bufferize
@@ -19,7 +20,8 @@ namespace StatsdClient.Bufferize
 
         StatsRouter CreateStatsRouter(
             Serializers serializers,
-            BufferBuilder bufferBuilder);
+            BufferBuilder bufferBuilder,
+            Aggregators optionalAggregators);
 
         ITransport CreateUDPTransport(IPEndPoint endPoint);
 

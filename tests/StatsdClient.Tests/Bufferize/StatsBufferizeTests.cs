@@ -23,7 +23,7 @@ namespace Tests
             {
                 EventSerializer = new EventSerializer(new SerializerHelper(null)),
             };
-            var statsRouter = new StatsRouter(serializers, bufferBuilder);
+            var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
             using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero))
             {
                 var pool = new Pool<Stats>(p => new Stats(p), 1);
