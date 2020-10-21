@@ -19,7 +19,6 @@ public class GlobalSetup
         {
             _values[i] = Environment.GetEnvironmentVariable(EnvironmentVariables[i]);
             Environment.SetEnvironmentVariable(EnvironmentVariables[i], null);
-
         }
     }
 
