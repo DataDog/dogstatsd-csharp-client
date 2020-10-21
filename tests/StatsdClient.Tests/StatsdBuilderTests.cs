@@ -164,15 +164,16 @@ namespace StatsdClient.Tests
         [Test]
         public void CreateTelemetry()
         {
+            Environment.SetEnvironmentVariable(StatsdConfig.EntityIdEnvVar, "EntityId");
+            Environment.SetEnvironmentVariable(StatsdConfig.ServiceEnvVar, "service");
+            Environment.SetEnvironmentVariable(StatsdConfig.EnvironmentEnvVar, "env");
+            Environment.SetEnvironmentVariable(StatsdConfig.VersionEnvVar, "version");
+
             var config = new StatsdConfig { };
             var conf = config.Advanced;
 
             conf.TelemetryFlushInterval = TimeSpan.FromMinutes(1);
             config.ConstantTags = new[] { "key:value" };
-            Environment.SetEnvironmentVariable(StatsdConfig.EntityIdEnvVar, "EntityId");
-            Environment.SetEnvironmentVariable(StatsdConfig.ServiceEnvVar, "service");
-            Environment.SetEnvironmentVariable(StatsdConfig.EnvironmentEnvVar, "env");
-            Environment.SetEnvironmentVariable(StatsdConfig.VersionEnvVar, "version");
 
             var expectedTags = new List<string>(config.ConstantTags);
             expectedTags.Add("dd.internal.entity_id:EntityId");
