@@ -126,6 +126,27 @@ namespace StatsdClient
                 globalTags.Add($"{_entityIdInternalTagKey}:{entityId}");
             }
 
+            string service = Environment.GetEnvironmentVariable(StatsdConfig.ServiceEnvVar);
+
+            if (!string.IsNullOrEmpty(service))
+            {
+                globalTags.Add($"{StatsdConfig.ServiceTagKey}:{service}");
+            }
+
+            string env = Environment.GetEnvironmentVariable(StatsdConfig.EnvironmentEnvVar);
+
+            if (!string.IsNullOrEmpty(env))
+            {
+                globalTags.Add($"{StatsdConfig.EnvironmentTagKey}:{env}");
+            }
+
+            string version = Environment.GetEnvironmentVariable(StatsdConfig.VersionEnvVar);
+
+            if (!string.IsNullOrEmpty(version))
+            {
+                globalTags.Add($"{StatsdConfig.VersionTagKey}:{version}");
+            }
+
             return globalTags.ToArray();
         }
 

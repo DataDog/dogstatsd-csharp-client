@@ -60,6 +60,27 @@ namespace StatsdClient
         public const string AgentPipeNameEnvVar = "DD_AGENT_PIPE_NAME";
 
         /// <summary>
+        /// The name of the environment variable defining the service name
+        /// </summary>
+        public const string ServiceEnvVar = "DD_SERVICE";
+
+        /// <summary>
+        /// The name of the environment variable defining the environment name
+        /// </summary>
+        public const string EnvironmentEnvVar = "DD_ENV";
+
+        /// <summary>
+        /// The name of the environment variable defining the version of the service
+        /// </summary>
+        public const string VersionEnvVar = "DD_VERSION";
+
+        internal const string ServiceTagKey = "service";
+
+        internal const string EnvironmentTagKey = "env";
+
+        internal const string VersionTagKey = "version";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="StatsdConfig"/> class.
         /// </summary>
         public StatsdConfig()
