@@ -163,29 +163,38 @@ namespace Tests
             Environment.SetEnvironmentVariable("DD_AGENT_HOST", null);
         }
 
-        [Test]
-        public void Setting_entity_id_with_env_arg()
+        [TestCase("DD_ENTITY_ID", "dd.internal.entity_id")]
+        [TestCase(StatsdConfig.ServiceEnvVar, StatsdConfig.ServiceTagKey)]
+        [TestCase(StatsdConfig.VersionEnvVar, StatsdConfig.VersionTagKey)]
+        [TestCase(StatsdConfig.EnvironmentEnvVar, StatsdConfig.EnvironmentTagKey)]
+        public void Setting_tag_with_env_arg(string envVar, string tag)
         {
-            Environment.SetEnvironmentVariable("DD_ENTITY_ID", "foobar");
-            using (var nonStaticServiceInstance = new DogStatsdService())
+            Environment.SetEnvironmentVariable(envVar, "foobar");
+
+            try
             {
-                var metricsConfig = new StatsdConfig
+                using (var nonStaticServiceInstance = new DogStatsdService())
                 {
-                    StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8132,
-                };
+                    var metricsConfig = new StatsdConfig
+                    {
+                        StatsdServerName = "127.0.0.1",
+                        StatsdPort = 8132,
+                    };
 
-                nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData(
-                    nonStaticServiceInstance,
-                    "127.0.0.1",
-                    8132,
-                    () => { nonStaticServiceInstance.Increment("test"); });
+                    nonStaticServiceInstance.Configure(metricsConfig);
+                    var receivedData = ReceiveData(
+                        nonStaticServiceInstance,
+                        "127.0.0.1",
+                        8132,
+                        () => { nonStaticServiceInstance.Increment("test"); });
 
-                Assert.AreEqual(new List<string> { "test:1|c|#dd.internal.entity_id:foobar" }, receivedData);
+                    Assert.AreEqual(new List<string> { $"test:1|c|#{tag}:foobar" }, receivedData);
+                }
             }
-
-            Environment.SetEnvironmentVariable("DD_ENTITY_ID", null);
+            finally
+            {
+                Environment.SetEnvironmentVariable(envVar, null);
+            }
         }
 
         private List<string> ReceiveData(DogStatsdService dogstasdService, string testServerName, int testPort, Action sendData)

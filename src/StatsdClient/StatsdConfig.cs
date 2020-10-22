@@ -60,6 +60,27 @@ namespace StatsdClient
         public const string AgentPipeNameEnvVar = "DD_AGENT_PIPE_NAME";
 
         /// <summary>
+        /// The name of the environment variable defining the service name
+        /// </summary>
+        public const string ServiceEnvVar = "DD_SERVICE";
+
+        /// <summary>
+        /// The name of the environment variable defining the environment name
+        /// </summary>
+        public const string EnvironmentEnvVar = "DD_ENV";
+
+        /// <summary>
+        /// The name of the environment variable defining the version of the service
+        /// </summary>
+        public const string VersionEnvVar = "DD_VERSION";
+
+        internal const string ServiceTagKey = "service";
+
+        internal const string EnvironmentTagKey = "env";
+
+        internal const string VersionTagKey = "version";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="StatsdConfig"/> class.
         /// </summary>
         public StatsdConfig()
@@ -115,6 +136,21 @@ namespace StatsdClient
         /// </summary>
         /// <value>The advanced configuration</value>
         public AdvancedStatsConfig Advanced { get; }
+
+        /// <summary>
+        /// Gets or sets the environment tag
+        /// </summary>
+        public string Environment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the service version tag
+        /// </summary>
+        public string ServiceVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the service name tag
+        /// </summary>
+        public string ServiceName { get; set; }
 
         /// <summary>
         /// Gets or sets the global tags to be applied to every metric, event, and service check.

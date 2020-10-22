@@ -21,6 +21,9 @@ namespace StatsdClient.Tests
             StatsdConfig.DD_AGENT_HOST_ENV_VAR,
             StatsdConfig.EntityIdEnvVar,
             StatsdConfig.AgentPipeNameEnvVar,
+            StatsdConfig.EnvironmentEnvVar,
+            StatsdConfig.ServiceEnvVar,
+            StatsdConfig.VersionEnvVar,
         };
 
         private Mock<IStatsBufferizeFactory> _mock;
@@ -161,15 +164,22 @@ namespace StatsdClient.Tests
         [Test]
         public void CreateTelemetry()
         {
+            Environment.SetEnvironmentVariable(StatsdConfig.EntityIdEnvVar, "EntityId");
+            Environment.SetEnvironmentVariable(StatsdConfig.ServiceEnvVar, "service");
+            Environment.SetEnvironmentVariable(StatsdConfig.EnvironmentEnvVar, "env");
+            Environment.SetEnvironmentVariable(StatsdConfig.VersionEnvVar, "version");
+
             var config = new StatsdConfig { };
             var conf = config.Advanced;
 
             conf.TelemetryFlushInterval = TimeSpan.FromMinutes(1);
             config.ConstantTags = new[] { "key:value" };
-            Environment.SetEnvironmentVariable(StatsdConfig.EntityIdEnvVar, "EntityId");
 
             var expectedTags = new List<string>(config.ConstantTags);
             expectedTags.Add("dd.internal.entity_id:EntityId");
+            expectedTags.Add($"{StatsdConfig.ServiceTagKey}:service");
+            expectedTags.Add($"{StatsdConfig.EnvironmentTagKey}:env");
+            expectedTags.Add($"{StatsdConfig.VersionTagKey}:version");
 
             BuildStatsData(config);
             _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Once);

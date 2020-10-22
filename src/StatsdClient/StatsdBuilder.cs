@@ -49,6 +49,21 @@ namespace StatsdClient
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 
+        private static void AddTag(List<string> tags, string tagKey, string environmentVariableName, string originalValue = null)
+        {
+            var value = originalValue;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                value = Environment.GetEnvironmentVariable(environmentVariableName);
+            }
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                tags.Add($"{tagKey}:{value}");
+            }
+        }
+
         private static DogStatsdEndPoint BuildEndPoint(StatsdConfig config)
         {
             var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
@@ -120,11 +135,10 @@ namespace StatsdClient
                 globalTags.AddRange(config.ConstantTags);
             }
 
-            string entityId = Environment.GetEnvironmentVariable(StatsdConfig.EntityIdEnvVar);
-            if (!string.IsNullOrEmpty(entityId))
-            {
-                globalTags.Add($"{_entityIdInternalTagKey}:{entityId}");
-            }
+            AddTag(globalTags, _entityIdInternalTagKey, StatsdConfig.EntityIdEnvVar);
+            AddTag(globalTags, StatsdConfig.ServiceTagKey, StatsdConfig.ServiceEnvVar, config.ServiceName);
+            AddTag(globalTags, StatsdConfig.EnvironmentTagKey, StatsdConfig.EnvironmentEnvVar, config.Environment);
+            AddTag(globalTags, StatsdConfig.VersionTagKey, StatsdConfig.VersionEnvVar, config.ServiceVersion);
 
             return globalTags.ToArray();
         }

@@ -66,17 +66,44 @@ namespace StatsdClient
             _prefix = prefix;
             _optionalTelemetry = optionalTelemetry;
 
+            var environmentTags = new List<string>();
+
             string entityId = Environment.GetEnvironmentVariable(StatsdConfig.DD_ENTITY_ID_ENV_VAR);
 
-            if (string.IsNullOrEmpty(entityId))
+            if (!string.IsNullOrEmpty(entityId))
+            {
+                environmentTags.Add($"{_entityIdInternalTagKey}:{entityId}");
+            }
+
+            string service = Environment.GetEnvironmentVariable(StatsdConfig.ServiceEnvVar);
+
+            if (!string.IsNullOrEmpty(service))
+            {
+                environmentTags.Add($"{StatsdConfig.ServiceTagKey}:{service}");
+            }
+
+            string env = Environment.GetEnvironmentVariable(StatsdConfig.EnvironmentEnvVar);
+
+            if (!string.IsNullOrEmpty(env))
+            {
+                environmentTags.Add($"{StatsdConfig.EnvironmentTagKey}:{env}");
+            }
+
+            string version = Environment.GetEnvironmentVariable(StatsdConfig.VersionEnvVar);
+
+            if (!string.IsNullOrEmpty(version))
+            {
+                environmentTags.Add($"{StatsdConfig.VersionTagKey}:{version}");
+            }
+
+            if (environmentTags.Count == 0)
             {
                 // copy array to prevent changes, coalesce to empty array
                 _constantTags = constantTags?.ToArray() ?? EmptyStringArray;
             }
             else
             {
-                var entityIdTags = new[] { $"{_entityIdInternalTagKey}:{entityId}" };
-                _constantTags = constantTags == null ? entityIdTags : constantTags.Concat(entityIdTags).ToArray();
+                _constantTags = constantTags == null ? environmentTags.ToArray() : constantTags.Concat(environmentTags).ToArray();
             }
         }
 
