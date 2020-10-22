@@ -88,10 +88,6 @@ namespace StatsdClient
             StatsdPort = 0;
             StatsdMaxUDPPacketSize = DefaultStatsdMaxUDPPacketSize;
             Advanced = new AdvancedStatsConfig();
-
-            Service = System.Environment.GetEnvironmentVariable(ServiceEnvVar);
-            Version = System.Environment.GetEnvironmentVariable(VersionEnvVar);
-            Environment = System.Environment.GetEnvironmentVariable(EnvironmentEnvVar);
         }
 
         /// <summary>
@@ -147,14 +143,14 @@ namespace StatsdClient
         public string Environment { get; set; }
 
         /// <summary>
-        /// Gets or sets the version tag
+        /// Gets or sets the service version tag
         /// </summary>
-        public string Version { get; set; }
+        public string ServiceVersion { get; set; }
 
         /// <summary>
-        /// Gets or sets the service tag
+        /// Gets or sets the service name tag
         /// </summary>
-        public string Service { get; set; }
+        public string ServiceName { get; set; }
 
         /// <summary>
         /// Gets or sets the global tags to be applied to every metric, event, and service check.
