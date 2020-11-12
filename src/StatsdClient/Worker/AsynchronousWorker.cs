@@ -112,7 +112,7 @@ namespace StatsdClient.Worker
                         }
                     }
                 }
-#if !NETSTANDARD1_3
+#if NETFRAMEWORK
                 catch (ThreadAbortException e)
                 {
                     Debug.WriteLine(e.Message);
