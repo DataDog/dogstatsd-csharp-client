@@ -1,6 +1,10 @@
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using StatsdClient.Aggregator;
 using StatsdClient.Statistic;
+using Tests.Utils;
 
 namespace StatsdClient.Tests.Aggregator
 {
@@ -21,6 +25,37 @@ namespace StatsdClient.Tests.Aggregator
             AddStatsMetric(aggregator, "s3", 1);
             aggregator.TryFlush(force: true);
             Assert.AreEqual("s3:1|c|@0", handler.Value);
+        }
+
+        [Test]
+        public void SampleRate()
+        {
+            var config = new StatsdConfig
+            {
+                StatsdServerName = "127.0.0.1",
+                StatsdPort = 1234,
+            };
+            config.ClientSideAggregation = new ClientSideAggregationConfig { };
+
+            using (var server = new SocketServer(config))
+            {
+                using (var service = new DogStatsdService())
+                {
+                    service.Configure(config);
+                    for (int i = 0; i < 500; i++)
+                    {
+                        service.Increment("test1", 1, 0.5);
+                        service.Increment("test1", 1, 0.3);
+                        service.Increment("test1", 1, 0.8);
+                    }
+                }
+                var metric = server.Stop().Single();
+                var match = Regex.Match(metric, @"^test1:(.*)\|c$");
+                Assert.True(match.Success);
+                var metricValue = Double.Parse(match.Groups[1].Value);
+
+                Assert.AreEqual(500.0 * 3, metricValue, delta: 100);
+            }
         }
 
         private static void AddStatsMetric(CountAggregator aggregator, string statName, double value)
