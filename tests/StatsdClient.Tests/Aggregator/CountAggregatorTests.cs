@@ -49,10 +49,11 @@ namespace StatsdClient.Tests.Aggregator
                         service.Increment("test1", 1, 0.8);
                     }
                 }
+
                 var metric = server.Stop().Single();
                 var match = Regex.Match(metric, @"^test1:(.*)\|c$");
                 Assert.True(match.Success);
-                var metricValue = Double.Parse(match.Groups[1].Value);
+                var metricValue = double.Parse(match.Groups[1].Value);
 
                 Assert.AreEqual(500.0 * 3, metricValue, delta: 100);
             }
