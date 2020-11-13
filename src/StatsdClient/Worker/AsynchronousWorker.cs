@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StatsdClient.Worker
@@ -111,6 +112,15 @@ namespace StatsdClient.Worker
                         }
                     }
                 }
+#if NETFRAMEWORK
+                catch (ThreadAbortException e)
+                {
+                    Debug.WriteLine(e.Message);
+                    // This is the defined behavior of a ThreadAbortException, but it doesn't happen on
+                    // the .NET Framework in 64-bit release builds using RyuJIT
+                    throw;
+                }
+#endif
                 catch (Exception e)
                 {
                     Debug.WriteLine(e.Message);

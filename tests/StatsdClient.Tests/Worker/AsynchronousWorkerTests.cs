@@ -81,6 +81,25 @@ namespace Tests
             worker.Dispose();
         }
 
+#if NETFRAMEWORK
+        /// <summary>
+        /// This test can only fail when run on the .NET Framework in 64-bit release build using RyuJIT.
+        /// </summary>
+        [Test]
+        public void ThreadAbortExceptionExitsWorker()
+        {
+            var domain = AppDomain.CreateDomain("ThreadAbortExceptionExitsWorkerTest");
+
+            var domainDelegate = (AppDomainDelegate)domain.CreateInstanceFromAndUnwrap(
+                typeof(AppDomainDelegate).Assembly.Location,
+                typeof(AppDomainDelegate).FullName);
+
+            domainDelegate.Execute();
+
+            Assert.DoesNotThrow(() => AppDomain.Unload(domain));
+        }
+#endif
+
         private AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
         {
             var worker = new AsynchronousWorker<int>(
@@ -92,5 +111,22 @@ namespace Tests
             _workers.Add(worker);
             return worker;
         }
+
+#if NETFRAMEWORK
+        private class AppDomainDelegate : MarshalByRefObject
+        {
+            public void Execute()
+            {
+                // This intentionally avoids referencing AsynchronousWorkerTests types
+                // because the assembly would fail to load
+                _ = new AsynchronousWorker<int>(
+                    new Mock<IAsynchronousWorkerHandler<int>>().Object,
+                    new Mock<IWaiter>().Object,
+                    1,
+                    10,
+                    null);
+            }
+        }
+#endif
     }
 }
