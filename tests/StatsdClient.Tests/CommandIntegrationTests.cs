@@ -27,6 +27,10 @@ namespace Tests
             _udpListener = new UdpListener(serverName, _serverPort);
         }
 
+        // When using client side aggregation, ignore tests using sample rate as client side aggregation
+        // set the sample rate at 1.0 for count metrics.
+        private bool IgnoreSampleRateTest => _optionalClientSideAggregationConfig != null;
+
         [OneTimeTearDown]
         public void TearDownUdpListener()
         {
@@ -77,24 +81,33 @@ namespace Tests
         [Test]
         public void Counter_sample_rate()
         {
-            // A sample rate over 1 doesn't really make sense, but it allows
-            // the test to pass every time
-            _dogStatsdService.Counter("counter", 1, sampleRate: 1.1);
-            AssertWasReceived("counter:1|c|@1.1");
+            if (!IgnoreSampleRateTest)
+            {
+                // A sample rate over 1 doesn't really make sense, but it allows
+                // the test to pass every time
+                _dogStatsdService.Counter("counter", 1, sampleRate: 1.1);
+                AssertWasReceived("counter:1|c|@1.1");
+            }
         }
 
         [Test]
         public void Counter_sample_rate_tags()
         {
-            _dogStatsdService.Counter("counter", 1337, sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
-            AssertWasReceived("counter:1337|c|@12.2|#tag1:true,tag2");
+            if (!IgnoreSampleRateTest)
+            {
+                _dogStatsdService.Counter("counter", 1337, sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
+                AssertWasReceived("counter:1337|c|@12.2|#tag1:true,tag2");
+            }
         }
 
         [Test]
         public void Counter_sample_rate_tags_double()
         {
-            _dogStatsdService.Counter("counter", 1337.3, sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
-            AssertWasReceived("counter:1337.3|c|@12.2|#tag1:true,tag2");
+            if (!IgnoreSampleRateTest)
+            {
+                _dogStatsdService.Counter("counter", 1337.3, sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
+                AssertWasReceived("counter:1337.3|c|@12.2|#tag1:true,tag2");
+            }
         }
 
         [Test]
@@ -114,15 +127,21 @@ namespace Tests
         [Test]
         public void Increment_sample_rate()
         {
-            _dogStatsdService.Increment("increment", sampleRate: 1.1);
-            AssertWasReceived("increment:1|c|@1.1");
+            if (!IgnoreSampleRateTest)
+            {
+                _dogStatsdService.Increment("increment", sampleRate: 1.1);
+                AssertWasReceived("increment:1|c|@1.1");
+            }
         }
 
         [Test]
         public void Increment_sample_rate_tags()
         {
-            _dogStatsdService.Increment("increment", sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
-            AssertWasReceived("increment:1|c|@12.2|#tag1:true,tag2");
+            if (!IgnoreSampleRateTest)
+            {
+                _dogStatsdService.Increment("increment", sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
+                AssertWasReceived("increment:1|c|@12.2|#tag1:true,tag2");
+            }
         }
 
         [Test]
@@ -142,15 +161,21 @@ namespace Tests
         [Test]
         public void Decrement_sample_rate()
         {
-            _dogStatsdService.Decrement("decrement", sampleRate: 1.1);
-            AssertWasReceived("decrement:-1|c|@1.1");
+            if (!IgnoreSampleRateTest)
+            {
+                _dogStatsdService.Decrement("decrement", sampleRate: 1.1);
+                AssertWasReceived("decrement:-1|c|@1.1");
+            }
         }
 
         [Test]
         public void Decrement_sample_rate_tags()
         {
-            _dogStatsdService.Decrement("decrement", sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
-            AssertWasReceived("decrement:-1|c|@12.2|#tag1:true,tag2");
+            if (!IgnoreSampleRateTest)
+            {
+                _dogStatsdService.Decrement("decrement", sampleRate: 12.2, tags: new[] { "tag1:true", "tag2" });
+                AssertWasReceived("decrement:-1|c|@12.2|#tag1:true,tag2");
+            }
         }
 
         [Test]
@@ -372,17 +397,17 @@ namespace Tests
 
         [Test]
         public void Timer_sample_rate()
-        {
-            _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1);
-            AssertWasReceived("someevent:999|ms|@1.1");
-        }
+            {
+                _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1);
+                AssertWasReceived("someevent:999|ms|@1.1");
+            }
 
         [Test]
         public void Timer_sample_rate_tags()
-        {
-            _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
-            AssertWasReceived("someevent:999|ms|@1.1|#tag1:true,tag2");
-        }
+            {
+                _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+                AssertWasReceived("someevent:999|ms|@1.1|#tag1:true,tag2");
+            }
 
         [Test]
         public void Timer_double()
@@ -400,17 +425,17 @@ namespace Tests
 
         [Test]
         public void Timer_double_sample_rate()
-        {
-            _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1);
-            AssertWasReceived("someevent:999.99|ms|@1.1");
-        }
+            {
+                _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1);
+                AssertWasReceived("someevent:999.99|ms|@1.1");
+            }
 
         [Test]
         public void Timer_double_sample_rate_tags()
-        {
-            _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
-            AssertWasReceived("someevent:999.99|ms|@1.1|#tag1:true,tag2");
-        }
+            {
+                _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+                AssertWasReceived("someevent:999.99|ms|@1.1|#tag1:true,tag2");
+            }
 
         [Test]
         public void Timer_method()
@@ -432,21 +457,21 @@ namespace Tests
 
         [Test]
         public void Timer_method_sample_rate()
-        {
-            _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1);
-            // Make sure that the received timer is of the right order of magnitude.
-            // The measured value will probably be a few ms longer than the sleep value.
-            AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
-        }
+            {
+                _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1);
+                // Make sure that the received timer is of the right order of magnitude.
+                // The measured value will probably be a few ms longer than the sleep value.
+                AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
+            }
 
         [Test]
         public void Timer_method_sample_rate_tags()
-        {
-            _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
-            // Make sure that the received timer is of the right order of magnitude.
-            // The measured value will probably be a few ms longer than the sleep value.
-            AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
-        }
+            {
+                _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+                // Make sure that the received timer is of the right order of magnitude.
+                // The measured value will probably be a few ms longer than the sleep value.
+                AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
+            }
 
         [Test]
         public void Timer_method_sets_return_value()
@@ -466,19 +491,19 @@ namespace Tests
 
         [Test]
         public void Timer_method_sets_return_value_sample_rate()
-        {
-            var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2);
-            AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2");
-            Assert.AreEqual(42, returnValue);
-        }
+            {
+                var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2);
+                AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2");
+                Assert.AreEqual(42, returnValue);
+            }
 
         [Test]
         public void Timer_method_sets_return_value_sample_rate_and_tag()
-        {
-            var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
-            AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2\|#fjords");
-            Assert.AreEqual(42, returnValue);
-        }
+            {
+                var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
+                AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2\|#fjords");
+                Assert.AreEqual(42, returnValue);
+            }
 
         [Test]
         public void Timer_method_doesnt_swallow_exception_and_submits_metric()
