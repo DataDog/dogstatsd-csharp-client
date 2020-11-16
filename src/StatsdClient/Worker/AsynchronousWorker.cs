@@ -19,6 +19,9 @@ namespace StatsdClient.Worker
         private readonly IWaiter _waiter;
         private volatile bool _terminate = false;
 
+        private volatile bool _requestFlush = false;
+        private AutoResetEvent _flushEvent = new AutoResetEvent(false);
+
         public AsynchronousWorker(
             IAsynchronousWorkerHandler<T> handler,
             IWaiter waiter,
@@ -40,7 +43,7 @@ namespace StatsdClient.Worker
 
             _handler = handler;
             _waiter = waiter;
-            for (int i = 0; i < workerThreadCount; ++i)
+            for (int i = 0; i < workerThreadCount; ++i) // $$ probably need a single worker.
             {
                 _workers.Add(Task.Run(() => Dequeue()));
             }
@@ -55,7 +58,7 @@ namespace StatsdClient.Worker
             return _queue.TryEnqueue(value);
         }
 
-        public void Dispose()
+        public void Flush()
         {
             var remainingWaitCount = maxWaitDurationInDispose.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
             while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
@@ -64,6 +67,13 @@ namespace StatsdClient.Worker
                 --remainingWaitCount;
             }
 
+            _requestFlush = true;
+            _flushEvent.WaitOne(maxWaitDurationInDispose); // $$ rename           
+        }
+
+        public void Dispose()
+        {
+            Flush();
             _terminate = true;
             try
             {
@@ -95,9 +105,16 @@ namespace StatsdClient.Worker
                     }
                     else
                     {
+                        if (_requestFlush)
+                        {
+                            _handler.Flush();
+                            _requestFlush = false;
+                            _flushEvent.Set();
+                        }
+
                         if (_terminate)
                         {
-                            _handler.OnShutdown();
+                            _handler.Flush();
                             return;
                         }
 

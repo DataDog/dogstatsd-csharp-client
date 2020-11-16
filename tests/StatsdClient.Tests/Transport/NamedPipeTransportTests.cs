@@ -29,6 +29,18 @@ namespace Tests
             CollectionAssert.AreEqual(task.Result, _buffToSend);
         }
 
+        //  [Test]
+        // public void Flush()
+        // {
+        //     var task = StartServerSingleRead(_buffToSend.Length);
+
+        //     using (var transport = new NamedPipeTransport(_pipeName))
+        //     {
+        //         Assert.True(transport.Send(_buffToSend, _buffToSend.Length));
+        //         CollectionAssert.AreEqual(task.Result, _buffToSend);
+        //     }
+        // }
+
         [Test]
         public void NoTimeout()
         {

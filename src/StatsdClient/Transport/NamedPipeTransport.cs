@@ -55,8 +55,26 @@ namespace StatsdClient.Transport
             }
         }
 
+        public void Flush()
+        {
+            var gotLock = false;
+            try
+            {
+                _lock.Enter(ref gotLock);
+               _namedPipe.Flush();  // $$ check what happen if there is no connection
+            }
+            finally
+            {
+                if (gotLock)
+                {
+                    _lock.Exit();
+                }
+            }
+        }
+
         public void Dispose()
         {
+            Flush();
             _namedPipe.Dispose();
         }
 

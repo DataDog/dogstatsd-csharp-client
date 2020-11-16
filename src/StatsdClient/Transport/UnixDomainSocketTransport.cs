@@ -66,8 +66,13 @@ namespace StatsdClient.Transport
             return false;
         }
 
+        public void Flush()
+        {
+        }
+
         public void Dispose()
         {
+            _socket.Shutdown(SocketShutdown.Both); // $$ TEST
             _socket.Dispose();
         }
     }

@@ -20,5 +20,7 @@ namespace StatsdClient.Transport
         /// Must be thread safe as it is called to send metrics and the telemetry.
         /// </summary>
         bool Send(byte[] buffer, int length);
+
+        void Flush();
     }
 }
