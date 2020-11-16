@@ -73,21 +73,24 @@ namespace StatsdClient.Worker
 
         public void Dispose()
         {
-            Flush();
-            _terminate = true;
-            try
+            if (!_terminate)
             {
-                foreach (var worker in _workers)
+                Flush();
+                _terminate = true;
+                try
                 {
-                    worker.Wait();
+                    foreach (var worker in _workers)
+                    {
+                        worker.Wait();
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                }
 
-            _workers.Clear();
+                _workers.Clear();
+            }
         }
 
         private void Dequeue()

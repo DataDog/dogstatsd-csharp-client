@@ -88,7 +88,8 @@ namespace Tests
             var worker = CreateWorker(workerThreadCount: 1);
             {
                 worker.Flush();
-                _handler.Verify(h => h.Flush(), Times.Once());
+                worker.Flush();
+                _handler.Verify(h => h.Flush(), Times.Exactly(2));
             }
         }
 
