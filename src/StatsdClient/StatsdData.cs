@@ -25,7 +25,12 @@ namespace StatsdClient
 
         public Telemetry Telemetry { get; private set; }
 
-        public void Dispose()
+        public void Flush()
+        {
+            _statsBufferize?.Flush();
+            Telemetry.Flush();
+        }
+
         {
             // _statsBufferize and _telemetry must be disposed before _statsSender to make
             // sure _statsSender does not received data when it is already disposed.

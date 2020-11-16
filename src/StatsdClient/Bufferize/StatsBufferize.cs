@@ -40,6 +40,11 @@ namespace StatsdClient.Bufferize
             return true;
         }
 
+        public void Flush()
+        {
+            this._worker.Flush();
+        }
+
         public void Dispose()
         {
             this._worker.Dispose();
@@ -83,7 +88,7 @@ namespace StatsdClient.Bufferize
                 return true;
             }
 
-            public void OnShutdown()
+            public void Flush()
             {
                 this._statsRouter.Flush();
             }

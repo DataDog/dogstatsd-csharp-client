@@ -21,6 +21,7 @@ namespace Tests
             };
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
+            config.Advanced.TelemetryFlushInterval = null;
 
             SendAndCheckMetricsAreReceived(
                 new SocketServer(config),
@@ -43,6 +44,7 @@ namespace Tests
                 config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.UDSBufferFullBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
+                config.Advanced.TelemetryFlushInterval = null;
 
                 SendAndCheckMetricsAreReceived(
                     new SocketServer(config),
@@ -69,6 +71,7 @@ namespace Tests
             };
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
+            config.Advanced.TelemetryFlushInterval = null;
 
             SendAndCheckMetricsAreReceived(
                 new NamedPipeServer(config.PipeName, 10000, TimeSpan.FromSeconds(1)),
@@ -88,7 +91,7 @@ namespace Tests
                         service.Increment($"test{i}", tags: new[] { "KEY:VALUE" });
                     }
 
-                    service.Dispose();
+                    service.Flush();
                     var metricsReceived = server.Stop();
                     Assert.AreEqual(metricToSendCount, metricsReceived.Count);
                     for (int i = 0; i < metricToSendCount; ++i)

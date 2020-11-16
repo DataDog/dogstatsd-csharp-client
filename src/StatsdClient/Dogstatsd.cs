@@ -228,6 +228,14 @@ namespace StatsdClient
                 _dogStatsdService.ServiceCheck(name, status, timestamp, hostname, tags, message);
 
         /// <summary>
+        /// Flushes all metrics.
+        /// </summary>
+        public static void Flush()
+        {
+            _dogStatsdService.Flush();
+        }
+
+        /// <summary>
         /// Disposes the instance of DogStatsdService.
         /// Flushes all metrics.
         /// </summary>

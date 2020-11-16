@@ -22,6 +22,7 @@ namespace Tests
         public void Init()
         {
             _handler = new Mock<IAsynchronousWorkerHandler<int>>();
+            _handler.Setup(h => h.OnIdle());
             _waiter = new Mock<IWaiter>();
         }
 
@@ -79,6 +80,16 @@ namespace Tests
             var worker = CreateWorker();
             // Check we do not block
             worker.Dispose();
+        }
+
+        [Test]
+        public void Flush()
+        {
+            var worker = CreateWorker(workerThreadCount: 1);
+            {
+                worker.Flush();
+                _handler.Verify(h => h.Flush(), Times.Once());
+            }
         }
 
 #if NETFRAMEWORK
