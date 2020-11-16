@@ -248,7 +248,6 @@ namespace StatsdClient
         public void Flush()
         {
             _statsdData?.Flush();
-            _statsdData = null;
         }
 
         /// <summary>
