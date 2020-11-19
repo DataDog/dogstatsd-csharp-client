@@ -83,6 +83,8 @@ namespace StatsdClient.Worker
                     {
                         worker.Wait();
                     }
+
+                    _flushEvent.Dispose();
                 }
                 catch (Exception e)
                 {
