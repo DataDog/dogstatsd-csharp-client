@@ -243,6 +243,14 @@ namespace StatsdClient
         }
 
         /// <summary>
+        /// Flushes all metrics.
+        /// </summary>
+        public void Flush()
+        {
+            _statsdData?.Flush();
+        }
+
+        /// <summary>
         /// Disposes an instance of DogStatsdService.
         /// Flushes all metrics.
         /// </summary>

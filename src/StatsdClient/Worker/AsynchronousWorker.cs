@@ -12,12 +12,15 @@ namespace StatsdClient.Worker
     /// </summary>
     internal class AsynchronousWorker<T> : IDisposable
     {
-        private static TimeSpan maxWaitDurationInDispose = TimeSpan.FromSeconds(3);
+        private static TimeSpan maxWaitDurationInFlush = TimeSpan.FromSeconds(3);
         private readonly ConcurrentBoundedQueue<T> _queue;
         private readonly List<Task> _workers = new List<Task>();
         private readonly IAsynchronousWorkerHandler<T> _handler;
         private readonly IWaiter _waiter;
         private volatile bool _terminate = false;
+
+        private volatile bool _requestFlush = false;
+        private AutoResetEvent _flushEvent = new AutoResetEvent(false);
 
         public AsynchronousWorker(
             IAsynchronousWorkerHandler<T> handler,
@@ -55,29 +58,41 @@ namespace StatsdClient.Worker
             return _queue.TryEnqueue(value);
         }
 
-        public void Dispose()
+        public void Flush()
         {
-            var remainingWaitCount = maxWaitDurationInDispose.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
+            var remainingWaitCount = maxWaitDurationInFlush.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
             while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
             {
                 _waiter.Wait(MinWaitDuration);
                 --remainingWaitCount;
             }
 
-            _terminate = true;
-            try
-            {
-                foreach (var worker in _workers)
-                {
-                    worker.Wait();
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
+            _requestFlush = true;
+            _flushEvent.WaitOne(maxWaitDurationInFlush);
+        }
 
-            _workers.Clear();
+        public void Dispose()
+        {
+            if (!_terminate)
+            {
+                Flush();
+                _terminate = true;
+                try
+                {
+                    foreach (var worker in _workers)
+                    {
+                        worker.Wait();
+                    }
+
+                    _flushEvent.Dispose();
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                }
+
+                _workers.Clear();
+            }
         }
 
         private void Dequeue()
@@ -95,9 +110,15 @@ namespace StatsdClient.Worker
                     }
                     else
                     {
+                        if (_requestFlush)
+                        {
+                            _handler.Flush();
+                            _requestFlush = false;
+                            _flushEvent.Set();
+                        }
+
                         if (_terminate)
                         {
-                            _handler.OnShutdown();
                             return;
                         }
 
