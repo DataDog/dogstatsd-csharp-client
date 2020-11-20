@@ -1,5 +1,16 @@
 CHANGELOG
 =========
+# 6.0.0 / XX-XX-XXXX
+## Breaking changes.
+Methods `Counter`, `Gauge`, `Histogram`, `Distribution` and `Timer` from `DogStatsdService` and `DogStatsd` are not generic methods anymore. (See https://github.com/DataDog/dogstatsd-csharp-client/pull/133/commits/ab18f9572de3bfe76fb95b5fce14d6ee965b62d4)
+
+## Changes 
+* [IMPROVEMENT] Add `Flush` method. See [#144][].
+* [FEATURE] Add client side aggregation for Count, Gauge and Set metrics. See [#133][], [#134][] and [#143][].
+* [FEATURE] Add support for universal service tagging. See [#139][] (Thanks [@kevingosse][])
+* [BUGFIX] Work around 64 bit RyuJIT ThreadAbortException bug on the .NET Framework. See [#137][] (Thanks [@jdasilva-olo][]).
+
+
 # 5.1.0 / 09-07-2020
 * [IMPROVEMENT] Reduce the memory allocations. See [#123][], [#124][], [#127][] and [#132][].
 * [IMPROVEMENT] Add a telemetry end point. See [#130][].
@@ -168,6 +179,12 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#128]: https://github.com/DataDog/dogstatsd-csharp-client/issues/128
 [#130]: https://github.com/DataDog/dogstatsd-csharp-client/issues/130
 [#132]: https://github.com/DataDog/dogstatsd-csharp-client/issues/132
+[#133]: https://github.com/DataDog/dogstatsd-csharp-client/issues/133
+[#134]: https://github.com/DataDog/dogstatsd-csharp-client/issues/134
+[#137]: https://github.com/DataDog/dogstatsd-csharp-client/issues/137
+[#139]: https://github.com/DataDog/dogstatsd-csharp-client/issues/139
+[#143]: https://github.com/DataDog/dogstatsd-csharp-client/issues/143
+[#144]: https://github.com/DataDog/dogstatsd-csharp-client/issues/144
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
@@ -177,7 +194,9 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [@chriskinsman]: https://github.com/chriskinsman
 [@daniel-chambers]: https://github.com/daniel-chambers
 [@danopia]: https://github.com/danopia
+[@jdasilva-olo]: https://github.com/jdasilva-olo
 [@jpasichnyk]: https://github.com/jpasichnyk
+[@kevingosse]: https://github.com/kevingosse
 [@michaellockwood]: https://github.com/michaellockwood
 [@nathanrobb]: https://github.com/nathanrobb
 [@nrjohnstone]: https://github.com/nrjohnstone
