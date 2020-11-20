@@ -17,8 +17,8 @@ namespace StatsdClient.Tests
         private readonly Dictionary<string, string> _envVarsToRestore = new Dictionary<string, string>();
         private readonly List<string> _envVarsKeyToRestore = new List<string>
         {
-            StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR,
-            StatsdConfig.DD_AGENT_HOST_ENV_VAR,
+            StatsdConfig.DogStatsdPortEnvVar,
+            StatsdConfig.AgentHostEnvVar,
             StatsdConfig.EntityIdEnvVar,
             StatsdConfig.AgentPipeNameEnvVar,
             StatsdConfig.EnvironmentEnvVar,
@@ -60,7 +60,7 @@ namespace StatsdClient.Tests
             }
 
             // Set default hostname
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, "0.0.0.0");
+            Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, "0.0.0.0");
         }
 
         [TearDown]
@@ -75,12 +75,12 @@ namespace StatsdClient.Tests
         [Test]
         public void StatsdServerName()
         {
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, null);
+            Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, null);
             Assert.Throws<ArgumentNullException>(() => GetStatsdServerName(CreateConfig()));
 
             Assert.AreEqual("0.0.0.1", GetStatsdServerName(CreateConfig(statsdServerName: "0.0.0.1")));
 
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, "0.0.0.2");
+            Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, "0.0.0.2");
             Assert.AreEqual("0.0.0.2", GetStatsdServerName(CreateConfig()));
 
             Assert.AreEqual("0.0.0.3", GetStatsdServerName(CreateConfig(statsdServerName: "0.0.0.3")));
@@ -93,7 +93,7 @@ namespace StatsdClient.Tests
 
             Assert.AreEqual(1, GetUDPPort(CreateConfig(statsdPort: 1)));
 
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR, "2");
+            Environment.SetEnvironmentVariable(StatsdConfig.DogStatsdPortEnvVar, "2");
             Assert.AreEqual(2, GetUDPPort(CreateConfig()));
 
             Assert.AreEqual(3, GetUDPPort(CreateConfig(statsdPort: 3)));
@@ -103,11 +103,11 @@ namespace StatsdClient.Tests
         [Test]
         public void UDSStatsdServerName()
         {
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, null);
+            Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, null);
             Assert.AreEqual("server1", GetUDSStatsdServerName(CreateUDSConfig("server1")));
 
             Environment.SetEnvironmentVariable(
-                StatsdConfig.DD_AGENT_HOST_ENV_VAR,
+                StatsdConfig.AgentHostEnvVar,
                 StatsdBuilder.UnixDomainSocketPrefix + "server2");
             Assert.AreEqual("server2", GetUDSStatsdServerName(CreateUDSConfig()));
 
@@ -229,7 +229,7 @@ namespace StatsdClient.Tests
         {
             var config = new StatsdConfig { };
             config.StatsdServerName = string.Empty;
-            Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, string.Empty);
+            Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, string.Empty);
 
             _mock.Setup(m => m.CreateNamedPipeTransport(It.IsAny<string>())).Returns(new NamedPipeTransport("pipename"));
 
