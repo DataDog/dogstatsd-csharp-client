@@ -29,8 +29,8 @@ namespace StatsdClient
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var telemetry = CreateTelemetry(config, globalTags, endPoint, transportData.Transport);
             var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
+            var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
@@ -144,6 +144,7 @@ namespace StatsdClient
         }
 
         private Telemetry CreateTelemetry(
+            MetricSerializer metricSerializer,
             StatsdConfig config,
             string[] globalTags,
             DogStatsdEndPoint dogStatsdEndPoint,
@@ -162,7 +163,7 @@ namespace StatsdClient
                     telemetryTransport = CreateTransport(optionalTelemetryEndPoint, config);
                 }
 
-                return _factory.CreateTelemetry(version, telemetryFlush.Value, telemetryTransport, globalTags);
+                return _factory.CreateTelemetry(metricSerializer, version, telemetryFlush.Value, telemetryTransport, globalTags);
             }
 
             // Telemetry is not enabled

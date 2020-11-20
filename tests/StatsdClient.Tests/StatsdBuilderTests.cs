@@ -185,6 +185,7 @@ namespace StatsdClient.Tests
             _mock.Verify(m => m.CreateUDPTransport(It.IsAny<IPEndPoint>()), Times.Once);
             _mock.Verify(
                 m => m.CreateTelemetry(
+                It.IsAny<MetricSerializer>(),
                 It.Is<string>(v => !string.IsNullOrEmpty(v)),
                 conf.TelemetryFlushInterval.Value,
                 It.IsAny<ITransport>(),

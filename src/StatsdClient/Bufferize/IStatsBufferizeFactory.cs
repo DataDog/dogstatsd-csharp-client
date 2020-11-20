@@ -32,6 +32,7 @@ namespace StatsdClient.Bufferize
         ITransport CreateNamedPipeTransport(string pipeName);
 
         Telemetry CreateTelemetry(
+            MetricSerializer metricSerializer,
             string assemblyVersion,
             TimeSpan flushInterval,
             ITransport transport,
