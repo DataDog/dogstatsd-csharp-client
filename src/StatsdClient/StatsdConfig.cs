@@ -57,7 +57,7 @@ namespace StatsdClient
         /// <summary>
         /// The name of the environment variable defining the name of the pipe. INTERNAL USAGE ONLY.
         /// </summary>
-        public const string AgentPipeNameEnvVar = "DD_AGENT_PIPE_NAME";
+        public const string AgentPipeNameEnvVar = "DD_DOGSTATSD_PIPE_NAME";
 
         /// <summary>
         /// The name of the environment variable defining the service name
