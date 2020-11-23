@@ -7,6 +7,7 @@ CHANGELOG
   * Remove variables `StatsdConfig.DD_ENTITY_ID_ENV_VAR`, `StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR` and `StatsdConfig.DD_AGENT_HOST_ENV_VAR`
   * Visibility change from `public` to `internal` for: `ICommandType`, `IRandomGenerator`, `IStopWatchFactory`, `IStopwatch`, `MetricsTimer`, `RandomGenerator`, `StopWatchFactory`, `Stopwatch`, `ThreadSafeRandom` and `StatsdUDP`.
   * Remove `Statsd`, `IStatsd` and `IStatsdUDP`.
+* Rename environment variable `DD_AGENT_PIPE_NAME` to `DD_DOGSTATSD_PIPE_NAME`.
 
 ## Changes 
 * [IMPROVEMENT] Add `Flush` method. See [#144][].
