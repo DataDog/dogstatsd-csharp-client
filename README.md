@@ -138,7 +138,7 @@ After the client is created, you can start sending Service Checks to Datadog. Se
 
 ## Usage via the Statsd class
 
-`Statsd` is removed because it is not thread safe and not efficient. You should use instead `DogStatsdService` or `DogStatsd`:
+`Statsd` has been removed in v`6.0.0` because it is not thread safe and not efficient. Use `DogStatsdService` or `DogStatsd` instead:
 * Methods from `DogStatsdService` and `DogStatsd` do not block when called except for `Flush` and `Dispose`.
 * `DogStatsdService` and `DogStatsd` batch automatically several metrics in one datagram.
 
