@@ -10,7 +10,7 @@ namespace StatsdClient
         /// <summary>
         /// Gets or sets the maximum number of unique stats before flushing.
         /// </summary>
-        public int MaxUniqueStatsBeforeFlush { get; set; } = 10000;
+        public int MaxUniqueStatsBeforeFlush { get; set; } = 1000 * 1000;
 
         /// <summary>
         /// Gets or sets the maximum interval duration between two flushes.
