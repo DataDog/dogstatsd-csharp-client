@@ -138,7 +138,9 @@ After the client is created, you can start sending Service Checks to Datadog. Se
 
 ## Usage via the Statsd class
 
-`Statsd` is marked as obsolete as both `DogStatsdService` and `DogStatsd` methods do not block anymore and batch several metrics automatically in one UDP or UDS message.
+`Statsd` is removed because it is not thread safe and not efficient. You should use instead `DogStatsdService` or `DogStatsd`:
+* Methods from `DogStatsdService` and `DogStatsd` do not block when called except for `Flush` and `Dispose`.
+* `DogStatsdService` and `DogStatsd` batch automatically several metrics in one datagram.
 
 ## Unix domain socket support
 
