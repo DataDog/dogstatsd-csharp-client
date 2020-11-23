@@ -1,6 +1,6 @@
 CHANGELOG
 =========
-# 6.0.0 / XX-XX-XXXX
+# 6.0.0 / 11-23-2020
 ## Breaking changes.
 * Methods `Counter`, `Gauge`, `Histogram`, `Distribution` and `Timer` from `DogStatsdService` and `DogStatsd` are not generic methods anymore. (See https://github.com/DataDog/dogstatsd-csharp-client/pull/133/commits/ab18f9572de3bfe76fb95b5fce14d6ee965b62d4)
 * The following obsolete code is removed:
