@@ -83,7 +83,7 @@ namespace Tests
                 case HostnameProvider.Property: dogstatsdConfig.StatsdServerName = serverName; break;
                 case HostnameProvider.Environment:
                     {
-                        Environment.SetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR, serverName);
+                        Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, serverName);
                         break;
                     }
             }

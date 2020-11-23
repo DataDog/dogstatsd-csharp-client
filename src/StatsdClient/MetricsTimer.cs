@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace StatsdClient
 {
-    #pragma warning disable CS1591
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "See ObsoleteAttribute.")]
-    [ObsoleteAttribute("This class will become private in a future release.")]
-    public class MetricsTimer : IDisposable
+    internal class MetricsTimer : IDisposable
     {
         private readonly string _name;
         private readonly DogStatsdService _dogStatsd;

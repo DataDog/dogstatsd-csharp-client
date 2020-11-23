@@ -29,8 +29,8 @@ namespace StatsdClient
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var telemetry = CreateTelemetry(config, globalTags, endPoint, transportData.Transport);
             var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
+            var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
@@ -68,7 +68,7 @@ namespace StatsdClient
         {
             var statsdServerName = !string.IsNullOrEmpty(config.StatsdServerName)
                             ? config.StatsdServerName
-                            : Environment.GetEnvironmentVariable(StatsdConfig.DD_AGENT_HOST_ENV_VAR);
+                            : Environment.GetEnvironmentVariable(StatsdConfig.AgentHostEnvVar);
 
             var pipeName = !string.IsNullOrEmpty(config.PipeName)
                             ? config.PipeName
@@ -79,7 +79,7 @@ namespace StatsdClient
                 // Ignore pipe name in the error message as its usage is internal only.
                 throw new ArgumentNullException(
                     $"{nameof(config)}.{nameof(config.StatsdServerName)} and"
-                    + $" {StatsdConfig.DD_AGENT_HOST_ENV_VAR} environment variable not set");
+                    + $" {StatsdConfig.AgentHostEnvVar} environment variable not set");
             }
 
             return new DogStatsdEndPoint
@@ -112,7 +112,7 @@ namespace StatsdClient
                 return statsdPort;
             }
 
-            var portString = Environment.GetEnvironmentVariable(StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR);
+            var portString = Environment.GetEnvironmentVariable(StatsdConfig.DogStatsdPortEnvVar);
             if (!string.IsNullOrEmpty(portString))
             {
                 if (int.TryParse(portString, out var port))
@@ -120,7 +120,7 @@ namespace StatsdClient
                     return port;
                 }
 
-                throw new ArgumentException($"Environment Variable '{StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR}' bad format: {portString}");
+                throw new ArgumentException($"Environment Variable '{StatsdConfig.DogStatsdPortEnvVar}' bad format: {portString}");
             }
 
             return StatsdConfig.DefaultStatsdPort;
@@ -144,6 +144,7 @@ namespace StatsdClient
         }
 
         private Telemetry CreateTelemetry(
+            MetricSerializer metricSerializer,
             StatsdConfig config,
             string[] globalTags,
             DogStatsdEndPoint dogStatsdEndPoint,
@@ -162,7 +163,7 @@ namespace StatsdClient
                     telemetryTransport = CreateTransport(optionalTelemetryEndPoint, config);
                 }
 
-                return _factory.CreateTelemetry(version, telemetryFlush.Value, telemetryTransport, globalTags);
+                return _factory.CreateTelemetry(metricSerializer, version, telemetryFlush.Value, telemetryTransport, globalTags);
             }
 
             // Telemetry is not enabled
