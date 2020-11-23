@@ -57,14 +57,6 @@ namespace Tests
         }
 
         [Test]
-        public void Udp_listener_sanity_test()
-        {
-            var client = new StatsdUDP("127.0.0.1", Convert.ToInt32("8126"));
-            client.Send("iamnotinsane!");
-            AssertWasReceived("iamnotinsane!");
-        }
-
-        [Test]
         public void Counter()
         {
             _dogStatsdService.Counter("counter", 1337);

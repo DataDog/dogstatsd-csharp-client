@@ -2,7 +2,12 @@ CHANGELOG
 =========
 # 6.0.0 / XX-XX-XXXX
 ## Breaking changes.
-Methods `Counter`, `Gauge`, `Histogram`, `Distribution` and `Timer` from `DogStatsdService` and `DogStatsd` are not generic methods anymore. (See https://github.com/DataDog/dogstatsd-csharp-client/pull/133/commits/ab18f9572de3bfe76fb95b5fce14d6ee965b62d4)
+* Methods `Counter`, `Gauge`, `Histogram`, `Distribution` and `Timer` from `DogStatsdService` and `DogStatsd` are not generic methods anymore. (See https://github.com/DataDog/dogstatsd-csharp-client/pull/133/commits/ab18f9572de3bfe76fb95b5fce14d6ee965b62d4)
+* The following obsolete code is removed:
+  * Remove variables `StatsdConfig.DD_ENTITY_ID_ENV_VAR`, `StatsdConfig.DD_DOGSTATSD_PORT_ENV_VAR` and `StatsdConfig.DD_AGENT_HOST_ENV_VAR`
+  * Visibility change from `public` to `internal` for: `ICommandType`, `IRandomGenerator`, `IStopWatchFactory`, `IStopwatch`, `MetricsTimer`, `RandomGenerator`, `StopWatchFactory`, `Stopwatch`, `ThreadSafeRandom` and `StatsdUDP`.
+  * Remove `Statsd`, `IStatsd` and `IStatsdUDP`.
+* Rename environment variable `DD_AGENT_PIPE_NAME` to `DD_DOGSTATSD_PIPE_NAME`.
 
 ## Changes 
 * [IMPROVEMENT] Add `Flush` method. See [#144][].
