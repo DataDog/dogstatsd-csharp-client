@@ -89,6 +89,25 @@ namespace Tests
             }
         }
 
+        [Test]
+        public void Service_should_be_configured_more_than_once_if_previously_disposed()
+        {
+            using (var sut = CreateSut())
+            {
+                StatsdConfig metricsConfig = new StatsdConfig()
+                {
+                    StatsdServerName = "127.0.0.1",
+                    StatsdPort = 8129,
+                    Prefix = "prefix",
+                };
+
+                sut.Configure(metricsConfig);
+                sut.Dispose();
+
+                Assert.DoesNotThrow(() => sut.Configure(metricsConfig));
+            }
+        }
+
         private DogStatsdService CreateSut()
         {
             return new DogStatsdService();

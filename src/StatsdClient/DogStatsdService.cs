@@ -258,6 +258,7 @@ namespace StatsdClient
         {
             _statsdData?.Dispose();
             _statsdData = null;
+            _config = null;
         }
     }
 }
