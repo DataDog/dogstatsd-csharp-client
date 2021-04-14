@@ -18,6 +18,7 @@ namespace StatsdClient.Aggregator
         private readonly long _flushIntervalMilliseconds;
         private readonly SerializedMetric _serializedMetric = new SerializedMetric();
         private readonly MetricType _expectedMetricType;
+        private readonly Telemetry _optionalTelemetry;
 
         public AggregatorFlusher(MetricAggregatorParameters parameters, MetricType expectedMetricType)
         {
@@ -25,6 +26,7 @@ namespace StatsdClient.Aggregator
             _bufferBuilder = parameters.BufferBuilder;
             _flushIntervalMilliseconds = (long)parameters.FlushInterval.TotalMilliseconds;
             _maxUniqueStatsBeforeFlush = parameters.MaxUniqueStatsBeforeFlush;
+            _optionalTelemetry = parameters.OptionalTelemetry;
             _expectedMetricType = expectedMetricType;
         }
 
@@ -51,6 +53,7 @@ namespace StatsdClient.Aggregator
             {
                 addSerializedMetric(_values);
                 _bufferBuilder.HandleBufferAndReset();
+                _optionalTelemetry?.OnAggregatedContextFlush(_expectedMetricType, _values.Count);
                 this._stopWatch.Restart();
                 _values.Clear();
             }
