@@ -49,6 +49,7 @@ namespace StatsdClient.Bufferize
             private readonly StatsRouter _statsRouter;
             private readonly TimeSpan _maxIdleWaitBeforeSending;
             private readonly System.Diagnostics.Stopwatch _stopwatch;
+            private volatile bool _resetTimer;
 
             public WorkerHandler(StatsRouter statsRouter, TimeSpan maxIdleWaitBeforeSending)
             {
@@ -62,15 +63,15 @@ namespace StatsdClient.Bufferize
                 using (stats)
                 {
                     _statsRouter.Route(stats);
-                    _stopwatch.Reset();
+                    _resetTimer = true;
                 }
             }
 
             public bool OnIdle()
             {
-                if (!_stopwatch.IsRunning)
+                if (_resetTimer)
                 {
-                    _stopwatch.Start();
+                    _stopwatch.Restart();
                 }
 
                 if (_stopwatch.ElapsedMilliseconds > _maxIdleWaitBeforeSending.TotalMilliseconds)
