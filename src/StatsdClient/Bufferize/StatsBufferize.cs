@@ -49,7 +49,7 @@ namespace StatsdClient.Bufferize
             private readonly StatsRouter _statsRouter;
             private readonly TimeSpan _maxIdleWaitBeforeSending;
             private readonly System.Diagnostics.Stopwatch _stopwatch;
-            private volatile bool _resetTimer;
+            private bool _resetTimer;
 
             public WorkerHandler(StatsRouter statsRouter, TimeSpan maxIdleWaitBeforeSending)
             {
