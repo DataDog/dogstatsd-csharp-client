@@ -72,6 +72,7 @@ namespace StatsdClient.Bufferize
                 if (_resetTimer)
                 {
                     _stopwatch.Restart();
+                    _resetTimer = false;
                 }
 
                 if (_stopwatch.ElapsedMilliseconds > _maxIdleWaitBeforeSending.TotalMilliseconds)
