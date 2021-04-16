@@ -46,7 +46,10 @@ namespace StatsdClient
                 stats.Event.Hostname = hostname;
                 stats.Event.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
 
-                Send(stats, () => _optionalTelemetry?.OnEventSent());
+                if (Send(stats))
+                {
+                    _optionalTelemetry?.OnEventSent();
+                }
             }
         }
 
@@ -62,7 +65,11 @@ namespace StatsdClient
                 stats.ServiceCheck.Hostname = hostname;
                 stats.ServiceCheck.ServiceCheckMessage = serviceCheckMessage;
                 stats.ServiceCheck.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
-                Send(stats, () => _optionalTelemetry?.OnServiceCheckSent());
+
+                if (Send(stats))
+                {
+                    _optionalTelemetry?.OnServiceCheckSent();
+                }
             }
         }
 
@@ -84,7 +91,10 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.NumericValue = value;
 
-                    Send(stats, () => _optionalTelemetry?.OnMetricSent());
+                    if (Send(stats))
+                    {
+                        _optionalTelemetry?.OnMetricSent();
+                    }
                 }
             }
         }
@@ -102,7 +112,10 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.StringValue = value;
 
-                    Send(stats, () => _optionalTelemetry?.OnMetricSent());
+                    if (Send(stats))
+                    {
+                        _optionalTelemetry?.OnMetricSent();
+                    }
                 }
             }
         }
@@ -134,16 +147,15 @@ namespace StatsdClient
             return false;
         }
 
-        private void Send(Stats metricFields, Action onSuccess)
+        private bool Send(Stats metricFields)
         {
             if (_statsBufferize.Send(metricFields))
             {
-                onSuccess();
+                return true;
             }
-            else
-            {
-                _optionalTelemetry?.OnPacketsDroppedQueue();
-            }
+
+            _optionalTelemetry?.OnPacketsDroppedQueue();
+            return false;
         }
     }
 }

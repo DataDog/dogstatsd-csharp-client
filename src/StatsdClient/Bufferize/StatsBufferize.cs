@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using StatsdClient.Statistic;
 using StatsdClient.Worker;
 
@@ -54,10 +53,12 @@ namespace StatsdClient.Bufferize
         {
             private readonly StatsRouter _statsRouter;
             private readonly TimeSpan _maxIdleWaitBeforeSending;
-            private System.Diagnostics.Stopwatch _stopwatch;
+            private readonly System.Diagnostics.Stopwatch _stopwatch;
+            private bool _resetTimer;
 
             public WorkerHandler(StatsRouter statsRouter, TimeSpan maxIdleWaitBeforeSending)
             {
+                _stopwatch = new System.Diagnostics.Stopwatch();
                 _statsRouter = statsRouter;
                 _maxIdleWaitBeforeSending = maxIdleWaitBeforeSending;
             }
@@ -67,15 +68,16 @@ namespace StatsdClient.Bufferize
                 using (stats)
                 {
                     _statsRouter.Route(stats);
-                    _stopwatch = null;
+                    _resetTimer = true;
                 }
             }
 
             public bool OnIdle()
             {
-                if (_stopwatch == null)
+                if (_resetTimer)
                 {
-                    _stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                    _stopwatch.Restart();
+                    _resetTimer = false;
                 }
 
                 if (_stopwatch.ElapsedMilliseconds > _maxIdleWaitBeforeSending.TotalMilliseconds)
