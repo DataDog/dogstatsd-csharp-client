@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using StatsdClient.Statistic;
 using StatsdClient.Utils;
@@ -15,7 +16,19 @@ namespace StatsdClient.Aggregator
 
         public SetAggregator(MetricAggregatorParameters parameters, Telemetry optionalTelemetry)
         {
-            _aggregator = new AggregatorFlusher<StatsMetricSet>(parameters, MetricType.Set);
+            Action<AggregatorFlusher<StatsMetricSet>, StatsMetricSet> flushMetric = (agg, statsMetric) =>
+            {
+                using (var statsMetricSet = statsMetric)
+                {
+                    var metric = statsMetricSet.StatsMetric;
+                    foreach (var v in statsMetricSet.Values)
+                    {
+                        metric.StringValue = v;
+                        agg.FlushStatsMetric(metric);
+                    }
+                }
+            };
+            _aggregator = new AggregatorFlusher<StatsMetricSet>(parameters, MetricType.Set, flushMetric);
             _pool = new Pool<StatsMetricSet>(pool => new StatsMetricSet(pool), 2 * parameters.MaxUniqueStatsBeforeFlush);
             _optionalTelemetry = optionalTelemetry;
         }
@@ -48,23 +61,7 @@ namespace StatsdClient.Aggregator
 
         public void TryFlush(bool force = false)
         {
-            _aggregator.TryFlush(
-                dictionary =>
-                {
-                    foreach (var keyValue in dictionary)
-                    {
-                        using (var statsMetricSet = keyValue.Value)
-                        {
-                            var metric = statsMetricSet.StatsMetric;
-                            foreach (var v in statsMetricSet.Values)
-                            {
-                                metric.StringValue = v;
-                                _aggregator.FlushStatsMetric(metric);
-                            }
-                        }
-                    }
-                },
-                force);
+            _aggregator.TryFlush(force);
         }
 
         private class StatsMetricSet : AbstractPoolObject
