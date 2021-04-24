@@ -28,11 +28,20 @@ namespace StatsdClient.Bufferize
                 blockingQueueTimeout);
         }
 
-        public bool Send(Stats serializedMetric)
+        public int? GetFreeIndex()
+        {
+            return _worker.GetFreeIndex();
+        }
+        public ref Stats Get(int index)
+        {
+            return ref _worker.Get(index);
+        }
+
+        public bool Send(int serializedMetric)
         {
             if (!this._worker.TryEnqueue(serializedMetric))
             {
-                serializedMetric.Dispose();
+               // serializedMetric.Dispose();
                 return false;
             }
 
@@ -63,11 +72,11 @@ namespace StatsdClient.Bufferize
                 _maxIdleWaitBeforeSending = maxIdleWaitBeforeSending;
             }
 
-            public void OnNewValue(Stats stats)
+            public void OnNewValue(ref Stats stats)
             {
-                using (stats)
+                //using (stats)
                 {
-                    _statsRouter.Route(stats);
+                    _statsRouter.Route(ref stats);
                     _resetTimer = true;
                 }
             }

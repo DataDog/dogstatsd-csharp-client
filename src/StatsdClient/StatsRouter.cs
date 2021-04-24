@@ -37,7 +37,7 @@ namespace StatsdClient
             }
         }
 
-        public void Route(Stats stats)
+        public void Route(ref Stats stats)
         {
             switch (stats.Kind)
             {

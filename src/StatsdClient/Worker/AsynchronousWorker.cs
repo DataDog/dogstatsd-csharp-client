@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace StatsdClient.Worker
 {
@@ -10,10 +11,13 @@ namespace StatsdClient.Worker
     /// AsynchronousWorker performs tasks asynchronously.
     /// `handler` must be thread safe if `workerThreadCount` > 1.
     /// </summary>
-    internal class AsynchronousWorker<T> : IDisposable
+    internal class AsynchronousWorker<T> : IDisposable where T: new()
     {
         private static TimeSpan maxWaitDurationInFlush = TimeSpan.FromSeconds(3);
-        private readonly ConcurrentBoundedQueue<T> _queue;
+        private readonly ConcurrentQueue<int> _queue;
+        private readonly T[] _buffer;
+        private readonly ConcurrentQueue<int> _freeIndex;
+
         private readonly List<Task> _workers = new List<Task>();
         private readonly IAsynchronousWorkerHandler<T> _handler;
         private readonly IWaiter _waiter;
@@ -29,17 +33,24 @@ namespace StatsdClient.Worker
             int maxItemCount,
             TimeSpan? blockingQueueTimeout)
         {
-            if (blockingQueueTimeout.HasValue)
-            {
-                _queue = new ConcurrentBoundedBlockingQueue<T>(
-                    new ManualResetEventWrapper(),
-                    blockingQueueTimeout.Value,
-                    maxItemCount);
+            _freeIndex = new ConcurrentQueue<int>();
+            _buffer = new T[maxItemCount + 10];
+            for (int i = 0; i < maxItemCount + 10; i++)
+            {                
+                _freeIndex.Enqueue(i);
             }
-            else
-            {
-                _queue = new ConcurrentBoundedQueue<T>(maxItemCount);
-            }
+            // if (blockingQueueTimeout.HasValue)
+            // {
+            //     _queue = new ConcurrentBoundedBlockingQueue<int>(
+            //         new ManualResetEventWrapper(),
+            //         blockingQueueTimeout.Value,
+            //         maxItemCount);
+            // }
+            // else
+            // {
+            //     _queue = new ConcurrentBoundedQueue<int>(maxItemCount);
+            // }
+            _queue = new ConcurrentQueue<int>();
 
             _handler = handler;
             _waiter = waiter;
@@ -53,15 +64,26 @@ namespace StatsdClient.Worker
 
         public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
 
-        public bool TryEnqueue(T value)
+        public int? GetFreeIndex()
         {
-            return _queue.TryEnqueue(value);
+            if (_freeIndex.TryDequeue(out var v))
+                return v;
+            return null;
+        }
+        public ref T Get(int index)
+        {
+            return ref _buffer[index];
+        }
+        public bool TryEnqueue(int value)
+        {
+            _queue.Enqueue(value);
+            return true;
         }
 
         public void Flush()
         {
             var remainingWaitCount = maxWaitDurationInFlush.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
-            while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
+            while (!_queue.IsEmpty && remainingWaitCount > 0)
             {
                 _waiter.Wait(MinWaitDuration);
                 --remainingWaitCount;
@@ -104,8 +126,10 @@ namespace StatsdClient.Worker
                 try
                 {
                     if (_queue.TryDequeue(out var v))
-                    {
-                        _handler.OnNewValue(v);
+                    {                        
+                        ref T v2 = ref _buffer[v];
+                        _handler.OnNewValue(ref v2);
+                        _freeIndex.Enqueue(v);
                         waitDuration = MinWaitDuration;
                     }
                     else
