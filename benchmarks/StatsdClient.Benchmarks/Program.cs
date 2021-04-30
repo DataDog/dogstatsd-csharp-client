@@ -1,12 +1,10 @@
-﻿using System;
+﻿using BenchmarkDotNet.Running;
 
 namespace StatsdClient.Benchmarks
 {
     class Program
     {
         static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+            => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }
