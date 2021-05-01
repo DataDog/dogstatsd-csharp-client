@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using StatsdClient.Statistic;
 
 namespace StatsdClient
@@ -20,6 +21,7 @@ namespace StatsdClient
 
         private readonly SerializerHelper _serializerHelper;
         private readonly string _prefix;
+        private readonly char[] doubleBuffer = new char[32];
 
         internal MetricSerializer(SerializerHelper serializerHelper, string prefix)
         {
@@ -40,7 +42,7 @@ namespace StatsdClient
             switch (metricStats.MetricType)
             {
                 case MetricType.Set: builder.Append(metricStats.StringValue); break;
-                default: builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", metricStats.NumericValue); break;
+                default: AppendDouble(builder, metricStats.NumericValue); break;
             }
 
             builder.Append('|');
@@ -52,6 +54,19 @@ namespace StatsdClient
             }
 
             _serializerHelper.AppendTags(builder, metricStats.Tags);
+        }
+
+        private void AppendDouble(StringBuilder builder, double v)
+        {
+#if NETSTANDARD2_1
+            Span<char> span = doubleBuffer;
+            if (v.TryFormat(span, out int charsWritten, provider: CultureInfo.InvariantCulture))
+            {
+                builder.Append(doubleBuffer, 0, charsWritten);
+                return;
+            }
+#endif
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", v);
         }
     }
 }
