@@ -5,14 +5,14 @@ namespace StatsdClient.Benchmarks
 {
     public class ServiceBenchmark
     {
-        private DogStatsdService service;
+        private DogStatsdService _service;
         static readonly string[] tags = new[] { "TAG1", "TAG2", "TAG3" };
         const int iterationCount = 20 * 1000 * 1000;
 
         [GlobalSetup]
         public void GlobalSetup()
         {
-            service = new DogStatsdService();
+            _service = new DogStatsdService();
             var config = new StatsdConfig
             {
                 StatsdServerName = "127.0.0.1",
@@ -24,13 +24,13 @@ namespace StatsdClient.Benchmarks
 
             // Make sure metrics are never dropped.
             config.Advanced.MaxMetricsInAsyncQueue = iterationCount;
-            service.Configure(config);
+            _service.Configure(config);
         }
 
         [GlobalCleanup]
         public void GlobalCleanup()
         {
-            service.Dispose();
+            _service.Dispose();
         }
 
         [Benchmark]
@@ -38,9 +38,9 @@ namespace StatsdClient.Benchmarks
         {
             for (int i = 0; i < iterationCount; ++i)
             {
-                service.Increment("statsd_client.benchmarks.test_counter", 1, tags: tags);
+                _service.Increment("statsd_client.benchmarks.test_counter", 1, tags: tags);
             }
-            service.Flush();
+            _service.Flush();
         }
     }
 }
