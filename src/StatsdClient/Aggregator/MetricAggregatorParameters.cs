@@ -9,12 +9,14 @@ namespace StatsdClient.Aggregator
             MetricSerializer serializer,
             BufferBuilder bufferBuilder,
             int maxUniqueStatsBeforeFlush,
-            TimeSpan flushInterval)
+            TimeSpan flushInterval,
+            Telemetry optionalTelemetry)
         {
             Serializer = serializer;
             BufferBuilder = bufferBuilder;
             MaxUniqueStatsBeforeFlush = maxUniqueStatsBeforeFlush;
             FlushInterval = flushInterval;
+            OptionalTelemetry = optionalTelemetry;
         }
 
         public MetricSerializer Serializer { get; }
@@ -24,5 +26,7 @@ namespace StatsdClient.Aggregator
         public int MaxUniqueStatsBeforeFlush { get; }
 
         public TimeSpan FlushInterval { get; }
+
+        public Telemetry OptionalTelemetry { get; }
     }
 }

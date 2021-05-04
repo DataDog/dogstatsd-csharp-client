@@ -26,7 +26,8 @@ namespace StatsdClient.Tests.Aggregator
                 serializer,
                 bufferBuilder,
                 maxUniqueStatsBeforeFlush,
-                flushInterval);
+                flushInterval,
+                null);
         }
     }
 }

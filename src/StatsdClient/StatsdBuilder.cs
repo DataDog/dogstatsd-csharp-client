@@ -231,7 +231,8 @@ namespace StatsdClient
                     serializers.MetricSerializer,
                     bufferBuilder,
                     optionalClientSideAggregationConfig.MaxUniqueStatsBeforeFlush,
-                    optionalClientSideAggregationConfig.FlushInterval);
+                    optionalClientSideAggregationConfig.FlushInterval,
+                    telemetry);
 
                 optionalAggregators = new Aggregators
                 {
