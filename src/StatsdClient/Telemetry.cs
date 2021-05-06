@@ -18,6 +18,7 @@ namespace StatsdClient
         private readonly string[] _optionalTags;
         private readonly MetricSerializer _optionalMetricSerializer;
         private readonly ITransport _optionalTransport;
+        private readonly Dictionary<MetricType, ValueWithTags> _aggregatedContexts = new Dictionary<MetricType, ValueWithTags>();
 
         private int _metricsSent;
         private int _eventsSent;
@@ -47,6 +48,9 @@ namespace StatsdClient
             var optionalTags = new List<string> { "client:csharp", $"client_version:{assemblyVersion}", $"client_transport:{transportStr}" };
             optionalTags.AddRange(globalTags);
             _optionalTags = optionalTags.ToArray();
+            _aggregatedContexts.Add(MetricType.Gauge, new ValueWithTags(_optionalTags, "metrics_type:gauge"));
+            _aggregatedContexts.Add(MetricType.Count, new ValueWithTags(_optionalTags, "metrics_type:count"));
+            _aggregatedContexts.Add(MetricType.Set, new ValueWithTags(_optionalTags, "metrics_type:set"));
 
             _optionalTimer = new Timer(
                 _ => Flush(),
@@ -70,6 +74,8 @@ namespace StatsdClient
         public static string PacketsDroppedMetricName => _telemetryPrefix + "packets_dropped";
 
         public static string PacketsDroppedQueueMetricName => _telemetryPrefix + "packets_dropped_queue";
+
+        public static string AggregatedContextByTypeName => _telemetryPrefix + "aggregated_context_by_type";
 
         public int MetricsSent => _metricsSent;
 
@@ -99,6 +105,17 @@ namespace StatsdClient
                 SendMetric(PacketsSentMetricName, Interlocked.Exchange(ref _packetsSent, 0));
                 SendMetric(PacketsDroppedMetricName, Interlocked.Exchange(ref _packetsDropped, 0));
                 SendMetric(PacketsDroppedQueueMetricName, Interlocked.Exchange(ref _packetsDroppedQueue, 0));
+
+                foreach (var kvp in _aggregatedContexts)
+                {
+                    var metricType = kvp.Key;
+                    var metricWithTags = kvp.Value;
+
+                    SendMetricWithTags(
+                        AggregatedContextByTypeName,
+                        metricWithTags.Tags,
+                        _aggregatedContexts[metricType].InterlockedExchange(0));
+                }
             }
             catch (Exception e)
             {
@@ -138,13 +155,21 @@ namespace StatsdClient
             Interlocked.Increment(ref _packetsDroppedQueue);
         }
 
+        public void OnAggregatedContextFlush(MetricType metricType, int count)
+        {
+            if (_aggregatedContexts.TryGetValue(metricType, out var aggregatedContext))
+            {
+                aggregatedContext.InterlockedAdd(count);
+            }
+        }
+
         public void Dispose()
         {
             _optionalTimer?.Change(Timeout.Infinite, Timeout.Infinite);
             _optionalTimer?.Dispose();
         }
 
-        private void SendMetric(string metricName, int value)
+        private void SendMetricWithTags(string metricName, string[] tags, int value)
         {
             if (_optionalTransport != null && _optionalMetricSerializer != null)
             {
@@ -155,11 +180,40 @@ namespace StatsdClient
                     StatName = metricName,
                     NumericValue = value,
                     SampleRate = 1.0,
-                    Tags = _optionalTags,
+                    Tags = tags,
                 };
                 _optionalMetricSerializer.SerializeTo(ref metricStats, serializedMetric);
                 var bytes = BufferBuilder.GetBytes(serializedMetric.ToString());
                 _optionalTransport.Send(bytes, bytes.Length);
+            }
+        }
+
+        private void SendMetric(string metricName, int value)
+        {
+            SendMetricWithTags(metricName, _optionalTags, value);
+        }
+
+        private class ValueWithTags
+        {
+            private int value;
+
+            public ValueWithTags(string[] tags, string metricTypeTag)
+            {
+                this.Tags = new string[tags.Length + 1];
+                Array.Copy(tags, this.Tags, tags.Length);
+                this.Tags[this.Tags.Length - 1] = metricTypeTag;
+            }
+
+            public string[] Tags { get; }
+
+            public void InterlockedAdd(int count)
+            {
+                Interlocked.Add(ref value, count);
+            }
+
+            public int InterlockedExchange(int newValue)
+            {
+                return Interlocked.Exchange(ref value, newValue);
             }
         }
     }

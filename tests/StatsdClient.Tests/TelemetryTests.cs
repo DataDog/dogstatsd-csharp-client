@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Moq;
 using NUnit.Framework;
@@ -96,6 +97,25 @@ namespace Tests
             {
                 { Telemetry.PacketsDroppedQueueMetricName, 1 },
             });
+        }
+
+        [Test]
+        public void AggregatedContextFlush()
+        {
+            _telemetry.OnAggregatedContextFlush(MetricType.Count, 10);
+            _telemetry.OnAggregatedContextFlush(MetricType.Set, 20);
+            _telemetry.OnAggregatedContextFlush(MetricType.Gauge, 30);
+            _telemetry.Flush();
+            var metrics = _metrics.Where(m => m.Contains(Telemetry.AggregatedContextByTypeName));
+            var tags = "client:csharp,client_version:1.0.0.0,client_transport:uds,globalTagKey:globalTagValue,";
+            var expected = new[]
+            {
+                $"{Telemetry.AggregatedContextByTypeName}:30|c|#{tags}metrics_type:gauge",
+                $"{Telemetry.AggregatedContextByTypeName}:10|c|#{tags}metrics_type:count",
+                $"{Telemetry.AggregatedContextByTypeName}:20|c|#{tags}metrics_type:set",
+            };
+
+            Assert.That(metrics, Is.EquivalentTo(expected));
         }
 
         [Test]
