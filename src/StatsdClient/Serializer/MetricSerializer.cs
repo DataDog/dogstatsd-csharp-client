@@ -21,7 +21,7 @@ namespace StatsdClient
 
         private readonly SerializerHelper _serializerHelper;
         private readonly string _prefix;
-        private readonly char[] doubleBuffer = new char[32];
+        private readonly char[] numericBuffer = new char[32];
 
         internal MetricSerializer(SerializerHelper serializerHelper, string prefix)
         {
@@ -58,15 +58,39 @@ namespace StatsdClient
 
         private void AppendDouble(StringBuilder builder, double v)
         {
+            var intValue = (int)v;
+            var provider = CultureInfo.InvariantCulture;
+
 #if NETSTANDARD2_1
-            Span<char> span = doubleBuffer;
-            if (v.TryFormat(span, out int charsWritten, provider: CultureInfo.InvariantCulture))
+            Span<char> span = numericBuffer;
+            bool tryFormatSuccess;
+            int charsWritten;
+
+            // Try format as `int` as `v` is often an `int` value and formating an `int` is a lot faster.
+            if (v == intValue)
             {
-                builder.Append(doubleBuffer, 0, charsWritten);
+                tryFormatSuccess = intValue.TryFormat(span, out charsWritten, provider: provider);
+            }
+            else
+            {
+                tryFormatSuccess = v.TryFormat(span, out charsWritten, provider: provider);
+            }
+
+            if (tryFormatSuccess)
+            {
+                builder.Append(numericBuffer, 0, charsWritten);
                 return;
             }
 #endif
-            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", v);
+
+            if (v == intValue)
+            {
+                builder.AppendFormat(provider, "{0}", intValue);
+            }
+            else
+            {
+                builder.AppendFormat(provider, "{0}", v);
+            }
         }
     }
 }
