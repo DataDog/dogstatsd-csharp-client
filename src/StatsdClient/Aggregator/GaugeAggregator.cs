@@ -11,7 +11,10 @@ namespace StatsdClient.Aggregator
 
         public GaugeAggregator(MetricAggregatorParameters parameters)
         {
-            _aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Gauge);
+            _aggregator = new AggregatorFlusher<StatsMetric>(
+                parameters,
+                MetricType.Gauge,
+                (a, v) => a.FlushStatsMetric(v));
         }
 
         public void OnNewValue(ref StatsMetric metric)
@@ -31,15 +34,7 @@ namespace StatsdClient.Aggregator
 
         public void TryFlush(bool force = false)
         {
-            _aggregator.TryFlush(
-                values =>
-                {
-                    foreach (var keyValue in values)
-                    {
-                        _aggregator.FlushStatsMetric(keyValue.Value);
-                    }
-                },
-                force);
+            _aggregator.TryFlush(force);
         }
     }
 }

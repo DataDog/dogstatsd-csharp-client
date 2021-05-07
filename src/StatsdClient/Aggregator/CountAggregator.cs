@@ -12,7 +12,10 @@ namespace StatsdClient.Aggregator
 
         public CountAggregator(MetricAggregatorParameters parameters)
         {
-            _aggregator = new AggregatorFlusher<StatsMetric>(parameters, MetricType.Count);
+            _aggregator = new AggregatorFlusher<StatsMetric>(
+                parameters,
+                MetricType.Count,
+                (a, v) => a.FlushStatsMetric(v));
         }
 
         public void OnNewValue(ref StatsMetric metric)
@@ -42,15 +45,7 @@ namespace StatsdClient.Aggregator
 
         public void TryFlush(bool force = false)
         {
-            _aggregator.TryFlush(
-                values =>
-                {
-                    foreach (var keyValue in values)
-                    {
-                        _aggregator.FlushStatsMetric(keyValue.Value);
-                    }
-                },
-                force);
+            _aggregator.TryFlush(force);
         }
     }
 }

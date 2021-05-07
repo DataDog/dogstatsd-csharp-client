@@ -11,7 +11,7 @@ namespace StatsdClient
 
         public bool ShouldSend(double sampleRate)
         {
-            return _random.NextDouble() < sampleRate;
+            return sampleRate >= 1 || _random.NextDouble() < sampleRate;
         }
     }
 }

@@ -18,9 +18,13 @@ namespace StatsdClient.Aggregator
         private readonly long _flushIntervalMilliseconds;
         private readonly SerializedMetric _serializedMetric = new SerializedMetric();
         private readonly MetricType _expectedMetricType;
+        private readonly Action<T> _flushMetric;
         private readonly Telemetry _optionalTelemetry;
 
-        public AggregatorFlusher(MetricAggregatorParameters parameters, MetricType expectedMetricType)
+        public AggregatorFlusher(
+            MetricAggregatorParameters parameters,
+            MetricType expectedMetricType,
+            Action<AggregatorFlusher<T>, T> flushMetric)
         {
             _serializer = parameters.Serializer;
             _bufferBuilder = parameters.BufferBuilder;
@@ -28,6 +32,7 @@ namespace StatsdClient.Aggregator
             _maxUniqueStatsBeforeFlush = parameters.MaxUniqueStatsBeforeFlush;
             _optionalTelemetry = parameters.OptionalTelemetry;
             _expectedMetricType = expectedMetricType;
+            _flushMetric = v => flushMetric(this, v);
         }
 
         public bool TryGetValue(ref MetricStatsKey key, out T v)
@@ -45,13 +50,17 @@ namespace StatsdClient.Aggregator
             this._values[key] = v;
         }
 
-        public void TryFlush(Action<Dictionary<MetricStatsKey, T>> addSerializedMetric, bool force)
+        public void TryFlush(bool force)
         {
             if (force
             || _stopWatch.ElapsedMilliseconds > _flushIntervalMilliseconds
             || _values.Count >= _maxUniqueStatsBeforeFlush)
             {
-                addSerializedMetric(_values);
+                foreach (var keyValue in _values)
+                {
+                    _flushMetric(keyValue.Value);
+                }
+
                 _bufferBuilder.HandleBufferAndReset();
                 _optionalTelemetry?.OnAggregatedContextFlush(_expectedMetricType, _values.Count);
                 this._stopWatch.Restart();
