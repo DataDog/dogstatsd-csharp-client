@@ -28,16 +28,9 @@ namespace StatsdClient.Bufferize
                 blockingQueueTimeout);
         }
 
-        public bool Send(Stats serializedMetric)
-        {
-            if (!this._worker.TryEnqueue(serializedMetric))
-            {
-                serializedMetric.Dispose();
-                return false;
-            }
+        public void Send(Stats serializedMetric) => this._worker.Enqueue(serializedMetric);
 
-            return true;
-        }
+        public bool TryDequeueFromPool(out Stats value) => _worker.TryDequeueFromPool(out value);
 
         public void Flush()
         {
@@ -65,11 +58,8 @@ namespace StatsdClient.Bufferize
 
             public void OnNewValue(Stats stats)
             {
-                using (stats)
-                {
-                    _statsRouter.Route(stats);
-                    _resetTimer = true;
-                }
+                _statsRouter.Route(stats);
+                _resetTimer = true;
             }
 
             public bool OnIdle()
