@@ -16,3 +16,4 @@ src/.vs/
 *.ncrunchproject
 *.crunchsolution.cache
 _NCrunch_*
+BenchmarkDotNet.Artifacts
