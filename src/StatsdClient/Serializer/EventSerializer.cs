@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Text;
 using StatsdClient.Statistic;
 
 namespace StatsdClient
@@ -22,9 +23,9 @@ namespace StatsdClient
             var builder = serializedMetric.Builder;
 
             builder.Append("_e{");
-            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", processedTitle.Length);
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", Encoding.UTF8.GetByteCount(processedTitle));
             builder.Append(',');
-            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", processedText.Length);
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", Encoding.UTF8.GetByteCount(processedText));
             builder.Append("}:");
             builder.Append(processedTitle);
             builder.Append('|');
