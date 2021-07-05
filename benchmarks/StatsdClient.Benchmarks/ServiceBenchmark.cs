@@ -1,5 +1,6 @@
+using System;
+using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
-using StatsdClient;
 
 namespace StatsdClient.Benchmarks
 {
@@ -7,7 +8,16 @@ namespace StatsdClient.Benchmarks
     {
         private DogStatsdService _service;
         static readonly string[] tags = new[] { "TAG1", "TAG2", "TAG3" };
-        const int iterationCount = 20 * 1000 * 1000;
+        const int iterationCount = 10 * 1000 * 1000;
+
+        public IEnumerable<(int, TimeSpan?)> ParamsValues => new[] {
+            ValueTuple.Create<int, TimeSpan?>(iterationCount, null),
+            ValueTuple.Create<int, TimeSpan?>(iterationCount, TimeSpan.FromMinutes(1)),
+            ValueTuple.Create<int, TimeSpan?>(10 * 1024, TimeSpan.FromMinutes(1)),
+            };
+
+        [ParamsSource(nameof(ParamsValues))]
+        public (int MaxMetricsInAsyncQueue, TimeSpan? MaxBlockDuration) Params { get; set; }
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -20,10 +30,10 @@ namespace StatsdClient.Benchmarks
                 StatsdMaxUDPPacketSize = 8096
             };
             // Disable telemetry
-            config.Advanced.TelemetryFlushInterval = null;
+            config.Advanced.TelemetryFlushInterval = TimeSpan.FromDays(1);
 
-            // Make sure metrics are never dropped.
-            config.Advanced.MaxMetricsInAsyncQueue = iterationCount;
+            config.Advanced.MaxBlockDuration = this.Params.MaxBlockDuration;
+            config.Advanced.MaxMetricsInAsyncQueue = this.Params.MaxMetricsInAsyncQueue;
             _service.Configure(config);
         }
 
@@ -40,7 +50,13 @@ namespace StatsdClient.Benchmarks
             {
                 _service.Increment("statsd_client.benchmarks.test_counter", 1, tags: tags);
             }
-            _service.Flush();
+            _service.Flush(flushTelemetry: false);
+            var counters = _service.TelemetryCounters;
+
+            if (counters.PacketsDropped > 0 || counters.PacketsDroppedQueue > 0)
+            {
+                throw new InvalidOperationException("Invalid benchmark. Packets dropped.");
+            }
         }
     }
 }

@@ -25,10 +25,13 @@ namespace StatsdClient
 
         public Telemetry Telemetry { get; private set; }
 
-        public void Flush()
+        public void Flush(bool flushTelemetry)
         {
             _statsBufferize?.Flush();
-            Telemetry.Flush();
+            if (flushTelemetry)
+            {
+                Telemetry.Flush();
+            }
         }
 
         public void Dispose()
