@@ -11,7 +11,6 @@ namespace StatsdClient.Worker
     /// `handler` must be thread safe if `workerThreadCount` > 1.
     /// </summary>
     internal class AsynchronousWorker<T> : IDisposable
-    where T : new()
     {
         private static TimeSpan maxWaitDurationInFlush = TimeSpan.FromSeconds(3);
         private readonly List<Task> _workers = new List<Task>();
@@ -23,13 +22,14 @@ namespace StatsdClient.Worker
         private ConcurrentQueueWithPool<T> _queue;
 
         public AsynchronousWorker(
+            Func<T> factory,
             IAsynchronousWorkerHandler<T> handler,
             IWaiter waiter,
             int workerThreadCount,
             int maxItemCount,
             TimeSpan? blockingQueueTimeout)
         {
-            _queue = new ConcurrentQueueWithPool<T>(maxItemCount, blockingQueueTimeout);
+            _queue = new ConcurrentQueueWithPool<T>(factory, maxItemCount, blockingQueueTimeout);
             _handler = handler;
             _waiter = waiter;
             for (int i = 0; i < workerThreadCount; ++i)

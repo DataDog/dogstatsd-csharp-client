@@ -115,6 +115,7 @@ namespace Tests
         private AsynchronousWorker<int> CreateWorker(int workerThreadCount = 2)
         {
             var worker = new AsynchronousWorker<int>(
+                () => 0,
                 _handler.Object,
                 _waiter.Object,
                 workerThreadCount,
@@ -132,6 +133,7 @@ namespace Tests
                 // This intentionally avoids referencing AsynchronousWorkerTests types
                 // because the assembly would fail to load
                 _ = new AsynchronousWorker<int>(
+                    () => 0,
                     new Mock<IAsynchronousWorkerHandler<int>>().Object,
                     new Mock<IWaiter>().Object,
                     1,

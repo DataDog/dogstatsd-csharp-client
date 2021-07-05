@@ -12,7 +12,7 @@ namespace Tests
         [Test]
         public void TryDequeueFromPool()
         {
-            var queue = new ConcurrentQueueWithPool<int>(2, null);
+            var queue = new ConcurrentQueueWithPool<int>(() => 0, 2, null);
 
             Assert.True(queue.TryDequeueFromPool(out var _));
             Assert.True(queue.TryDequeueFromPool(out var _));
@@ -27,7 +27,7 @@ namespace Tests
         [Test]
         public void TryDequeueFromPoolTimeout()
         {
-            var queue = new ConcurrentQueueWithPool<int>(0, TimeSpan.FromSeconds(1));
+            var queue = new ConcurrentQueueWithPool<int>(() => 0, 0, TimeSpan.FromSeconds(1));
             Assert.False(queue.TryDequeueFromPool(out var _));
 
             var task = Task.Run(() =>

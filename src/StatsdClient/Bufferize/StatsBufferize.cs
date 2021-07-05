@@ -21,6 +21,7 @@ namespace StatsdClient.Bufferize
 
             // `handler` (and also `statsRouter`) do not need to be thread safe as long as `workerThreadCount` is 1.
             this._worker = new AsynchronousWorker<Stats>(
+                () => new Stats(),
                 handler,
                 new Waiter(),
                 workerThreadCount: 1,
