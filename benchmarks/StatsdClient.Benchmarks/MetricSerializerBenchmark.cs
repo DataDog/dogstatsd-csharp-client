@@ -3,6 +3,7 @@ using StatsdClient.Statistic;
 
 namespace StatsdClient.Benchmarks
 {
+    [MemoryDiagnoser]
     public class MetricSerializerBenchmark
     {
         private MetricSerializer _metricSerializer;

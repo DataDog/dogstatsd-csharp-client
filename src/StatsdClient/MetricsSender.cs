@@ -1,7 +1,6 @@
 ﻿using System;
 using StatsdClient.Bufferize;
 using StatsdClient.Statistic;
-using StatsdClient.Utils;
 
 namespace StatsdClient
 {
@@ -12,22 +11,19 @@ namespace StatsdClient
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
-        private readonly Pool<Stats> _pool;
 
         internal MetricsSender(
                     StatsBufferize statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
                     Telemetry optionalTelemetry,
-                    bool truncateIfTooLong,
-                    int poolMaxAllocation)
+                    bool truncateIfTooLong)
         {
             _stopwatchFactory = stopwatchFactory;
             _statsBufferize = statsBufferize;
             _randomGenerator = randomGenerator;
             _optionalTelemetry = optionalTelemetry;
             _truncateIfTooLong = truncateIfTooLong;
-            _pool = new Pool<Stats>(pool => new Stats(pool), poolMaxAllocation);
         }
 
         public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
@@ -46,10 +42,8 @@ namespace StatsdClient
                 stats.Event.Hostname = hostname;
                 stats.Event.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
 
-                if (Send(stats))
-                {
-                    _optionalTelemetry?.OnEventSent();
-                }
+                Send(stats);
+                _optionalTelemetry?.OnEventSent();
             }
         }
 
@@ -66,10 +60,8 @@ namespace StatsdClient
                 stats.ServiceCheck.ServiceCheckMessage = serviceCheckMessage;
                 stats.ServiceCheck.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
 
-                if (Send(stats))
-                {
-                    _optionalTelemetry?.OnServiceCheckSent();
-                }
+                Send(stats);
+                _optionalTelemetry?.OnServiceCheckSent();
             }
         }
 
@@ -91,10 +83,8 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.NumericValue = value;
 
-                    if (Send(stats))
-                    {
-                        _optionalTelemetry?.OnMetricSent();
-                    }
+                    Send(stats);
+                    _optionalTelemetry?.OnMetricSent();
                 }
             }
         }
@@ -112,10 +102,8 @@ namespace StatsdClient
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.StringValue = value;
 
-                    if (Send(stats))
-                    {
-                        _optionalTelemetry?.OnMetricSent();
-                    }
+                    Send(stats);
+                    _optionalTelemetry?.OnMetricSent();
                 }
             }
         }
@@ -138,7 +126,7 @@ namespace StatsdClient
 
         private bool TryDequeueStats(out Stats stats)
         {
-            if (_pool.TryDequeue(out stats))
+            if (_statsBufferize.TryDequeueFromPool(out stats))
             {
                 return true;
             }
@@ -147,15 +135,6 @@ namespace StatsdClient
             return false;
         }
 
-        private bool Send(Stats metricFields)
-        {
-            if (_statsBufferize.Send(metricFields))
-            {
-                return true;
-            }
-
-            _optionalTelemetry?.OnPacketsDroppedQueue();
-            return false;
-        }
+        private void Send(Stats metricFields) => _statsBufferize.Send(metricFields);
     }
 }

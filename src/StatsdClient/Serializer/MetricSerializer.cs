@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using StatsdClient.Statistic;
 
 namespace StatsdClient
@@ -20,6 +21,7 @@ namespace StatsdClient
 
         private readonly SerializerHelper _serializerHelper;
         private readonly string _prefix;
+        private readonly char[] numericBuffer = new char[32];
 
         internal MetricSerializer(SerializerHelper serializerHelper, string prefix)
         {
@@ -40,7 +42,7 @@ namespace StatsdClient
             switch (metricStats.MetricType)
             {
                 case MetricType.Set: builder.Append(metricStats.StringValue); break;
-                default: builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", metricStats.NumericValue); break;
+                default: AppendDouble(builder, metricStats.NumericValue); break;
             }
 
             builder.Append('|');
@@ -52,6 +54,43 @@ namespace StatsdClient
             }
 
             _serializerHelper.AppendTags(builder, metricStats.Tags);
+        }
+
+        private void AppendDouble(StringBuilder builder, double v)
+        {
+            var intValue = (int)v;
+            var provider = CultureInfo.InvariantCulture;
+
+#if NETSTANDARD2_1
+            Span<char> span = numericBuffer;
+            bool tryFormatSuccess;
+            int charsWritten;
+
+            // Try format as `int` as `v` is often an `int` value and formating an `int` is a lot faster.
+            if (v == intValue)
+            {
+                tryFormatSuccess = intValue.TryFormat(span, out charsWritten, provider: provider);
+            }
+            else
+            {
+                tryFormatSuccess = v.TryFormat(span, out charsWritten, provider: provider);
+            }
+
+            if (tryFormatSuccess)
+            {
+                builder.Append(numericBuffer, 0, charsWritten);
+                return;
+            }
+#endif
+
+            if (v == intValue)
+            {
+                builder.AppendFormat(provider, "{0}", intValue);
+            }
+            else
+            {
+                builder.AppendFormat(provider, "{0}", v);
+            }
         }
     }
 }

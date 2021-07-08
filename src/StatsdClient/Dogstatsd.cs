@@ -231,9 +231,10 @@ namespace StatsdClient
         /// <summary>
         /// Flushes all metrics.
         /// </summary>
-        public static void Flush()
+        /// <param name="flushTelemetry">The value indicating whether the telemetry must be flushed.</param>
+        public static void Flush(bool flushTelemetry = true)
         {
-            _dogStatsdService.Flush();
+            _dogStatsdService.Flush(flushTelemetry);
         }
 
         /// <summary>
