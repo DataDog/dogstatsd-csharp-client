@@ -581,8 +581,8 @@ namespace Tests
         [Test]
         public void Events_aggregation_key_and_tags()
         {
-            _dogStatsdService.Event("Title", "♬ †øU †øU ¥ºu T0µ ♪", aggregationKey: "key", tags: new[] { "t1", "t2:v2" });
-            AssertWasReceived("_e{5,19}:Title|♬ †øU †øU ¥ºu T0µ ♪|k:key|#t1,t2:v2");
+            _dogStatsdService.Event("Title♬", "♬ †øU †øU ¥ºu T0µ ♪", aggregationKey: "key", tags: new[] { "t1", "t2:v2" });
+            AssertWasReceived("_e{8,32}:Title♬|♬ †øU †øU ¥ºu T0µ ♪|k:key|#t1,t2:v2");
         }
 
         [Test]
