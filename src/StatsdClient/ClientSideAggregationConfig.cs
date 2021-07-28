@@ -15,6 +15,6 @@ namespace StatsdClient
         /// <summary>
         /// Gets or sets the maximum interval duration between two flushes.
         /// </summary>
-        public TimeSpan FlushInterval { get; set; } = TimeSpan.FromSeconds(3);
+        public TimeSpan FlushInterval { get; set; } = TimeSpan.FromSeconds(2);
     }
 }
