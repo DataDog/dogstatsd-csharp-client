@@ -245,9 +245,10 @@ namespace StatsdClient
         /// <summary>
         /// Flushes all metrics.
         /// </summary>
-        public void Flush()
+        /// <param name="flushTelemetry">The value indicating whether the telemetry must be flushed.</param>
+        public void Flush(bool flushTelemetry = true)
         {
-            _statsdData?.Flush();
+            _statsdData?.Flush(flushTelemetry);
         }
 
         /// <summary>

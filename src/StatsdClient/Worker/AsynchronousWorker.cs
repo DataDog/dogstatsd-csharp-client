@@ -13,34 +13,23 @@ namespace StatsdClient.Worker
     internal class AsynchronousWorker<T> : IDisposable
     {
         private static TimeSpan maxWaitDurationInFlush = TimeSpan.FromSeconds(3);
-        private readonly ConcurrentBoundedQueue<T> _queue;
         private readonly List<Task> _workers = new List<Task>();
         private readonly IAsynchronousWorkerHandler<T> _handler;
         private readonly IWaiter _waiter;
         private volatile bool _terminate = false;
-
         private volatile bool _requestFlush = false;
         private AutoResetEvent _flushEvent = new AutoResetEvent(false);
+        private ConcurrentQueueWithPool<T> _queue;
 
         public AsynchronousWorker(
+            Func<T> factory,
             IAsynchronousWorkerHandler<T> handler,
             IWaiter waiter,
             int workerThreadCount,
             int maxItemCount,
             TimeSpan? blockingQueueTimeout)
         {
-            if (blockingQueueTimeout.HasValue)
-            {
-                _queue = new ConcurrentBoundedBlockingQueue<T>(
-                    new ManualResetEventWrapper(),
-                    blockingQueueTimeout.Value,
-                    maxItemCount);
-            }
-            else
-            {
-                _queue = new ConcurrentBoundedQueue<T>(maxItemCount);
-            }
-
+            _queue = new ConcurrentQueueWithPool<T>(factory, maxItemCount, blockingQueueTimeout);
             _handler = handler;
             _waiter = waiter;
             for (int i = 0; i < workerThreadCount; ++i)
@@ -53,15 +42,14 @@ namespace StatsdClient.Worker
 
         public static TimeSpan MaxWaitDuration { get; } = TimeSpan.FromMilliseconds(100);
 
-        public bool TryEnqueue(T value)
-        {
-            return _queue.TryEnqueue(value);
-        }
+        public void Enqueue(T value) => _queue.EnqueueValue(value);
+
+        public bool TryDequeueFromPool(out T value) => _queue.TryDequeueFromPool(out value);
 
         public void Flush()
         {
             var remainingWaitCount = maxWaitDurationInFlush.TotalMilliseconds / MinWaitDuration.TotalMilliseconds;
-            while (_queue.QueueCurrentSize > 0 && remainingWaitCount > 0)
+            while (!_queue.IsEmpty && remainingWaitCount > 0)
             {
                 _waiter.Wait(MinWaitDuration);
                 --remainingWaitCount;
@@ -103,9 +91,17 @@ namespace StatsdClient.Worker
             {
                 try
                 {
-                    if (_queue.TryDequeue(out var v))
+                    if (_queue.TryDequeueValue(out var v))
                     {
-                        _handler.OnNewValue(v);
+                        try
+                        {
+                            _handler.OnNewValue(v);
+                        }
+                        finally
+                        {
+                            _queue.EnqueuePool(v);
+                        }
+
                         waitDuration = MinWaitDuration;
                     }
                     else

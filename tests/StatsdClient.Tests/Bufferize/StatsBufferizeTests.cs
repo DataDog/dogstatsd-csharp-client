@@ -26,8 +26,7 @@ namespace Tests
             var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
             using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero))
             {
-                var pool = new Pool<Stats>(p => new Stats(p), 1);
-                var stats = new Stats(pool) { Kind = StatsKind.Event };
+                var stats = new Stats { Kind = StatsKind.Event };
                 stats.Event.Text = "test";
                 stats.Event.Title = "title";
 

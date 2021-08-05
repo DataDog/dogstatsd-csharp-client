@@ -11,7 +11,7 @@ namespace StatsdClient.Bufferize
         private static readonly Encoding _encoding = Encoding.UTF8;
         private readonly IBufferBuilderHandler _handler;
         private readonly byte[] _buffer;
-        private readonly byte[] _separator;
+        private readonly byte _separator;
         private readonly char[] _charsBuffers;
 
         public BufferBuilder(
@@ -22,11 +22,14 @@ namespace StatsdClient.Bufferize
             _buffer = new byte[bufferCapacity];
             _charsBuffers = new char[bufferCapacity];
             _handler = handler;
-            _separator = _encoding.GetBytes(separator);
-            if (_separator.Length >= _buffer.Length)
+            var separatorBytes = _encoding.GetBytes(separator);
+
+            if (separatorBytes.Length != 1)
             {
-                throw new ArgumentException("separator is greater or equal to the bufferCapacity");
+                throw new ArgumentException($"{nameof(separator)} must be converted to a single byte.");
             }
+
+            _separator = separatorBytes[0];
         }
 
         public int Length { get; private set; }
@@ -47,30 +50,36 @@ namespace StatsdClient.Bufferize
                 throw new InvalidOperationException($"The metric size exceeds the internal buffer capacity {_charsBuffers.Length}: {serializedMetric.ToString()}");
             }
 
-            var byteCount = _encoding.GetByteCount(_charsBuffers, 0, length);
-
-            if (byteCount > Capacity)
+            // Heuristic to know if there is enough space without calling `GetByteCount`.
+            // Note: GetMaxByteCount(length) >= GetByteCount(length)
+            // `+ 1` is for _separator.
+            if (Length + 1 + _encoding.GetMaxByteCount(length) > Capacity)
             {
-                throw new InvalidOperationException($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
+                var byteCount = _encoding.GetByteCount(_charsBuffers, 0, length);
+
+                if (byteCount > Capacity)
+                {
+                    throw new InvalidOperationException($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
+                }
+
+                if (Length != 0)
+                {
+                    byteCount++;
+                }
+
+                if (Length + byteCount > Capacity)
+                {
+                    this.HandleBufferAndReset();
+                }
             }
 
             if (Length != 0)
             {
-                byteCount += _separator.Length;
+                _buffer[Length] = _separator;
+                Length++;
             }
 
-            if (Length + byteCount > Capacity)
-            {
-                this.HandleBufferAndReset();
-            }
-
-            if (Length != 0)
-            {
-                Array.Copy(_separator, 0, _buffer, Length, _separator.Length);
-                Length += _separator.Length;
-            }
-
-            // GetBytes requires the buffer to be big enough otherwise it throws, that is why we use GetByteCount.
+            // GetBytes requires the buffer to be big enough otherwise it throws.
             Length += _encoding.GetBytes(_charsBuffers, 0, length, _buffer, Length);
         }
 
