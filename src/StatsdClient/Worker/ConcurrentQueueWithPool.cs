@@ -15,15 +15,15 @@ namespace StatsdClient.Worker
     ///     - Get an object from the queue with TryDequeueValue
     ///     - Use the object
     ///     - When the object is not used, put the object in the pool with EnqueuePool.
-    /// 
-    /// Implementation note: I gather the queue for value `_queue` and for pool `_poolQueue` 
-    /// in the same class because: 
-    ///     - The sender and the receiver need both `_queue` and `_poolQueue`. Removing 
+    ///
+    /// Implementation note: I gather the queue for value `_queue` and for pool `_poolQueue`
+    /// in the same class because:
+    ///     - The sender and the receiver need both `_queue` and `_poolQueue`. Removing
     ///       `_queue` from this class, force the caller and the receiver to have two parameters.
-    ///     - Other queues owning a value type would require some kind of pooling to limit the 
+    ///     - Other queues owning a value type would require some kind of pooling to limit the
     ///       memory allocations.
     ///     - `_queue` is independent from `_poolQueue` but it is an implementation details.
-    ///       `TryDequeueValue` could have an out parameter of type `IDisposable<T>`. This object
+    ///       `TryDequeueValue` could have an out parameter of type `IDisposable`. This object
     ///        could call `EnqueuePool` inside the `Dispose` method.
     /// </summary>
     internal class ConcurrentQueueWithPool<T>
