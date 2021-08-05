@@ -40,6 +40,7 @@ namespace Tests
             Assert.True(queue.TryDequeueFromPool(out var v));
             Assert.AreEqual(42, v);
 
+            // This call should timeout and not dequeue `43`.
             Assert.False(queue.TryDequeueFromPool(out var _));
 
             Assert.True(queue.TryDequeueFromPool(out v));

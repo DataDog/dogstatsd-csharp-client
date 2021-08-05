@@ -29,7 +29,8 @@ namespace StatsdClient.Benchmarks
                 StatsdPort = 1234, // Invalid port, UDP payloads are dropped.
                 StatsdMaxUDPPacketSize = 8096
             };
-            // Disable telemetry
+            // Do not send the telemetry but create an instance of `Telemetry` to gets 
+            // the values of `TelemetryCounters` in Increment().
             config.Advanced.TelemetryFlushInterval = TimeSpan.FromDays(1);
 
             config.Advanced.MaxBlockDuration = this.Params.MaxBlockDuration;
