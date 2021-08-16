@@ -17,21 +17,49 @@ namespace StatsdClient.Aggregator
             _tags = tags;
         }
 
-        // This code was auto generated
         public override bool Equals(object obj)
         {
-            return obj is MetricStatsKey key &&
-                   _metricName == key._metricName &&
-                   EqualityComparer<string[]>.Default.Equals(_tags, key._tags);
+            return obj is MetricStatsKey key
+                && _metricName == key._metricName
+                && AreEquals(_tags, key._tags);
         }
 
-        // This code was auto generated
         public override int GetHashCode()
         {
             int hashCode = -335110880;
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(_metricName);
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string[]>.Default.GetHashCode(_tags);
+            hashCode = (hashCode * -1521134295) + _metricName.GetHashCode();
+            if (_tags != null)
+            {
+                foreach (var tag in _tags)
+                {
+                    hashCode = (hashCode * -1521134295) + tag.GetHashCode();
+                }
+            }
+
             return hashCode;
+        }
+
+        private static bool AreEquals(string[] arr1, string[] arr2)
+        {
+            if (arr1 == null && arr2 == null)
+            {
+                return true;
+            }
+
+            if (arr1 == null || arr2 == null || arr1.Length != arr2.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                if (arr1[i] != arr2[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
