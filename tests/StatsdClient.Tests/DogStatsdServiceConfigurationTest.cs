@@ -27,7 +27,7 @@ namespace Tests
                     8125,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
-                Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
+                Assert.AreEqual(new List<string> { "test:1|c\n" }, receivedData);
             }
         }
 
@@ -49,7 +49,7 @@ namespace Tests
                     8126,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
-                Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
+                Assert.AreEqual(new List<string> { "test:1|c\n" }, receivedData);
             }
         }
 
@@ -92,7 +92,7 @@ namespace Tests
                     8129,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
-                Assert.AreEqual(new List<string> { "prefix.test:1|c" }, receivedData);
+                Assert.AreEqual(new List<string> { "prefix.test:1|c\n" }, receivedData);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Tests
                     8131,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
-                Assert.AreEqual(new List<string> { "test:1|c" }, receivedData);
+                Assert.AreEqual(new List<string> { "test:1|c\n" }, receivedData);
             }
 
             Environment.SetEnvironmentVariable("DD_DOGSTATSD_PORT", null);
@@ -188,7 +188,7 @@ namespace Tests
                         8132,
                         () => { nonStaticServiceInstance.Increment("test"); });
 
-                    Assert.AreEqual(new List<string> { $"test:1|c|#{tag}:foobar" }, receivedData);
+                    Assert.AreEqual(new List<string> { $"test:1|c|#{tag}:foobar\n" }, receivedData);
                 }
             }
             finally

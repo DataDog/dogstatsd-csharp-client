@@ -55,7 +55,7 @@ namespace Tests
         public void Distribution_should_be_received()
         {
             DogStatsd.Distribution("distribution", 42);
-            AssertWasReceived("distribution:42|d");
+            AssertWasReceived("distribution:42|d\n");
         }
 
         // Test helper. Waits until the listener is done receiving a message,

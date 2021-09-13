@@ -62,10 +62,8 @@ namespace StatsdClient.Bufferize
                     throw new InvalidOperationException($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
                 }
 
-                if (Length != 0)
-                {
-                    byteCount++;
-                }
+                // For separator
+                byteCount++;
 
                 if (Length + byteCount > Capacity)
                 {
@@ -73,14 +71,11 @@ namespace StatsdClient.Bufferize
                 }
             }
 
-            if (Length != 0)
-            {
-                _buffer[Length] = _separator;
-                Length++;
-            }
-
             // GetBytes requires the buffer to be big enough otherwise it throws.
             Length += _encoding.GetBytes(_charsBuffers, 0, length, _buffer, Length);
+
+            _buffer[Length] = _separator;
+            Length++;
         }
 
         public void HandleBufferAndReset()

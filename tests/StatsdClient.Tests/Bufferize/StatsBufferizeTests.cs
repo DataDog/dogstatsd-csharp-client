@@ -37,7 +37,7 @@ namespace Tests
                 }
 
                 // Sent because buffer is full.
-                Assert.AreEqual("_e{5,4}:title|test", Encoding.UTF8.GetString(handler.Buffer));
+                Assert.AreEqual("_e{5,4}:title|test\n", Encoding.UTF8.GetString(handler.Buffer));
             }
         }
     }

@@ -670,7 +670,7 @@ namespace Tests
             {
             }
 
-            Assert.AreEqual(shouldBe, _udpListener.GetAndClearLastMessages()[index]);
+            Assert.AreEqual(shouldBe + "\n", _udpListener.GetAndClearLastMessages()[index]);
         }
 
         // Test helper. Waits until the listener is done receiving a message,

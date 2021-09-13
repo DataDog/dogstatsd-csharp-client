@@ -20,11 +20,11 @@ namespace StatsdClient.Tests.Aggregator
             AddStatsMetric(aggregator, "s1", 2);
             AddStatsMetric(aggregator, "s2", 2);
             aggregator.TryFlush(force: true);
-            Assert.AreEqual("s1:3|c,s2:2|c", handler.Value);
+            Assert.AreEqual("s1:3|c\ns2:2|c\n", handler.Value);
 
             AddStatsMetric(aggregator, "s3", 1);
             aggregator.TryFlush(force: true);
-            Assert.AreEqual("s3:1|c", handler.Value);
+            Assert.AreEqual("s3:1|c\n", handler.Value);
         }
 
         [Test]

@@ -43,7 +43,7 @@ namespace Tests
                     var metric = "gas_tank.level";
                     var value = 0.75;
                     service.Gauge(metric, value);
-                    Assert.AreEqual($"{metric}:{value}|g", ReadFromServer(socket));
+                    Assert.AreEqual($"{metric}:{value}|g\n", ReadFromServer(socket));
                 }
             }
         }
