@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/bg8e39b5f9iiavvj/branch/master?svg=true)](https://ci.appveyor.com/project/Datadog/dogstatsd-csharp-client/branch/master)
 
-A C# [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?tab=net) client. DogStatsD is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/) metric server for [Datadog](http://datadoghq.com).
+A C# [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET) client. DogStatsD is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/) metric server for [Datadog](http://datadoghq.com).
 
 See [CHANGELOG](CHANGELOG.md) for details.
 
@@ -39,7 +39,7 @@ using (var service = new DogStatsdService())
 }
 ```
 
-See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#client-instantiation-parameters).
+See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET#client-instantiation-parameters).
 
 Supported environment variables:
 
@@ -50,7 +50,7 @@ Where `StatsdServerName` is the hostname or address of the StatsD server, `Stats
 
 ## Usage via the DogStatsdService class or the static DogStatsd class.
 
-For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=net#setup).
+For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET#setup).
 
 Here is an example to submit different kinds of metrics with `DogStatsdService`.
 ```csharp
@@ -117,23 +117,23 @@ DogStatsd.Dispose(); // Flush all metrics not yet sent
 
 ### Metrics
 
-After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net) to see how to submit all supported metric types to Datadog with working code examples:
+After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET) to see how to submit all supported metric types to Datadog with working code examples:
 
-* [Submit a COUNT metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#count).
-* [Submit a GAUGE metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#gauge).
-* [Submit a SET metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#set)
-* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#histogram)
-* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#distribution)
+* [Submit a COUNT metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#count).
+* [Submit a GAUGE metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#gauge).
+* [Submit a SET metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#set)
+* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#histogram)
+* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#distribution)
 
-Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#metric-submission-options) or [Tagging your metrics with your custom Tags](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=net#metric-tagging).
+Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#metric-submission-options) or [Tagging your metrics with your custom Tags](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#metric-tagging).
 
 ### Events
 
-After the client is created, you can start sending events to your Datadog Event Stream. See the dedicated [Event Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/events/dogstatsd/?tab=net) to see how to submit an event to Datadog Event Stream.
+After the client is created, you can start sending events to your Datadog Event Stream. See the dedicated [Event Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/events/dogstatsd/?code-lang=.NET) to see how to submit an event to Datadog Event Stream.
 
 ### Service Checks
 
-After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?tab=net) to see how to submit a Service Check to Datadog.
+After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?code-lang=.NET) to see how to submit a Service Check to Datadog.
 
 
 ## Usage via the Statsd class
