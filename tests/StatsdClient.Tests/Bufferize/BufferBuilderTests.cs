@@ -3,7 +3,6 @@ using System.Text;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Bufferize;
-using StatsdClient.Utils;
 
 namespace Tests
 {
@@ -30,8 +29,8 @@ namespace Tests
             _bufferBuilder.Add(CreateSerializedMetric('3', 3));
             Assert.Null(_handler.Buffer);
             _bufferBuilder.Add(CreateSerializedMetric('4', 3));
-            Assert.AreEqual(3, _bufferBuilder.Length);
-            Assert.AreEqual(_handler.Buffer, Encoding.UTF8.GetBytes("111\n222\n333"));
+            Assert.AreEqual(4, _bufferBuilder.Length);
+            Assert.AreEqual("111\n222\n333\n", Encoding.UTF8.GetString(_handler.Buffer));
         }
 
         [Test]
@@ -40,11 +39,11 @@ namespace Tests
             Assert.Less(4, _bufferBuilder.Capacity);
             _bufferBuilder.Add(CreateSerializedMetric('1', 2));
             _bufferBuilder.HandleBufferAndReset();
-            Assert.AreEqual(_handler.Buffer, Encoding.UTF8.GetBytes("11"));
+            Assert.AreEqual("11\n", Encoding.UTF8.GetString(_handler.Buffer));
 
             _bufferBuilder.Add(CreateSerializedMetric('3', 4));
             _bufferBuilder.HandleBufferAndReset();
-            Assert.AreEqual(_handler.Buffer, Encoding.UTF8.GetBytes("3333"));
+            Assert.AreEqual("3333\n", Encoding.UTF8.GetString(_handler.Buffer));
         }
 
         [Test]
@@ -53,7 +52,7 @@ namespace Tests
             Assert.Throws<InvalidOperationException>(() => _bufferBuilder.Add(CreateSerializedMetric('1', _bufferBuilder.Capacity + 1)));
             Assert.AreEqual(0, _bufferBuilder.Length);
 
-            _bufferBuilder.Add(CreateSerializedMetric('1', _bufferBuilder.Capacity));
+            _bufferBuilder.Add(CreateSerializedMetric('1', _bufferBuilder.Capacity - 1)); // -1 for separator
             Assert.AreEqual(_bufferBuilder.Capacity, _bufferBuilder.Length);
         }
 

@@ -19,11 +19,11 @@ namespace StatsdClient.Tests.Aggregator
             AddStatsMetric(aggregator, "s1", "2");
             AddStatsMetric(aggregator, "s2", "3");
             aggregator.TryFlush(force: true);
-            Assert.AreEqual("s1:1|s|@0,s1:2|s|@0,s2:3|s|@0", handler.Value);
+            Assert.AreEqual("s1:1|s|@0\ns1:2|s|@0\ns2:3|s|@0\n", handler.Value);
 
             AddStatsMetric(aggregator, "s1", "4");
             aggregator.TryFlush(force: true);
-            Assert.AreEqual("s1:4|s|@0", handler.Value);
+            Assert.AreEqual("s1:4|s|@0\n", handler.Value);
         }
 
         [Test]
@@ -37,7 +37,7 @@ namespace StatsdClient.Tests.Aggregator
             for (int i = 0; i < 10; ++i)
             {
                 AddStatsMetric(aggregator, "s1", i.ToString());
-                Assert.AreEqual($"s1:{i}|s|@0", handler.Value);
+                Assert.AreEqual($"s1:{i}|s|@0\n", handler.Value);
             }
         }
 

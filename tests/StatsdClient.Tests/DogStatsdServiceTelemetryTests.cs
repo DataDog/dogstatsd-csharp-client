@@ -72,7 +72,7 @@ namespace Tests
             await Task.Delay(TimeSpan.FromMilliseconds(500));
 
             Assert.AreEqual(1, _service.TelemetryCounters.PacketsSent);
-            Assert.AreEqual(8, _service.TelemetryCounters.BytesSent);
+            Assert.AreEqual(9, _service.TelemetryCounters.BytesSent);
         }
 
 #if !OS_WINDOWS

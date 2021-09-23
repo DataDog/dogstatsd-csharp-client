@@ -17,7 +17,7 @@ namespace StatsdClient.Tests.Aggregator
             AddStatsMetric(aggregator, "s2", 3);
             aggregator.TryFlush(force: true);
 
-            Assert.AreEqual("s1:2|g|@0,s2:3|g|@0", handler.Value);
+            Assert.AreEqual("s1:2|g|@0\ns2:3|g|@0\n", handler.Value);
         }
 
         private static void AddStatsMetric(GaugeAggregator aggregator, string statName, double value)
