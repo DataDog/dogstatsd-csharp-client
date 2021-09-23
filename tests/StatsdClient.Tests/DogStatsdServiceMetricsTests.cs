@@ -40,6 +40,7 @@ namespace Tests
                 var config = new StatsdConfig
                 {
                     StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path,
+                    StatsdMaxUnixDomainSocketPacketSize = 2048,
                 };
                 config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.UDSBufferFullBlockDuration = TimeSpan.FromSeconds(3);
