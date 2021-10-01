@@ -207,7 +207,7 @@ namespace StatsdClient.Tests
         public void ClientSideAggregation()
         {
             var config = new StatsdConfig { };
-
+            config.ClientSideAggregation = null;
             BuildStatsData(config);
             _mock.Verify(
                 m => m.CreateStatsRouter(
