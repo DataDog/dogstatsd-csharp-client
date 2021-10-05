@@ -18,7 +18,7 @@ namespace Tests
                 StatsdServerName = "127.0.0.1",
                 StatsdPort = 1234,
             };
-
+            config.ClientSideAggregation = null;
             CheckReconnection(c => new SocketServer(c), config);
         }
 
@@ -32,7 +32,7 @@ namespace Tests
                 {
                     StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path,
                 };
-
+                config.ClientSideAggregation = null;
                 CheckReconnection(c => new SocketServer(c), config);
             }
         }
@@ -46,6 +46,7 @@ namespace Tests
                 PipeName = "TestPipe",
             };
             config.Advanced.TelemetryFlushInterval = null;
+            config.ClientSideAggregation = null;
             CheckReconnection(c => new NamedPipeServer(c.PipeName, 1000, TimeSpan.FromSeconds(1)), config);
         }
 #endif

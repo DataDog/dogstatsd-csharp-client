@@ -138,6 +138,6 @@
         /// Gets or sets a value defining the client side aggregation config.
         /// If the value is null, the client side aggregation is not enabled.
         /// </summary>
-        public ClientSideAggregationConfig ClientSideAggregation { get; set; }
+        public ClientSideAggregationConfig ClientSideAggregation { get; set; } = new ClientSideAggregationConfig();
     }
 }

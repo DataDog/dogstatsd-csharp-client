@@ -19,6 +19,7 @@ namespace Tests
         {
             _service = new DogStatsdService();
             _config = new StatsdConfig { StatsdServerName = "localhost" };
+            _config.ClientSideAggregation = null;
         }
 
         [TearDown]
@@ -86,8 +87,8 @@ namespace Tests
                     var endPoint = new UnixEndPoint(temporaryPath.Path);
                     server.Bind(endPoint);
 
-                    var serverName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path;
-                    _service.Configure(new StatsdConfig { StatsdServerName = serverName });
+                    _config.StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path;
+                    _service.Configure(_config);
 
                     for (int i = 0; i < 10000; ++i)
                     {
