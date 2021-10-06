@@ -1,5 +1,36 @@
 CHANGELOG
 =========
+
+# 7.0.0 / XX-XX-2021
+## Breaking changes
+### Enable client side aggregation by default for simple metric types. See [#172][].
+By default, metrics are aggregated before they are sent. For example, instead of sending 3 times `my_metric:10|c|#tag1:value`, DogStatsD client sends `my_metric:30|c|#tag1:value`. You can disable client side aggregation by setting `ClientSideAggregation` property to `null`.
+For more details about how client side aggregation works see [#134][].
+
+Enabling client side aggregation has the benefit of reducing the network usage and also reducing the load for DogStatsD server (Core Agent).
+
+When an application sends a lot of different contexts but each context appear with a very low frequency, then enabling client side aggregation may take more memory and more CPU. A context identifies a metric name, a tag sets and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation. 
+
+### Set good default values for UDS and UDP buffer sizes. See [#170][].
+This PR changes the default values for unix domain socket and UDP buffer sizes.
+In most cases, this change should work out of the box. Unlike Windows and Linux, on some operating systems like MacOS, the maximum unix domain socket buffer size is lower than `8192`. For these systems you have to set `StatsdMaxUnixDomainSocketPacketSize` to the appropriate value.
+
+## Changes
+* [BUGFIX] Update links to https://docs.datadoghq.com. See [#171][].
+* [IMPROVEMENT] Add end of line separator after each message. See [#169][].
+* [IMPROVEMENT] Add benchmark for client side aggregation. See [#168][].
+* [BUGFIX] Fix the implementation of MetricStatsKey.GetHashCode(). See [#167][].
+* [IMPROVEMENT] Update client side flush interval from 3s to 2s. See [#166][].
+* [BUGFIX] For event, use the size of the title and the text in UTF8. See [#165][].
+* [IMPROVEMENT] Performance improvements. See [#164][].
+* [FEATURE] Add benchmarks. See [#163][].
+* [IMPROVEMENT] Improve performance. See [#162][].
+* [FEATURE] Add the telemetry metric aggregated_context_by_type. See [#161][].
+* [IMPROVEMENT] Minor grammar update in comments. See [#160][] (Thanks [@shreyamsh][]).
+* [IMPROVEMENT] Use Thread.Sleep instead of Task.Delay when possible. See [#159][] (Thanks [@kevingosse][]).
+* [IMPROVEMENT] Remove System.Net.NameResolution for netstandard2.0. See [#155][] (Thanks [@fjmorel ][]).
+* [IMPROVEMENT] Use dedicated threads for background workers. See [#151][] (Thanks [@kevingosse][]).
+
 # 6.0.0 / 11-23-2020
 ## Breaking changes.
 * Methods `Counter`, `Gauge`, `Histogram`, `Distribution` and `Timer` from `DogStatsdService` and `DogStatsd` are not generic methods anymore. (See https://github.com/DataDog/dogstatsd-csharp-client/pull/133/commits/ab18f9572de3bfe76fb95b5fce14d6ee965b62d4)
@@ -190,6 +221,22 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#139]: https://github.com/DataDog/dogstatsd-csharp-client/issues/139
 [#143]: https://github.com/DataDog/dogstatsd-csharp-client/issues/143
 [#144]: https://github.com/DataDog/dogstatsd-csharp-client/issues/144
+[#151]: https://github.com/DataDog/dogstatsd-csharp-client/issues/151
+[#155]: https://github.com/DataDog/dogstatsd-csharp-client/issues/155
+[#159]: https://github.com/DataDog/dogstatsd-csharp-client/issues/159
+[#160]: https://github.com/DataDog/dogstatsd-csharp-client/issues/160
+[#161]: https://github.com/DataDog/dogstatsd-csharp-client/issues/161
+[#162]: https://github.com/DataDog/dogstatsd-csharp-client/issues/162
+[#163]: https://github.com/DataDog/dogstatsd-csharp-client/issues/163
+[#164]: https://github.com/DataDog/dogstatsd-csharp-client/issues/164
+[#165]: https://github.com/DataDog/dogstatsd-csharp-client/issues/165
+[#166]: https://github.com/DataDog/dogstatsd-csharp-client/issues/166
+[#167]: https://github.com/DataDog/dogstatsd-csharp-client/issues/167
+[#168]: https://github.com/DataDog/dogstatsd-csharp-client/issues/168
+[#169]: https://github.com/DataDog/dogstatsd-csharp-client/issues/169
+[#170]: https://github.com/DataDog/dogstatsd-csharp-client/issues/170
+[#171]: https://github.com/DataDog/dogstatsd-csharp-client/issues/171
+[#172]: https://github.com/DataDog/dogstatsd-csharp-client/issues/172
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
@@ -199,6 +246,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [@chriskinsman]: https://github.com/chriskinsman
 [@daniel-chambers]: https://github.com/daniel-chambers
 [@danopia]: https://github.com/danopia
+[@fjmorel]: https://github.com/fjmorel
 [@jdasilva-olo]: https://github.com/jdasilva-olo
 [@jpasichnyk]: https://github.com/jpasichnyk
 [@kevingosse]: https://github.com/kevingosse
@@ -206,6 +254,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [@nathanrobb]: https://github.com/nathanrobb
 [@nrjohnstone]: https://github.com/nrjohnstone
 [@pdpurcell]: https://github.com/pdpurcell
+[@shreyamsh]: https://github.com/shreyamsh
 [@sqdk]: https://github.com/sqdk
 [@windsnow98]: https://github.com/windsnow98
 [@wjdavis5]: https://github.com/wjdavis5
