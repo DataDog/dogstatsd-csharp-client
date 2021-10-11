@@ -9,7 +9,7 @@ For more details about how client-side aggregation works see [#134][].
 
 Enabling client-side aggregation has the benefit of reducing the network usage and also reducing the load for DogStatsD server (Core Agent).
 
-When an application sends a lot of different contexts but each context appear with a very low frequency, then enabling client side aggregation may take more memory and more CPU. A context identifies a metric name, a tag sets and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation. 
+When an application sends a lot of different contexts but each context appear with a very low frequency, then enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag sets and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation. 
 
 ### Set good default values for UDS and UDP buffer sizes. See [#170][].
 This PR changes the default values for unix domain socket and UDP buffer sizes.
