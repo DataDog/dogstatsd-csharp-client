@@ -13,7 +13,7 @@ When an application sends a lot of different contexts but each context appear wi
 
 ### Set good default values for UDS and UDP buffer sizes. See [#170][].
 This PR changes the default values for unix domain socket and UDP buffer sizes.
-In most cases, this change should work out of the box. Unlike Windows and Linux, on some operating systems like MacOS, the maximum unix domain socket buffer size is lower than `8192`. For these systems you have to set `StatsdMaxUnixDomainSocketPacketSize` to the appropriate value.
+In most cases, this change should work out of the box. Unlike Windows and Linux, on some operating systems like MacOS, the maximum unix domain socket buffer size is lower than `8192`. For these systems you have to set `StatsdMaxUnixDomainSocketPacketSize` to the maximum supported value.
 
 ## Changes
 * [BUGFIX] Update links to https://docs.datadoghq.com. See [#171][].
