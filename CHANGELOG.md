@@ -3,7 +3,7 @@ CHANGELOG
 
 # 7.0.0 / XX-XX-2021
 ## Breaking changes
-### Enable client side aggregation by default for simple metric types. See [#172][].
+### Enable client-side aggregation by default for simple metric types. See [#172][].
 By default, metrics are aggregated before they are sent. For example, instead of sending 3 times `my_metric:10|c|#tag1:value`, DogStatsD client sends `my_metric:30|c|#tag1:value`. You can disable client side aggregation by setting `ClientSideAggregation` property to `null`.
 For more details about how client side aggregation works see [#134][].
 
