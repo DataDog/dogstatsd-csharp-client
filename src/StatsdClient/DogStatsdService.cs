@@ -62,6 +62,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
         {
+            return;
             _metricsSender?.SendEvent(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags);
         }
 
@@ -74,6 +75,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags);
         }
 
@@ -86,6 +88,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags);
         }
 
@@ -98,6 +101,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Count, statName, -value, sampleRate, tags);
         }
 
@@ -110,6 +114,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Gauge, statName, value, sampleRate, tags);
         }
 
@@ -122,6 +127,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Histogram(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Histogram, statName, value, sampleRate, tags);
         }
 
@@ -134,6 +140,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Distribution(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Distribution, statName, value, sampleRate, tags);
         }
 
@@ -147,6 +154,7 @@ namespace StatsdClient
         /// <typeparam name="T">The type of the value.</typeparam>
         public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             var strValue = string.Format(CultureInfo.InvariantCulture, "{0}", value);
             _metricsSender?.SendSetMetric(statName, strValue, sampleRate, tags);
         }
@@ -160,6 +168,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Set(string statName, string value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendSetMetric(statName, value, sampleRate, tags);
         }
 
@@ -172,6 +181,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Timer(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
+            return;
             _metricsSender?.SendMetric(MetricType.Timing, statName, value, sampleRate, tags);
         }
 
@@ -239,6 +249,7 @@ namespace StatsdClient
         /// <param name="message">Additional information or a description of why the status occurred.</param>
         public void ServiceCheck(string name, Status status, int? timestamp = null, string hostname = null, string[] tags = null, string message = null)
         {
+            return;
             _metricsSender?.SendServiceCheck(name, (int)status, timestamp, hostname, tags, message);
         }
 
@@ -248,6 +259,7 @@ namespace StatsdClient
         /// <param name="flushTelemetry">The value indicating whether the telemetry must be flushed.</param>
         public void Flush(bool flushTelemetry = true)
         {
+            return;
             _statsdData?.Flush(flushTelemetry);
         }
 
