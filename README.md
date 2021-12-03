@@ -173,7 +173,7 @@ When an application sends a lot of different contexts but each context appears w
 
 ### Configuration
 
-The aggregation window is 2s by default and can be changed through [FlushInterval](https://github.com/DataDog/dogstatsd-csharp-client/blob/7.0.0/src/StatsdClient/ClientSideAggregationConfig.cs#L18). Note that the aggregation window on the Agent side is 10s for DogStatsD metrics. So for example, setting an aggregation window of 3s in the client produces a spike in your dashboard every 30s for counts metrics (as the third 10s bucket on the Agent is received 4 samples from the client).
+The aggregation window is two seconds by default and can be changed using the [FlushInterval](https://github.com/DataDog/dogstatsd-csharp-client/blob/7.0.0/src/StatsdClient/ClientSideAggregationConfig.cs#L18). Note that the aggregation window on the Agent side is 10 seconds for DogStatsD metrics. For example, setting an aggregation window of 3s in the client produces a spike in your dashboard every 30s for counts metrics (as the third 10s bucket on the Agent is received 4 samples from the client).
 
 To disable client-side aggregation set [ClientSideAggregation](https://github.com/DataDog/dogstatsd-csharp-client/blob/7.0.0/src/StatsdClient/StatsdConfig.cs#L141) to `null`.
 
