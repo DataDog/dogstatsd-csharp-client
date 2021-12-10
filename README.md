@@ -162,6 +162,21 @@ Windows has support for [unix domain socket](https://devblogs.microsoft.com/comm
 
 On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPacketSize` is experimental.
 
+## Client side aggregation
+
+By default, metrics for basic types (gauges, counts, sets) are aggregated before they are sent. For example, instead of sending 3 times `my_metric:10|c|#tag1:value`, DogStatsD client sends `my_metric:30|c|#tag1:value` once. 
+For more technical details about how client-side aggregation works see #134.
+
+Enabling client-side aggregation has the benefit of reducing the network usage and also reducing the load for DogStatsD server (Datadog Agent).
+
+When an application sends a lot of different contexts but each context appears with a very low frequency, enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag set and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation. 
+
+### Configuration
+
+The aggregation window is two seconds by default and can be changed using the [FlushInterval](https://github.com/DataDog/dogstatsd-csharp-client/blob/7.0.0/src/StatsdClient/ClientSideAggregationConfig.cs#L18). Note that the aggregation window on the Agent side is 10 seconds for DogStatsD metrics. For example, setting an aggregation window of 3s in the client produces a spike in your dashboard every 30s for counts metrics (as the third 10s bucket on the Agent is received 4 samples from the client).
+
+To disable client-side aggregation set [ClientSideAggregation](https://github.com/DataDog/dogstatsd-csharp-client/blob/7.0.0/src/StatsdClient/StatsdConfig.cs#L141) to `null`.
+
 ## Testing
 
 1. Restore packages
