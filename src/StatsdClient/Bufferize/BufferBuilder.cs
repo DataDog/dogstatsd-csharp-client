@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text;
 
 namespace StatsdClient.Bufferize
@@ -47,7 +48,8 @@ namespace StatsdClient.Bufferize
 
             if (length < 0)
             {
-                throw new InvalidOperationException($"The metric size exceeds the internal buffer capacity {_charsBuffers.Length}: {serializedMetric.ToString()}");
+                Debug.WriteLine($"The metric size exceeds the internal buffer capacity {_charsBuffers.Length}: {serializedMetric.ToString()}");
+                return;
             }
 
             // Heuristic to know if there is enough space without calling `GetByteCount`.
@@ -59,7 +61,8 @@ namespace StatsdClient.Bufferize
 
                 if (byteCount > Capacity)
                 {
-                    throw new InvalidOperationException($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
+                    Debug.WriteLine($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
+                    return;
                 }
 
                 // For separator

@@ -49,9 +49,6 @@ namespace Tests
         [Test]
         public void AddReturnedValue()
         {
-            Assert.Throws<InvalidOperationException>(() => _bufferBuilder.Add(CreateSerializedMetric('1', _bufferBuilder.Capacity + 1)));
-            Assert.AreEqual(0, _bufferBuilder.Length);
-
             _bufferBuilder.Add(CreateSerializedMetric('1', _bufferBuilder.Capacity - 1)); // -1 for separator
             Assert.AreEqual(_bufferBuilder.Capacity, _bufferBuilder.Length);
         }
