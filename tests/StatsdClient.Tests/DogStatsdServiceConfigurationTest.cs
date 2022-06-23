@@ -197,6 +197,32 @@ namespace Tests
             }
         }
 
+        [Test]
+        [Timeout(5000)]
+        public void Test_message_too_long()
+        {
+            using (var service = new DogStatsdService())
+            {
+                var metricsConfig = new StatsdConfig
+                {
+                    StatsdServerName = "127.0.0.1",
+                    StatsdMaxUDPPacketSize = 10,
+                };
+                service.Configure(metricsConfig);
+
+                var receivedData = ReceiveData(
+                    service,
+                    metricsConfig.StatsdServerName,
+                    8125,
+                    () =>
+                {
+                    service.Increment("test");
+                    service.Increment("too_long_message_which_will_be_dropped");
+                });
+                Assert.AreEqual(new List<string> { "test:1|c\n" }, receivedData);
+            }
+        }
+
         private List<string> ReceiveData(DogStatsdService dogstasdService, string testServerName, int testPort, Action sendData)
         {
             using (var udpListener = new UdpListener(testServerName, testPort))
