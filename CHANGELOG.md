@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+# 7.0.1 / 06-28-2022
+## Changes
+* [BUGFIX] Don't throw an exception when the size of the metric exceeds the internal buffer capacity. See [#178][].
+
 # 7.0.0 / 10-13-2021
 ## Breaking changes
 ### Enable client-side aggregation by default for simple metric types. See [#172][].
@@ -237,6 +241,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#170]: https://github.com/DataDog/dogstatsd-csharp-client/issues/170
 [#171]: https://github.com/DataDog/dogstatsd-csharp-client/issues/171
 [#172]: https://github.com/DataDog/dogstatsd-csharp-client/issues/172
+[#178]: https://github.com/DataDog/dogstatsd-csharp-client/issues/178
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
