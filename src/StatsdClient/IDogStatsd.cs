@@ -170,5 +170,11 @@ namespace StatsdClient
             string hostname = null,
             string[] tags = null,
             string message = null);
+
+        /// <summary>
+        /// Flushes all metrics.
+        /// </summary>
+        /// <param name="flushTelemetry">The value indicating whether the telemetry must be flushed.</param>
+        void Flush(bool flushTelemetry = true);
     }
 }
