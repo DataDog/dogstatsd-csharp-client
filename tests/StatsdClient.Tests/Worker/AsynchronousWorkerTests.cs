@@ -139,6 +139,7 @@ namespace Tests
                     new Mock<IWaiter>().Object,
                     1,
                     10,
+                    null,
                     null);
             }
         }
