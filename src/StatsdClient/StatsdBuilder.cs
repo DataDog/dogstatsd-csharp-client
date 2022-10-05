@@ -23,21 +23,22 @@ namespace StatsdClient
             _factory = factory;
         }
 
-        public StatsdData BuildStatsData(StatsdConfig config)
+        public StatsdData BuildStatsData(StatsdConfig config, Action<Exception> optionalExceptionHandler)
         {
             var endPoint = BuildEndPoint(config);
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
             var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
-            var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport);
+            var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
                 transportData.Transport,
                 transportData.BufferCapacity,
                 config.Advanced,
                 serializers,
-                config.ClientSideAggregation);
+                config.ClientSideAggregation,
+                optionalExceptionHandler);
 
             var metricsSender = new MetricsSender(
                 statsBufferize,
@@ -147,7 +148,8 @@ namespace StatsdClient
             StatsdConfig config,
             string[] globalTags,
             DogStatsdEndPoint dogStatsdEndPoint,
-            ITransport transport)
+            ITransport transport,
+            Action<Exception> optionalExceptionHandler)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
 
@@ -162,7 +164,7 @@ namespace StatsdClient
                     telemetryTransport = CreateTransport(optionalTelemetryEndPoint, config);
                 }
 
-                return _factory.CreateTelemetry(metricSerializer, version, telemetryFlush.Value, telemetryTransport, globalTags);
+                return _factory.CreateTelemetry(metricSerializer, version, telemetryFlush.Value, telemetryTransport, globalTags, optionalExceptionHandler);
             }
 
             // Telemetry is not enabled
@@ -218,10 +220,11 @@ namespace StatsdClient
             int bufferCapacity,
             AdvancedStatsConfig config,
             Serializers serializers,
-            ClientSideAggregationConfig optionalClientSideAggregationConfig)
+            ClientSideAggregationConfig optionalClientSideAggregationConfig,
+            Action<Exception> optionalExceptionHandler)
         {
             var bufferHandler = new BufferBuilderHandler(telemetry, transport);
-            var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n");
+            var bufferBuilder = new BufferBuilder(bufferHandler, bufferCapacity, "\n", optionalExceptionHandler);
 
             Aggregators optionalAggregators = null;
             if (optionalClientSideAggregationConfig != null)
@@ -237,7 +240,7 @@ namespace StatsdClient
                 {
                     OptionalCount = new CountAggregator(parameters),
                     OptionalGauge = new GaugeAggregator(parameters),
-                    OptionalSet = new SetAggregator(parameters, telemetry),
+                    OptionalSet = new SetAggregator(parameters, telemetry, optionalExceptionHandler),
                 };
             }
 
@@ -247,7 +250,8 @@ namespace StatsdClient
                 statsRouter,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,
-                config.DurationBeforeSendingNotFullBuffer);
+                config.DurationBeforeSendingNotFullBuffer,
+                optionalExceptionHandler);
 
             return statsBufferize;
         }

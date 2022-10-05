@@ -132,7 +132,8 @@ namespace StatsdClient.Tests
                 It.IsAny<StatsRouter>(),
                 conf.MaxMetricsInAsyncQueue,
                 conf.MaxBlockDuration,
-                conf.DurationBeforeSendingNotFullBuffer));
+                conf.DurationBeforeSendingNotFullBuffer,
+                null));
             _mock.Verify(
                 m => m.CreateStatsRouter(
                 It.IsAny<Serializers>(),
@@ -152,7 +153,8 @@ namespace StatsdClient.Tests
                 It.IsAny<StatsRouter>(),
                 It.IsAny<int>(),
                 null,
-                It.IsAny<TimeSpan>()));
+                It.IsAny<TimeSpan>(),
+                null));
             _mock.Verify(
                 m => m.CreateStatsRouter(
                 It.IsAny<Serializers>(),
@@ -189,7 +191,8 @@ namespace StatsdClient.Tests
                 It.Is<string>(v => !string.IsNullOrEmpty(v)),
                 conf.TelemetryFlushInterval.Value,
                 It.IsAny<ITransport>(),
-                It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags))));
+                It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags)),
+                null));
         }
 
         [Test]
@@ -296,7 +299,7 @@ namespace StatsdClient.Tests
 
         private void BuildStatsData(StatsdConfig config)
         {
-            var buildStatsData = _statsdBuilder.BuildStatsData(config);
+            var buildStatsData = _statsdBuilder.BuildStatsData(config, null);
             buildStatsData.Dispose();
         }
     }

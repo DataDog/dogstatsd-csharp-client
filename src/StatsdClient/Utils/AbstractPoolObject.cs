@@ -1,16 +1,17 @@
 using System;
-using System.Diagnostics;
 
 namespace StatsdClient.Utils
 {
     internal abstract class AbstractPoolObject : IDisposable
     {
         private readonly IPool _pool;
+        private readonly Action<Exception> _optionalExceptionHandler;
         private bool _enqueue = false;
 
-        public AbstractPoolObject(IPool pool)
+        public AbstractPoolObject(IPool pool, Action<Exception> optionalExceptionHandler)
         {
             _pool = pool;
+            _optionalExceptionHandler = optionalExceptionHandler;
         }
 
         ~AbstractPoolObject()
@@ -21,7 +22,7 @@ namespace StatsdClient.Utils
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                _optionalExceptionHandler?.Invoke(e);
             }
         }
 

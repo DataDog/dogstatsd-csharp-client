@@ -17,7 +17,7 @@ namespace Tests
         public void Init()
         {
             _handler = new BufferBuilderHandlerMock();
-            _bufferBuilder = new BufferBuilder(_handler, 12, "\n");
+            _bufferBuilder = new BufferBuilder(_handler, 12, "\n", null);
         }
 
         [Test]

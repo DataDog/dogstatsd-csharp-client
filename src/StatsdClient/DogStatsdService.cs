@@ -24,28 +24,42 @@ namespace StatsdClient
         /// <summary>
         /// Configures the instance.
         /// Must be called before any other methods.
+        /// Can be called once.
         /// </summary>
         /// <param name="config">The value of the config.</param>
-        public void Configure(StatsdConfig config)
+        /// <param name="optionalExceptionHandler">The handler called when an error occurs."</param>
+        /// <returns>Return true if the operation succeed, false otherwise. If this function fails,
+        /// other methods in this class do nothing and an error is reported to <paramref name="optionalExceptionHandler"/>.</returns>
+        public bool Configure(StatsdConfig config, Action<Exception> optionalExceptionHandler = null)
         {
-            if (_statsdBuilder == null)
+            try
             {
-                throw new ObjectDisposedException(nameof(DogStatsdService));
+                if (_statsdBuilder == null)
+                {
+                    throw new ObjectDisposedException(nameof(DogStatsdService));
+                }
+
+                if (config == null)
+                {
+                    throw new ArgumentNullException("config");
+                }
+
+                if (_config != null)
+                {
+                    throw new InvalidOperationException("Configuration for DogStatsdService already performed");
+                }
+
+                _config = config;
+                _statsdData = _statsdBuilder.BuildStatsData(config, optionalExceptionHandler);
+                _metricsSender = _statsdData.MetricsSender;
+            }
+            catch (Exception e)
+            {
+                optionalExceptionHandler?.Invoke(e);
+                return false;
             }
 
-            if (config == null)
-            {
-                throw new ArgumentNullException("config");
-            }
-
-            if (_config != null)
-            {
-                throw new InvalidOperationException("Configuration for DogStatsdService already performed");
-            }
-
-            _config = config;
-            _statsdData = _statsdBuilder.BuildStatsData(config);
-            _metricsSender = _statsdData.MetricsSender;
+            return true;
         }
 
         /// <summary>

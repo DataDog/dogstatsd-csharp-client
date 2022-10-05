@@ -120,6 +120,7 @@ namespace Tests
                 _waiter.Object,
                 workerThreadCount,
                 10,
+                null,
                 null);
             _workers.Add(worker);
             return worker;

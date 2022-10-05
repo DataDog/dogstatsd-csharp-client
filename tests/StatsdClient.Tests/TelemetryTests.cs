@@ -27,7 +27,8 @@ namespace Tests
                 "1.0.0.0",
                 TimeSpan.FromHours(1),
                 transport.Object,
-                new string[] { "globalTagKey:globalTagValue" });
+                new string[] { "globalTagKey:globalTagValue" },
+                null);
         }
 
         [TearDown]

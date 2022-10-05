@@ -37,7 +37,7 @@ namespace Tests
         private class PoolObject : AbstractPoolObject
         {
             public PoolObject(IPool p)
-            : base(p)
+            : base(p, null)
             {
             }
 

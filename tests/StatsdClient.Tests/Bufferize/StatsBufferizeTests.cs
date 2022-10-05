@@ -18,13 +18,13 @@ namespace Tests
         public void StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
-            var bufferBuilder = new BufferBuilder(handler, 30, "\n");
+            var bufferBuilder = new BufferBuilder(handler, 30, "\n", null);
             var serializers = new Serializers
             {
                 EventSerializer = new EventSerializer(new SerializerHelper(null)),
             };
             var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
-            using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero))
+            using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero, null))
             {
                 var stats = new Stats { Kind = StatsKind.Event };
                 stats.Event.Text = "test";

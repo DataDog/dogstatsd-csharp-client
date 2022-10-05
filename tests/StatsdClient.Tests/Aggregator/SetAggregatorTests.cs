@@ -12,7 +12,7 @@ namespace StatsdClient.Tests.Aggregator
         public void OnNewValue()
         {
             var handler = new BufferBuilderHandlerMock();
-            var aggregator = new SetAggregator(MetricAggregatorParametersFactory.Create(handler.Object), null);
+            var aggregator = new SetAggregator(MetricAggregatorParametersFactory.Create(handler.Object), null, null);
             AddStatsMetric(aggregator, "s1", "1");
             AddStatsMetric(aggregator, "s1", "2");
             AddStatsMetric(aggregator, "s1", "2");
@@ -31,7 +31,7 @@ namespace StatsdClient.Tests.Aggregator
         {
             var handler = new BufferBuilderHandlerMock();
             var parameters = MetricAggregatorParametersFactory.Create(handler.Object, TimeSpan.FromMinutes(1), 1);
-            var aggregator = new SetAggregator(parameters, null);
+            var aggregator = new SetAggregator(parameters, null, null);
 
             // Check StatsMetricSet instance go back to the pool
             for (int i = 0; i < 10; ++i)

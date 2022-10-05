@@ -14,7 +14,7 @@ namespace StatsdClient.Aggregator
         private readonly Pool<StatsMetricSet> _pool;
         private readonly Telemetry _optionalTelemetry;
 
-        public SetAggregator(MetricAggregatorParameters parameters, Telemetry optionalTelemetry)
+        public SetAggregator(MetricAggregatorParameters parameters, Telemetry optionalTelemetry, Action<Exception> optionalExceptionHandler)
         {
             Action<AggregatorFlusher<StatsMetricSet>, StatsMetricSet> flushMetric = (agg, statsMetric) =>
             {
@@ -29,7 +29,7 @@ namespace StatsdClient.Aggregator
                 }
             };
             _aggregator = new AggregatorFlusher<StatsMetricSet>(parameters, MetricType.Set, flushMetric);
-            _pool = new Pool<StatsMetricSet>(pool => new StatsMetricSet(pool), 2 * parameters.MaxUniqueStatsBeforeFlush);
+            _pool = new Pool<StatsMetricSet>(pool => new StatsMetricSet(pool, optionalExceptionHandler), 2 * parameters.MaxUniqueStatsBeforeFlush);
             _optionalTelemetry = optionalTelemetry;
         }
 
@@ -66,8 +66,8 @@ namespace StatsdClient.Aggregator
 
         private class StatsMetricSet : AbstractPoolObject
         {
-            public StatsMetricSet(IPool pool)
-            : base(pool)
+            public StatsMetricSet(IPool pool, Action<Exception> optionalExceptionHandler)
+            : base(pool, optionalExceptionHandler)
             {
             }
 
