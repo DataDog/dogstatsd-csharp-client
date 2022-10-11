@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace StatsdClient
 {
@@ -27,7 +27,8 @@ namespace StatsdClient
         /// <param name="value">A given delta.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Counter(string statName, double value, double sampleRate = 1, string[] tags = null);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        void Counter(string statName, double value, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
 
         /// <summary>
         /// Decrements the specified counter.
@@ -68,7 +69,8 @@ namespace StatsdClient
         /// <param name="value">The value of the gauge.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Gauge(string statName, double value, double sampleRate = 1, string[] tags = null);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the gauge has been seen with the given value. This value is sent without any aggregation.</param>
+        void Gauge(string statName, double value, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
 
         /// <summary>
         /// Records a value for the specified named histogram.

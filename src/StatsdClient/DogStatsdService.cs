@@ -72,9 +72,10 @@ namespace StatsdClient
         /// <param name="value">A given delta.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        public void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
         {
-            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags, timestamp);
         }
 
         /// <summary>
@@ -108,9 +109,10 @@ namespace StatsdClient
         /// <param name="value">The value of the gauge.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the gauge has been seen with the given value. This value is sent without any aggregation.</param>
+        public void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
         {
-            _metricsSender?.SendMetric(MetricType.Gauge, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Gauge, statName, value, sampleRate, tags, timestamp);
         }
 
         /// <summary>
