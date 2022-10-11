@@ -89,7 +89,7 @@ namespace StatsdClient
                     }
                     else
                     {
-                        stats.Metric.Timestamp = timestamp.Value.ToUniversalTime().ToUnixTimeSeconds();
+                        stats.Metric.Timestamp = DateTimeOffsetHelper.ToUnixTimeSeconds(timestamp.Value);
                     }
 
                     Send(stats);
