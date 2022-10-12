@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using StatsdClient.Bufferize;
 
 namespace Tests
@@ -13,6 +14,21 @@ namespace Tests
             Array.Copy(buffer, newBuffer, length);
 
             Buffer = newBuffer;
+        }
+
+        public string BufferToString()
+        {
+            if (Buffer == null)
+            {
+                return string.Empty;
+            }
+
+            return Encoding.UTF8.GetString(Buffer, 0, Buffer.Length);
+        }
+
+        public void Reset()
+        {
+            Buffer = null;
         }
     }
 }

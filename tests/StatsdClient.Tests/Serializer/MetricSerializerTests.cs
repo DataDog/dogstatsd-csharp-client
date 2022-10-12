@@ -50,6 +50,45 @@ namespace StatsdClient.Tests
                 tags: new[] { "tag1:true", "tag2" });
         }
 
+        [Test]
+        public void SendCounterWithTimestamp()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "the.counter:5|c|T1367433000",
+                MetricType.Count,
+                "the.counter",
+                5,
+                timestamp: dto);
+        }
+
+        [Test]
+        public void SendCounterWithTagsAndTimestamp()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "the.counter:5|c|#tag1:true,tag2|T1367433000",
+                MetricType.Count,
+                "the.counter",
+                5,
+                tags: new[] { "tag1:true", "tag2" },
+                timestamp: dto);
+        }
+
+        [Test]
+        public void SendCounterWithTagsAndTimestampAndSampleRate()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "the.counter:5|c|@0.5|#tag1:true,tag2|T1367433000",
+                MetricType.Count,
+                "the.counter",
+                5,
+                sampleRate: 0.5,
+                tags: new[] { "tag1:true", "tag2" },
+                timestamp: dto);
+        }
+
         // =-=-=-=- TIMER -=-=-=-=
 
         [Test]
@@ -141,6 +180,45 @@ namespace StatsdClient.Tests
                 5.4,
                 sampleRate: 0.5,
                 tags: new[] { "tag1:true", "tag2" });
+        }
+
+        [Test]
+        public void SendGaugeWithTimestamp()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "gauge:5|g|T1367433000",
+                MetricType.Gauge,
+                "gauge",
+                5,
+                timestamp: dto);
+        }
+
+        [Test]
+        public void SendGaugeWithTagsAndTimestamp()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "gauge:5|g|#tag1:true,tag2|T1367433000",
+                MetricType.Gauge,
+                "gauge",
+                5,
+                tags: new[] { "tag1:true", "tag2" },
+                timestamp: dto);
+        }
+
+        [Test]
+        public void SendGaugeWithTagsAndTimestampAndSampleRate()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "gauge:5|g|@0.5|#tag1:true,tag2|T1367433000",
+                MetricType.Gauge,
+                "gauge",
+                5,
+                sampleRate: 0.5,
+                tags: new[] { "tag1:true", "tag2" },
+                timestamp: dto);
         }
 
         // =-=-=-=- PREFIX -=-=-=-=
@@ -296,7 +374,8 @@ namespace StatsdClient.Tests
             double value,
             double sampleRate = 1.0,
             string[] tags = null,
-            string prefix = null)
+            string prefix = null,
+            DateTimeOffset? timestamp = null)
         {
             var statsMetric = new StatsMetric
             {
@@ -306,6 +385,11 @@ namespace StatsdClient.Tests
                 NumericValue = value,
                 Tags = tags,
             };
+            if (timestamp != null)
+            {
+                statsMetric.Timestamp = DateTimeOffsetHelper.ToUnixTimeSeconds(timestamp.Value);
+            }
+
             AssertSerialize(expectValue, ref statsMetric, prefix);
         }
 

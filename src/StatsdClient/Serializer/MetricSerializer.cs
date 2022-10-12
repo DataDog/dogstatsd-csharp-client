@@ -53,12 +53,12 @@ namespace StatsdClient
                 builder.AppendFormat(CultureInfo.InvariantCulture, "|@{0}", metricStats.SampleRate);
             }
 
+            _serializerHelper.AppendTags(builder, metricStats.Tags);
+
             if (metricStats.Timestamp > 0)
             {
                 builder.AppendFormat(CultureInfo.InvariantCulture, "|T{0}", metricStats.Timestamp);
             }
-
-            _serializerHelper.AppendTags(builder, metricStats.Tags);
         }
 
         private void AppendDouble(StringBuilder builder, double v)
