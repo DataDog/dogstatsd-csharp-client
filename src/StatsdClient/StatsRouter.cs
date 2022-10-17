@@ -84,29 +84,18 @@ namespace StatsdClient
             switch (metric.MetricType)
             {
                 case MetricType.Count:
-                    // we do not want to aggregate the values when they have a timestamp
-                    // we send them directly to the serializer instead
-                    if (metric.Timestamp > 0)
-                    {
-                        break;
-                    }
-
-                    if (_optionalCountAggregator != null)
-                    {
+                    // we aggregate only if the client side aggregation is enabled for counts
+                    // and if the metric does not have a timestamp.
+                    if (_optionalCountAggregator != null && metric.Timestamp == 0) {
                         _optionalCountAggregator.OnNewValue(ref metric);
                         return false;
                     }
 
                     break;
                 case MetricType.Gauge:
-                    // we don't want to aggregate the gauge when they have a timestamp
-                    // we send them directly to the serializer instead
-                    if (metric.Timestamp > 0)
-                    {
-                        break;
-                    }
-
-                    if (_optionalGaugeAggregator != null)
+                    // we aggregate only if the client side aggregation is enabled for gauges
+                    // and if the metric does not have a timestamp.
+                    if (_optionalGaugeAggregator != null && metric.Timestamp == 0)
                     {
                         _optionalGaugeAggregator.OnNewValue(ref metric);
                         return false;
