@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net461</TargetFrameworks>
+    <TargetFrameworks>net461;net6.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
     <NoWarn>0618</NoWarn>
@@ -11,6 +11,12 @@
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <DefineConstants>OS_WINDOWS</DefineConstants>
   </PropertyGroup>
+
+  <!-- See https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/numeric-format-parsing-handles-higher-precision -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>NEW_DOUBLE_FORMATTING</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="Moq" Version="4.7.137" />
