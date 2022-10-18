@@ -48,11 +48,7 @@ namespace StatsdClient.Bufferize
 
         public ITransport CreateNamedPipeTransport(string pipeName)
         {
-#if NAMED_PIPE_AVAILABLE
             return new NamedPipeTransport(pipeName);
-#else
-            throw new NotSupportedException("Named pipes are not supported on this .NET framework.");
-#endif
         }
     }
 }
