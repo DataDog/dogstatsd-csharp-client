@@ -1,7 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>    
-    <TargetFrameworks>net461;net6.0</TargetFrameworks>
+  <PropertyGroup>
+    <!-- 
+      Test all target frameworks from src/StatsdClient/StatsdClient.csproj
+        - net461 -> net461
+        - netcoreapp2.1 -> netstandard2.0
+        - netcoreapp3.1 -> netcoreapp3.1 
+      -  net6.0 -> net6.0
+    -->
+    <TargetFrameworks>net461;netcoreapp2.1;net5.0;net6.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
     <NoWarn>0618</NoWarn>
@@ -13,7 +20,7 @@
   </PropertyGroup>
 
   <!-- See https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/numeric-format-parsing-handles-higher-precision -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net5.0' ">
     <DefineConstants>$(DefineConstants);NEW_DOUBLE_FORMATTING</DefineConstants>
   </PropertyGroup>
 
