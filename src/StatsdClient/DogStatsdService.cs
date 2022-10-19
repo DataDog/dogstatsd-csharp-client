@@ -24,7 +24,7 @@ namespace StatsdClient
         /// <summary>
         /// Configures the instance.
         /// Must be called before any other methods.
-        /// Can be called once.
+        /// Can only be called once.
         /// </summary>
         /// <param name="config">The value of the config.</param>
         /// <param name="optionalExceptionHandler">The handler called when an error occurs."</param>
