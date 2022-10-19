@@ -74,28 +74,39 @@ namespace StatsdClient.Transport
             }
 
             var cts = new CancellationTokenSource(_timeout);
-
+            bool ioException = false;
             try
             {
                 // WriteAsync overload with a CancellationToken instance seems to not work.
                 _namedPipe.WriteAsync(buffer, 0, length).Wait(cts.Token);
                 return true;
             }
-            catch (OperationCanceledException)
-            {
-                return false;
-            }
+            catch (OperationCanceledException) { }
             catch (IOException)
             {
-                // When the server disconnects, IOException is raised with the message "Pipe is broken".
-                // In this case, we try to reconnect once.
-                if (allowRetry)
-                {
-                    return SendBuffer(buffer, length, allowRetry: false);
-                }
-
-                return false;
+                ioException = true;
             }
+            catch (AggregateException e) // dotnet6.0 raises AggregateException when an IOException occurs. 
+            {
+                e.Handle(ex =>
+                {
+                    if (ex is IOException)
+                    {
+                        ioException = true;
+                        return true;
+                    }
+                    return ex is OperationCanceledException;
+                });
+            }
+
+            // When the server disconnects, IOException is raised with the message "Pipe is broken".
+            // In this case, we try to reconnect once.
+            if (ioException && allowRetry)
+            {
+                return SendBuffer(buffer, length, allowRetry: false);
+            }
+
+            return false;
         }
     }
 }
