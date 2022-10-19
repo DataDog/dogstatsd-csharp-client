@@ -7,6 +7,7 @@ using StatsdClient;
 using StatsdClient.Bufferize;
 using StatsdClient.Statistic;
 using StatsdClient.Utils;
+using Tests.Utils;
 
 namespace Tests
 {
@@ -18,13 +19,13 @@ namespace Tests
         public void StatsBufferize()
         {
             var handler = new BufferBuilderHandlerMock();
-            var bufferBuilder = new BufferBuilder(handler, 30, "\n", null);
+            var bufferBuilder = new BufferBuilder(handler, 30, "\n", Tools.ExceptionHandler);
             var serializers = new Serializers
             {
                 EventSerializer = new EventSerializer(new SerializerHelper(null)),
             };
             var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
-            using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero, null))
+            using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero, Tools.ExceptionHandler))
             {
                 var stats = new Stats { Kind = StatsKind.Event };
                 stats.Event.Text = "test";

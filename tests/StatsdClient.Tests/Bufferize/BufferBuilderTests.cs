@@ -3,6 +3,7 @@ using System.Text;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Bufferize;
+using Tests.Utils;
 
 namespace Tests
 {
@@ -17,7 +18,7 @@ namespace Tests
         public void Init()
         {
             _handler = new BufferBuilderHandlerMock();
-            _bufferBuilder = new BufferBuilder(_handler, 12, "\n", null);
+            _bufferBuilder = new BufferBuilder(_handler, 12, "\n", Tools.ExceptionHandler);
         }
 
         [Test]

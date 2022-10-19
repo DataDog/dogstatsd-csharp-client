@@ -8,6 +8,7 @@ using NUnit.Framework;
 using StatsdClient.Aggregator;
 using StatsdClient.Bufferize;
 using StatsdClient.Transport;
+using Tests.Utils;
 
 namespace StatsdClient.Tests
 {
@@ -133,7 +134,7 @@ namespace StatsdClient.Tests
                 conf.MaxMetricsInAsyncQueue,
                 conf.MaxBlockDuration,
                 conf.DurationBeforeSendingNotFullBuffer,
-                null));
+                Tools.ExceptionHandler));
             _mock.Verify(
                 m => m.CreateStatsRouter(
                 It.IsAny<Serializers>(),
@@ -154,7 +155,7 @@ namespace StatsdClient.Tests
                 It.IsAny<int>(),
                 null,
                 It.IsAny<TimeSpan>(),
-                null));
+                Tools.ExceptionHandler));
             _mock.Verify(
                 m => m.CreateStatsRouter(
                 It.IsAny<Serializers>(),
@@ -192,7 +193,7 @@ namespace StatsdClient.Tests
                 conf.TelemetryFlushInterval.Value,
                 It.IsAny<ITransport>(),
                 It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags)),
-                null));
+                Tools.ExceptionHandler));
         }
 
         [Test]
@@ -299,7 +300,7 @@ namespace StatsdClient.Tests
 
         private void BuildStatsData(StatsdConfig config)
         {
-            var buildStatsData = _statsdBuilder.BuildStatsData(config, null);
+            var buildStatsData = _statsdBuilder.BuildStatsData(config, Tools.ExceptionHandler);
             buildStatsData.Dispose();
         }
     }
