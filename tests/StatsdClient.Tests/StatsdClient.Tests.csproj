@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <!-- Use net5.0 and not net6.0 as net6.0 doesn't support Unix Domain socket on Windows -->
-    <TargetFrameworks>net461;net5.0</TargetFrameworks>
+  <PropertyGroup>    
+    <TargetFrameworks>net461;net6.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
     <NoWarn>0618</NoWarn>
@@ -15,7 +14,7 @@
 
   <!-- See https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/numeric-format-parsing-handles-higher-precision -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <DefineConstants>NEW_DOUBLE_FORMATTING</DefineConstants>
+    <DefineConstants>$(DefineConstants);NEW_DOUBLE_FORMATTING</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
