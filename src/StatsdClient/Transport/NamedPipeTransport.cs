@@ -86,8 +86,9 @@ namespace StatsdClient.Transport
             {
                 ioException = true;
             }
-            catch (AggregateException e) // dotnet6.0 raises AggregateException when an IOException occurs. 
+            catch (AggregateException e)
             {
+                // dotnet6.0 raises AggregateException when an IOException occurs.
                 e.Handle(ex =>
                 {
                     if (ex is IOException)
