@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using StatsdClient.Bufferize;
 
@@ -32,6 +33,12 @@ namespace StatsdClient
         /// other methods in this class do nothing and an error is reported to <paramref name="optionalExceptionHandler"/>.</returns>
         public bool Configure(StatsdConfig config, Action<Exception> optionalExceptionHandler = null)
         {
+            var exceptionHandler = optionalExceptionHandler;
+            if (exceptionHandler == null)
+            {
+                exceptionHandler = e => Debug.WriteLine(e);
+            }
+
             try
             {
                 if (_statsdBuilder == null)
@@ -50,12 +57,12 @@ namespace StatsdClient
                 }
 
                 _config = config;
-                _statsdData = _statsdBuilder.BuildStatsData(config, optionalExceptionHandler);
+                _statsdData = _statsdBuilder.BuildStatsData(config, exceptionHandler);
                 _metricsSender = _statsdData.MetricsSender;
             }
             catch (Exception e)
             {
-                optionalExceptionHandler?.Invoke(e);
+                exceptionHandler.Invoke(e);
                 return false;
             }
 
