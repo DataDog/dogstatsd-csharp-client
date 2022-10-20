@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using StatsdClient.Utils;
+using Tests.Utils;
 
 namespace Tests
 {
@@ -37,7 +38,7 @@ namespace Tests
         private class PoolObject : AbstractPoolObject
         {
             public PoolObject(IPool p)
-            : base(p)
+            : base(p, Tools.ExceptionHandler)
             {
             }
 

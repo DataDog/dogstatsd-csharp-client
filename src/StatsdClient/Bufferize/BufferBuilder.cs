@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Text;
 
 namespace StatsdClient.Bufferize
@@ -14,11 +13,13 @@ namespace StatsdClient.Bufferize
         private readonly byte[] _buffer;
         private readonly byte _separator;
         private readonly char[] _charsBuffers;
+        private readonly Action<Exception> _optionalExceptionHandler;
 
         public BufferBuilder(
             IBufferBuilderHandler handler,
             int bufferCapacity,
-            string separator)
+            string separator,
+            Action<Exception> optionalExceptionHandler)
         {
             _buffer = new byte[bufferCapacity];
             _charsBuffers = new char[bufferCapacity];
@@ -31,6 +32,7 @@ namespace StatsdClient.Bufferize
             }
 
             _separator = separatorBytes[0];
+            _optionalExceptionHandler = optionalExceptionHandler;
         }
 
         public int Length { get; private set; }
@@ -48,7 +50,8 @@ namespace StatsdClient.Bufferize
 
             if (length < 0)
             {
-                Debug.WriteLine($"The metric size exceeds the internal buffer capacity {_charsBuffers.Length}: {serializedMetric.ToString()}");
+                var error = new InvalidOperationException($"The metric size exceeds the internal buffer capacity {_charsBuffers.Length}: {serializedMetric.ToString()}");
+                _optionalExceptionHandler?.Invoke(error);
                 return;
             }
 
@@ -61,7 +64,8 @@ namespace StatsdClient.Bufferize
 
                 if (byteCount > Capacity)
                 {
-                    Debug.WriteLine($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
+                    var error = new InvalidOperationException($"The metric size exceeds the buffer capacity {Capacity}: {serializedMetric.ToString()}");
+                    _optionalExceptionHandler?.Invoke(error);
                     return;
                 }
 

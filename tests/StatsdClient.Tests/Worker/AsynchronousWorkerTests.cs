@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using StatsdClient.Worker;
+using Tests.Utils;
 
 namespace Tests
 {
@@ -120,7 +121,8 @@ namespace Tests
                 _waiter.Object,
                 workerThreadCount,
                 10,
-                null);
+                null,
+                Tools.ExceptionHandler);
             _workers.Add(worker);
             return worker;
         }
@@ -138,7 +140,8 @@ namespace Tests
                     new Mock<IWaiter>().Object,
                     1,
                     10,
-                    null);
+                    null,
+                    Tools.ExceptionHandler);
             }
         }
 #endif

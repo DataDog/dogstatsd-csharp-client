@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using StatsdClient.Bufferize;
 using StatsdClient.Statistic;
@@ -19,6 +18,7 @@ namespace StatsdClient
         private readonly MetricSerializer _optionalMetricSerializer;
         private readonly ITransport _optionalTransport;
         private readonly Dictionary<MetricType, ValueWithTags> _aggregatedContexts = new Dictionary<MetricType, ValueWithTags>();
+        private readonly Action<Exception> _optionalExceptionHandler;
 
         private int _metricsSent;
         private int _eventsSent;
@@ -39,7 +39,8 @@ namespace StatsdClient
             string assemblyVersion,
             TimeSpan flushInterval,
             ITransport transport,
-            string[] globalTags)
+            string[] globalTags,
+            Action<Exception> optionalExceptionHandler)
         {
             _optionalMetricSerializer = metricSerializer;
             _optionalTransport = transport;
@@ -51,7 +52,7 @@ namespace StatsdClient
             _aggregatedContexts.Add(MetricType.Gauge, new ValueWithTags(_optionalTags, "metrics_type:gauge"));
             _aggregatedContexts.Add(MetricType.Count, new ValueWithTags(_optionalTags, "metrics_type:count"));
             _aggregatedContexts.Add(MetricType.Set, new ValueWithTags(_optionalTags, "metrics_type:set"));
-
+            _optionalExceptionHandler = optionalExceptionHandler;
             _optionalTimer = new Timer(
                 _ => Flush(),
                 null,
@@ -119,7 +120,7 @@ namespace StatsdClient
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                _optionalExceptionHandler?.Invoke(e);
             }
         }
 

@@ -15,7 +15,8 @@ namespace StatsdClient.Bufferize
             StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
-            TimeSpan maxIdleWaitBeforeSending)
+            TimeSpan maxIdleWaitBeforeSending,
+            Action<Exception> optionalExceptionHandler)
         {
             var handler = new WorkerHandler(statsRouter, maxIdleWaitBeforeSending);
 
@@ -26,7 +27,8 @@ namespace StatsdClient.Bufferize
                 new Waiter(),
                 workerThreadCount: 1,
                 workerMaxItemCount,
-                blockingQueueTimeout);
+                blockingQueueTimeout,
+                optionalExceptionHandler);
         }
 
         public void Send(Stats serializedMetric) => this._worker.Enqueue(serializedMetric);

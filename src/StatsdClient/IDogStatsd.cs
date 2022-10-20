@@ -16,9 +16,13 @@ namespace StatsdClient
         /// <summary>
         /// Configures the instance.
         /// Must be called before any other methods.
+        /// Can only be called once.
         /// </summary>
         /// <param name="config">The value of the config.</param>
-        void Configure(StatsdConfig config);
+        /// <param name="optionalExceptionHandler">The handler called when an error occurs."</param>
+        /// <returns>Return true if the operation succeed, false otherwise. If this function fails,
+        /// other methods in this class do nothing and an error is reported to <paramref name="optionalExceptionHandler"/>.</returns>
+        bool Configure(StatsdConfig config, Action<Exception> optionalExceptionHandler = null);
 
         /// <summary>
         /// Adjusts the specified counter by a given delta.

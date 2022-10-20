@@ -16,7 +16,8 @@ namespace StatsdClient.Bufferize
           StatsRouter statsRouter,
           int workerMaxItemCount,
           TimeSpan? blockingQueueTimeout,
-          TimeSpan maxIdleWaitBeforeSending);
+          TimeSpan maxIdleWaitBeforeSending,
+          Action<Exception> optionalExceptionHandler);
 
         StatsRouter CreateStatsRouter(
             Serializers serializers,
@@ -36,6 +37,7 @@ namespace StatsdClient.Bufferize
             string assemblyVersion,
             TimeSpan flushInterval,
             ITransport transport,
-            string[] globalTags);
+            string[] globalTags,
+            Action<Exception> optionalExceptionHandler);
     }
 }
