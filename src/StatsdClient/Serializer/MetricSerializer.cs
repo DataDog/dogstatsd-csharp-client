@@ -61,7 +61,7 @@ namespace StatsdClient
             var intValue = (int)v;
             var provider = CultureInfo.InvariantCulture;
 
-#if NETSTANDARD2_1
+#if HAS_SPAN
             Span<char> span = numericBuffer;
             bool tryFormatSuccess;
             int charsWritten;
