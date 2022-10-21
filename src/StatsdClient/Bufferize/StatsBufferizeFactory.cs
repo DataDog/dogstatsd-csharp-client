@@ -12,13 +12,15 @@ namespace StatsdClient.Bufferize
             StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
-            TimeSpan maxIdleWaitBeforeSending)
+            TimeSpan maxIdleWaitBeforeSending,
+            Action<Exception> optionalExceptionHandler)
         {
             return new StatsBufferize(
                 statsRouter,
                 workerMaxItemCount,
                 blockingQueueTimeout,
-                maxIdleWaitBeforeSending);
+                maxIdleWaitBeforeSending,
+                optionalExceptionHandler);
         }
 
         public StatsRouter CreateStatsRouter(
@@ -41,18 +43,20 @@ namespace StatsdClient.Bufferize
             return new UnixDomainSocketTransport(endPoint, udsBufferFullBlockDuration);
         }
 
-        public Telemetry CreateTelemetry(MetricSerializer metricSerializer, string assemblyVersion, TimeSpan flushInterval, ITransport transport, string[] globalTags)
+        public Telemetry CreateTelemetry(
+            MetricSerializer metricSerializer,
+            string assemblyVersion,
+            TimeSpan flushInterval,
+            ITransport transport,
+            string[] globalTags,
+            Action<Exception> optionalExceptionHandler)
         {
-            return new Telemetry(metricSerializer, assemblyVersion, flushInterval, transport, globalTags);
+            return new Telemetry(metricSerializer, assemblyVersion, flushInterval, transport, globalTags, optionalExceptionHandler);
         }
 
         public ITransport CreateNamedPipeTransport(string pipeName)
         {
-#if NAMED_PIPE_AVAILABLE
             return new NamedPipeTransport(pipeName);
-#else
-            throw new NotSupportedException("Named pipes are not supported on this .NET framework.");
-#endif
         }
     }
 }

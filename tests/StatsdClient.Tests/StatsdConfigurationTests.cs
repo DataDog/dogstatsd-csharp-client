@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Helpers;
@@ -15,7 +14,9 @@ namespace Tests
         {
             var sut = CreateSut();
             StatsdConfig metricsConfig = null;
-            Assert.Throws<ArgumentNullException>(() => sut.Configure(metricsConfig));
+            Exception exception = null;
+            Assert.False(sut.Configure(metricsConfig, e => exception = e));
+            Assert.True(exception is ArgumentNullException);
         }
 
         [Test]
@@ -23,7 +24,9 @@ namespace Tests
         {
             var sut = CreateSut();
             var metricsConfig = new StatsdConfig { };
-            Assert.Throws<ArgumentNullException>(() => sut.Configure(metricsConfig));
+            Exception exception = null;
+            Assert.False(sut.Configure(metricsConfig, e => exception = e));
+            Assert.True(exception is ArgumentNullException);
         }
 
         [Test]
@@ -35,7 +38,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                 };
-                sut.Configure(metricsConfig);
+                Assert.True(sut.Configure(metricsConfig));
                 TestReceive("127.0.0.1", 8125, "test", "test:1|c\n", sut);
             }
         }
@@ -85,7 +88,9 @@ namespace Tests
 
                 sut.Configure(metricsConfig);
 
-                Assert.Throws<InvalidOperationException>(() => sut.Configure(metricsConfig));
+                Exception exception = null;
+                Assert.False(sut.Configure(metricsConfig, e => exception = e));
+                Assert.True(exception is InvalidOperationException);
             }
         }
 

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +15,7 @@ namespace StatsdClient.Worker
         private readonly List<Task> _workers = new List<Task>();
         private readonly IAsynchronousWorkerHandler<T> _handler;
         private readonly IWaiter _waiter;
+        private readonly Action<Exception> _optionalExceptionHandler;
         private volatile bool _terminate = false;
         private volatile bool _requestFlush = false;
         private AutoResetEvent _flushEvent = new AutoResetEvent(false);
@@ -27,11 +27,13 @@ namespace StatsdClient.Worker
             IWaiter waiter,
             int workerThreadCount,
             int maxItemCount,
-            TimeSpan? blockingQueueTimeout)
+            TimeSpan? blockingQueueTimeout,
+            Action<Exception> optionalExceptionHandler)
         {
             _queue = new ConcurrentQueueWithPool<T>(factory, maxItemCount, blockingQueueTimeout);
             _handler = handler;
             _waiter = waiter;
+            _optionalExceptionHandler = optionalExceptionHandler;
             for (int i = 0; i < workerThreadCount; ++i)
             {
                 _workers.Add(Task.Factory.StartNew(() => Dequeue(), TaskCreationOptions.LongRunning));
@@ -76,7 +78,7 @@ namespace StatsdClient.Worker
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine(e.Message);
+                    _optionalExceptionHandler?.Invoke(e);
                 }
 
                 _workers.Clear();
@@ -132,7 +134,7 @@ namespace StatsdClient.Worker
 #if NETFRAMEWORK
                 catch (ThreadAbortException e)
                 {
-                    Debug.WriteLine(e.Message);
+                    _optionalExceptionHandler?.Invoke(e);
                     // This is the defined behavior of a ThreadAbortException, but it doesn't happen on
                     // the .NET Framework in 64-bit release builds using RyuJIT
                     throw;
@@ -140,7 +142,7 @@ namespace StatsdClient.Worker
 #endif
                 catch (Exception e)
                 {
-                    Debug.WriteLine(e.Message);
+                    _optionalExceptionHandler?.Invoke(e);
                 }
             }
         }

@@ -4,7 +4,7 @@
     <PackageId>DogStatsD-CSharp-Client</PackageId>
     <Description>A DogStatsD client for C#. DogStatsD is an extension of the StatsD metric server for use with Datadog. For more information visit http://datadoghq.com.</Description>
     <Authors>Datadog</Authors>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net45;net461</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>    
     <PackageVersion>7.0.1</PackageVersion>
     <Version>7.0.0</Version>
     <PackageLicenseUrl>https://github.com/DataDog/dogstatsd-csharp-client/blob/master/MIT-LICENCE.md</PackageLicenseUrl>
@@ -16,14 +16,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.3' ">
-    <DefineConstants>NAMED_PIPE_AVAILABLE</DefineConstants>
+  <!-- See https://learn.microsoft.com/en-us/dotnet/api/system.span-1?view=net-6.0 -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'net6.0' ">
+    <DefineConstants>HAS_SPAN</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <PackageReference Include="System.Net.NameResolution">
-      <Version>4.3.0</Version>
-    </PackageReference>
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0">

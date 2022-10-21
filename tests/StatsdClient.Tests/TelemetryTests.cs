@@ -6,6 +6,7 @@ using Moq;
 using NUnit.Framework;
 using StatsdClient;
 using StatsdClient.Transport;
+using Tests.Utils;
 
 namespace Tests
 {
@@ -27,7 +28,8 @@ namespace Tests
                 "1.0.0.0",
                 TimeSpan.FromHours(1),
                 transport.Object,
-                new string[] { "globalTagKey:globalTagValue" });
+                new string[] { "globalTagKey:globalTagValue" },
+                Tools.ExceptionHandler);
         }
 
         [TearDown]

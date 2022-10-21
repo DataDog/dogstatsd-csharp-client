@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StatsdClient
 {
@@ -18,11 +13,8 @@ namespace StatsdClient
             if (!isValidIPAddress)
             {
                 ipAddress = null;
-#if NET45
-                IPAddress[] addressList = Dns.GetHostEntry(name).AddressList;
-#else
                 IPAddress[] addressList = Dns.GetHostEntryAsync(name).Result.AddressList;
-#endif
+
                 // The IPv4 address is usually the last one, but not always
                 for (int positionToTest = addressList.Length - 1; positionToTest >= 0; --positionToTest)
                 {

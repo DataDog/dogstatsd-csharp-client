@@ -1,6 +1,7 @@
 using System;
 using StatsdClient.Aggregator;
 using StatsdClient.Bufferize;
+using Tests.Utils;
 
 namespace StatsdClient.Tests.Aggregator
 {
@@ -20,7 +21,7 @@ namespace StatsdClient.Tests.Aggregator
             int maxUniqueStatsBeforeFlush)
         {
             var serializer = new MetricSerializer(new SerializerHelper(null), string.Empty);
-            var bufferBuilder = new BufferBuilder(handler, bufferCapacity: 1000, "\n");
+            var bufferBuilder = new BufferBuilder(handler, bufferCapacity: 1000, "\n", Tools.ExceptionHandler);
 
             return new MetricAggregatorParameters(
                 serializer,

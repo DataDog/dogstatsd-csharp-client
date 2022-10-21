@@ -16,7 +16,7 @@ namespace StatsdClient.Benchmarks
         {
             _serializedMetric = new SerializedMetric();
             _serializedMetric.Builder.Append(new String('A', 128));
-            _bufferBuilder = new BufferBuilder(new EmptyHandler(), 8096, "\n");
+            _bufferBuilder = new BufferBuilder(new EmptyHandler(), 8096, "\n", null);
         }
         class EmptyHandler : IBufferBuilderHandler
         {
