@@ -18,7 +18,7 @@ namespace Tests
         public void Routing()
         {
             var handler = new BufferBuilderHandlerMock();
-            var bufferBuilder = new BufferBuilder(handler, 1024, "\n");
+            var bufferBuilder = new BufferBuilder(handler, 1024, "\n", null);
             var serializers = new Serializers
             {
                 MetricSerializer = new MetricSerializer(new SerializerHelper(null), string.Empty),
@@ -49,7 +49,7 @@ namespace Tests
                 SampleRate = 1.0,
                 NumericValue = 40,
                 Tags = new[] { "tag1:true", "tag2" },
-                Timestamp = DateTimeOffsetHelper.ToUnixTimeSeconds(dto),
+                Timestamp = dto.ToUnixTimeSeconds(),
             };
 
             var statsWithTimestamp = new Stats

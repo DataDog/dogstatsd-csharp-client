@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using StatsdClient.Statistic;
 
@@ -387,7 +387,7 @@ namespace StatsdClient.Tests
             };
             if (timestamp != null)
             {
-                statsMetric.Timestamp = DateTimeOffsetHelper.ToUnixTimeSeconds(timestamp.Value);
+                statsMetric.Timestamp = timestamp.Value.ToUnixTimeSeconds();
             }
 
             AssertSerialize(expectValue, ref statsMetric, prefix);

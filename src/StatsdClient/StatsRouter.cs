@@ -86,7 +86,8 @@ namespace StatsdClient
                 case MetricType.Count:
                     // we aggregate only if the client side aggregation is enabled for counts
                     // and if the metric does not have a timestamp.
-                    if (_optionalCountAggregator != null && metric.Timestamp == 0) {
+                    if (_optionalCountAggregator != null && metric.Timestamp == 0)
+                    {
                         _optionalCountAggregator.OnNewValue(ref metric);
                         return false;
                     }
