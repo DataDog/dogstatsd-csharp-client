@@ -14,12 +14,19 @@ namespace Tests
     [TestFixture]
     public class StatsRouterTests
     {
-        [Test]
-        public void Routing()
+        private BufferBuilderHandlerMock _handler;
+        private BufferBuilder _bufferBuilder;
+        private Serializers _serializers;
+        private Stats _statsWithoutTimestamp;
+        private Stats _statsWithTimestamp;
+        private Aggregators _optionalAggregators;
+
+        [SetUp]
+        public void Init()
         {
-            var handler = new BufferBuilderHandlerMock();
-            var bufferBuilder = new BufferBuilder(handler, 1024, "\n", null);
-            var serializers = new Serializers
+            _handler = new BufferBuilderHandlerMock();
+            _bufferBuilder = new BufferBuilder(_handler, 1024, "\n", null);
+            _serializers = new Serializers
             {
                 MetricSerializer = new MetricSerializer(new SerializerHelper(null), string.Empty),
             };
@@ -35,7 +42,7 @@ namespace Tests
                 Tags = new[] { "tag1:true", "tag2" },
             };
 
-            var statsWithoutTimestamp = new Stats
+            _statsWithoutTimestamp = new Stats
             {
                 Kind = StatsKind.Metric,
                 Metric = statsMetricWithoutTimestamp,
@@ -52,65 +59,83 @@ namespace Tests
                 Timestamp = dto.ToUnixTimeSeconds(),
             };
 
-            var statsWithTimestamp = new Stats
+            _statsWithTimestamp = new Stats
             {
                 Kind = StatsKind.Metric,
                 Metric = statsMetricWithTimestamp,
             };
 
-            // without client side aggregation
-
-            var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
-
-            // no client side aggregation without timestamp,
-            // should be immediately written on the serializer
-            statsRouter.Route(statsWithoutTimestamp);
-            statsRouter.Route(statsWithoutTimestamp);
-            statsRouter.Flush();
-            Assert.AreEqual("count.name:40|c|#tag1:true,tag2\ncount.name:40|c|#tag1:true,tag2\n", handler.BufferToString());
-            handler.Reset();
-
-            // no client side aggregation with timestamp,
-            // should be immediately written on the serializer
-            statsRouter.Route(statsWithTimestamp);
-            statsRouter.Route(statsWithTimestamp);
-            statsRouter.Flush();
-            Assert.AreEqual("count.name:40|c|#tag1:true,tag2|T1367433000\ncount.name:40|c|#tag1:true,tag2|T1367433000\n", handler.BufferToString());
-            handler.Reset();
-
-            // with client side aggregation
-
             var parameters = new MetricAggregatorParameters(
-                serializers.MetricSerializer,
-                bufferBuilder,
+                _serializers.MetricSerializer,
+                _bufferBuilder,
                 1000,
                 TimeSpan.FromSeconds(100),
                 null);
 
-            var optionalAggregators = new Aggregators
+            _optionalAggregators = new Aggregators
             {
                 OptionalCount = new CountAggregator(parameters),
             };
+        }
 
-            statsRouter = new StatsRouter(serializers, bufferBuilder, optionalAggregators);
+        [Test]
+        public void StatsRouterWithoutAggWithoutTS()
+        {
+            // without client side aggregation
+            var statsRouter = new StatsRouter(_serializers, _bufferBuilder, null);
+
+            // no client side aggregation without timestamp,
+            // should be immediately written on the serializer
+            statsRouter.Route(_statsWithoutTimestamp);
+            statsRouter.Route(_statsWithoutTimestamp);
+            statsRouter.Flush();
+            Assert.AreEqual("count.name:40|c|#tag1:true,tag2\ncount.name:40|c|#tag1:true,tag2\n", _handler.BufferToString());
+            _handler.Reset();
+        }
+
+        [Test]
+        public void StatsRouterWithoutAggWithTS()
+        {
+            // without client side aggregation
+            var statsRouter = new StatsRouter(_serializers, _bufferBuilder, null);
+
+            // no client side aggregation with timestamp,
+            // should be immediately written on the serializer
+            statsRouter.Route(_statsWithTimestamp);
+            statsRouter.Route(_statsWithTimestamp);
+            statsRouter.Flush();
+            Assert.AreEqual("count.name:40|c|#tag1:true,tag2|T1367433000\ncount.name:40|c|#tag1:true,tag2|T1367433000\n", _handler.BufferToString());
+            _handler.Reset();
+        }
+
+        [Test]
+        public void StatsRouterWithAggWithoutTS()
+        {
+            var statsRouter = new StatsRouter(_serializers, _bufferBuilder, _optionalAggregators);
 
             // client side aggregation, no timestamp,
             // should be aggregated in only one count
-            statsRouter.Route(statsWithoutTimestamp);
-            statsRouter.Route(statsWithoutTimestamp);
-            statsRouter.Route(statsWithoutTimestamp);
+            statsRouter.Route(_statsWithoutTimestamp);
+            statsRouter.Route(_statsWithoutTimestamp);
+            statsRouter.Route(_statsWithoutTimestamp);
             statsRouter.Flush();
-            Assert.AreEqual("count.name:120|c|#tag1:true,tag2\n", handler.BufferToString());
-            handler.Reset();
+            Assert.AreEqual("count.name:120|c|#tag1:true,tag2\n", _handler.BufferToString());
+            _handler.Reset();
+        }
+
+        [Test]
+        public void WithAggWithoutTS()
+        {
+            var statsRouter = new StatsRouter(_serializers, _bufferBuilder, _optionalAggregators);
 
             // client side aggregation, with timestamp,
             // should be immediately written on the serializer
-            statsRouter.Route(statsWithTimestamp);
-            statsRouter.Route(statsWithTimestamp);
-            statsRouter.Route(statsWithTimestamp);
+            statsRouter.Route(_statsWithTimestamp);
+            statsRouter.Route(_statsWithTimestamp);
+            statsRouter.Route(_statsWithTimestamp);
             statsRouter.Flush();
-            Assert.AreEqual("count.name:40|c|#tag1:true,tag2|T1367433000\ncount.name:40|c|#tag1:true,tag2|T1367433000\ncount.name:40|c|#tag1:true,tag2|T1367433000\n", handler.BufferToString());
-            handler.Reset();
+            Assert.AreEqual("count.name:40|c|#tag1:true,tag2|T1367433000\ncount.name:40|c|#tag1:true,tag2|T1367433000\ncount.name:40|c|#tag1:true,tag2|T1367433000\n", _handler.BufferToString());
+            _handler.Reset();
         }
     }
 }
