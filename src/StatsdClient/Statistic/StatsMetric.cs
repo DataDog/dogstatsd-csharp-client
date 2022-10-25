@@ -17,6 +17,8 @@ namespace StatsdClient.Statistic
 
         public double SampleRate { get; set; }
 
+        public long Timestamp { get; set; } // UTC Timestamp
+
         public string[] Tags { get; set; }
 
         public override bool Equals(object obj)

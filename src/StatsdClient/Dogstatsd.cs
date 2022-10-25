@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("StatsdClient.Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001009558fd81ea0e330858198ae6c860c0c9fd2d9df3e5f2069434649e4ec61c9ceb9744d2a3fd82518d90abb5cbcefb6292e9d227d5854bd07dbd8884d129350c95c7742d499dfc4961223b35326e203c5924e413a2385a7aa7c704432e9101bb946da201977df2b992c25d0fb77645c1ac5bc29cde7bc8e5d054b78bd9c6727497")]
@@ -94,8 +94,9 @@ namespace StatsdClient
         /// <param name="value">A given delta.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public static void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null) =>
-            _dogStatsdService.Counter(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        public static void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null) =>
+            _dogStatsdService.Counter(statName: statName, value: value, sampleRate: sampleRate, tags: tags, timestamp: timestamp);
 
         /// <summary>
         /// Increments the specified counter.
@@ -124,8 +125,9 @@ namespace StatsdClient
         /// <param name="value">The value of the gauge.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public static void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null) =>
-            _dogStatsdService.Gauge(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the gauge has been seen with the given value. This value is sent without any aggregation.</param>
+        public static void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null) =>
+            _dogStatsdService.Gauge(statName: statName, value: value, sampleRate: sampleRate, tags: tags, timestamp);
 
         /// <summary>
         /// Records a value for the specified named histogram.

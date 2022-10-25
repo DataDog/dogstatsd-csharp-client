@@ -65,7 +65,7 @@ namespace StatsdClient
             }
         }
 
-        public void SendMetric(MetricType metricType, string name, double value, double sampleRate = 1.0, string[] tags = null)
+        public void SendMetric(MetricType metricType, string name, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
         {
             if (metricType == MetricType.Set)
             {
@@ -82,6 +82,15 @@ namespace StatsdClient
                     stats.Metric.StatName = name;
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.NumericValue = value;
+
+                    if (timestamp == null)
+                    {
+                        stats.Metric.Timestamp = 0;
+                    }
+                    else
+                    {
+                        stats.Metric.Timestamp = timestamp.Value.ToUnixTimeSeconds();
+                    }
 
                     Send(stats);
                     _optionalTelemetry?.OnMetricSent();

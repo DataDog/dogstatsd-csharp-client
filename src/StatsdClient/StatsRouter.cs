@@ -84,7 +84,9 @@ namespace StatsdClient
             switch (metric.MetricType)
             {
                 case MetricType.Count:
-                    if (_optionalCountAggregator != null)
+                    // we aggregate only if the client side aggregation is enabled for counts
+                    // and if the metric does not have a timestamp.
+                    if (_optionalCountAggregator != null && metric.Timestamp == 0)
                     {
                         _optionalCountAggregator.OnNewValue(ref metric);
                         return false;
@@ -92,7 +94,9 @@ namespace StatsdClient
 
                     break;
                 case MetricType.Gauge:
-                    if (_optionalGaugeAggregator != null)
+                    // we aggregate only if the client side aggregation is enabled for gauges
+                    // and if the metric does not have a timestamp.
+                    if (_optionalGaugeAggregator != null && metric.Timestamp == 0)
                     {
                         _optionalGaugeAggregator.OnNewValue(ref metric);
                         return false;

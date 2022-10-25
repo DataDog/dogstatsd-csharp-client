@@ -54,6 +54,11 @@ namespace StatsdClient
             }
 
             _serializerHelper.AppendTags(builder, metricStats.Tags);
+
+            if (metricStats.Timestamp > 0)
+            {
+                builder.AppendFormat(CultureInfo.InvariantCulture, "|T{0}", metricStats.Timestamp);
+            }
         }
 
         private void AppendDouble(StringBuilder builder, double v)
