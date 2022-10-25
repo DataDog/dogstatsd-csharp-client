@@ -51,7 +51,13 @@ namespace StatsdClient
         /// Must be called before any other methods.
         /// </summary>
         /// <param name="config">The value of the config.</param>
-        public static void Configure(StatsdConfig config) => _dogStatsdService.Configure(config);
+        /// <param name="optionalExceptionHandler">The handler called when an error occurs."</param>
+        /// <returns>Return true if the operation succeed, false otherwise. If this function fails,
+        /// other methods in this class do nothing and an error is reported to <paramref name="optionalExceptionHandler"/>.</returns>
+        public static bool Configure(StatsdConfig config, Action<Exception> optionalExceptionHandler = null)
+        {
+            return _dogStatsdService.Configure(config, optionalExceptionHandler);
+        }
 
         /// <summary>
         /// Records an event.
