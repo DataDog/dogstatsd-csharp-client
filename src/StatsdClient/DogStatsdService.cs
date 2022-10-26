@@ -106,9 +106,10 @@ namespace StatsdClient
         /// <param name="value">The amount of increment.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
         {
-            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags, timestamp);
         }
 
         /// <summary>
@@ -118,9 +119,10 @@ namespace StatsdClient
         /// <param name="value">The amount of decrement.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
         {
-            _metricsSender?.SendMetric(MetricType.Count, statName, -value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Count, statName, -value, sampleRate, tags, timestamp);
         }
 
         /// <summary>
@@ -145,7 +147,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Histogram(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Histogram, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Histogram, statName, value, sampleRate, tags, null);
         }
 
         /// <summary>
@@ -157,7 +159,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Distribution(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Distribution, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Distribution, statName, value, sampleRate, tags, null);
         }
 
         /// <summary>
@@ -195,7 +197,7 @@ namespace StatsdClient
         /// <param name="tags">Array of tags to be added to the data.</param>
         public void Timer(string statName, double value, double sampleRate = 1.0, string[] tags = null)
         {
-            _metricsSender?.SendMetric(MetricType.Timing, statName, value, sampleRate, tags);
+            _metricsSender?.SendMetric(MetricType.Timing, statName, value, sampleRate, tags, null);
         }
 
         /// <summary>

@@ -105,8 +105,9 @@ namespace StatsdClient
         /// <param name="value">The amount of increment.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public static void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null) =>
-            _dogStatsdService.Increment(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        public static void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null) =>
+            _dogStatsdService.Increment(statName: statName, value: value, sampleRate: sampleRate, tags: tags, timestamp: timestamp);
 
         /// <summary>
         /// Decrements the specified counter.
@@ -115,8 +116,9 @@ namespace StatsdClient
         /// <param name="value">The amount of decrement.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public static void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null) =>
-            _dogStatsdService.Decrement(statName: statName, value: value, sampleRate: sampleRate, tags: tags);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        public static void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null) =>
+            _dogStatsdService.Decrement(statName: statName, value: value, sampleRate: sampleRate, tags: tags, timestamp: timestamp);
 
         /// <summary>
         /// Records the latest fixed value for the specified named gauge.
