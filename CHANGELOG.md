@@ -1,6 +1,27 @@
 CHANGELOG
 =========
 
+# 8.0.0 / 10-26-2022
+## Breaking changes
+
+* [FEATURE] Support sending counters and gauges with timestamp. See [#185][] and [#188][].
+These PRs add a default parameter to the methods of `DogStatsdService`, `DogStatsd` and `IDogStatsd`. They also remove `params` for `tags` in `IDogStatsd.Decrement`.
+
+* [COMPATIBILITY] Remove support for old frameworks. See [#186][].
+This PR updates the targeted frameworks from `netstandard1.3;netstandard2.0;netstandard2.1;net45;net461` to `net461;netstandard2.0;netcoreapp3.1;net6.0`
+It means `netstandard1.3` and `net45` are not supported anymore.
+
+* [IMPROVEMENT] Add an exception handler. See [#183][] and [#187][].
+These PRs add a default parameter to `DogStatsdService.Configure`, `DogStatsd.Configure` and `IDogStatsd.Configure` 
+
+* [IMPROVEMENT] Add a `Flush` method to `IDogStatsd`. See [#182][]. 
+This PR adds a new method to `IDogStatsd`.
+
+## Changes
+
+* [IMPROVEMENT] Setting up codescanning action. See [#175][].
+
+
 # 7.0.1 / 06-28-2022
 ## Changes
 * [BUGFIX] Don't throw an exception when the size of the metric exceeds the internal buffer capacity. See [#178][].
@@ -241,7 +262,14 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#170]: https://github.com/DataDog/dogstatsd-csharp-client/issues/170
 [#171]: https://github.com/DataDog/dogstatsd-csharp-client/issues/171
 [#172]: https://github.com/DataDog/dogstatsd-csharp-client/issues/172
+[#175]: https://github.com/DataDog/dogstatsd-csharp-client/issues/175
 [#178]: https://github.com/DataDog/dogstatsd-csharp-client/issues/178
+[#182]: https://github.com/DataDog/dogstatsd-csharp-client/issues/182
+[#183]: https://github.com/DataDog/dogstatsd-csharp-client/issues/183
+[#185]: https://github.com/DataDog/dogstatsd-csharp-client/issues/185
+[#186]: https://github.com/DataDog/dogstatsd-csharp-client/issues/186
+[#187]: https://github.com/DataDog/dogstatsd-csharp-client/issues/187
+[#188]: https://github.com/DataDog/dogstatsd-csharp-client/issues/188
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
