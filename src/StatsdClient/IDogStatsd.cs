@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace StatsdClient
 {
@@ -41,7 +41,8 @@ namespace StatsdClient
         /// <param name="value">The amount of decrement.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Decrement(string statName, int value = 1, double sampleRate = 1, params string[] tags);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        void Decrement(string statName, int value = 1, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
 
         /// <summary>
         /// Records an event.
@@ -101,7 +102,8 @@ namespace StatsdClient
         /// <param name="value">The amount of increment.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Increment(string statName, int value = 1, double sampleRate = 1, string[] tags = null);
+        /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
+        void Increment(string statName, int value = 1, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
 
         /// <summary>
         /// Records a value for the specified set.

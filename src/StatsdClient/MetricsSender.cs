@@ -65,7 +65,7 @@ namespace StatsdClient
             }
         }
 
-        public void SendMetric(MetricType metricType, string name, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
+        public void SendMetric(MetricType metricType, string name, double value, double sampleRate, string[] tags, DateTimeOffset? timestamp)
         {
             if (metricType == MetricType.Set)
             {
@@ -129,7 +129,7 @@ namespace StatsdClient
             finally
             {
                 stopwatch.Stop();
-                SendMetric(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags);
+                SendMetric(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags, null);
             }
         }
 
