@@ -34,8 +34,9 @@ var dogstatsdConfig = new StatsdConfig
 };
 
 using (var service = new DogStatsdService())
-{
-    service.Configure(dogstatsdConfig);
+{    
+    if (!service.Configure(dogstatsdConfig))
+        throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
 }
 ```
 
@@ -67,7 +68,9 @@ var dogstatsdConfig = new StatsdConfig
 
 using (var service = new DogStatsdService())
 {
-    service.Configure(dogstatsdConfig);
+    if (!service.Configure(dogstatsdConfig))
+        throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
+                    
     service.Increment("example_metric.increment", tags: new[] { "environment:dev" });
     service.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
     service.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
@@ -97,7 +100,8 @@ var dogstatsdConfig = new StatsdConfig
     StatsdPort = 8125,
 };
 
-DogStatsd.Configure(dogstatsdConfig);
+if (!DogStatsd.Configure(dogstatsdConfig))
+    throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
 DogStatsd.Increment("example_metric.increment", tags: new[] { "environment:dev" });
 DogStatsd.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
 DogStatsd.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
