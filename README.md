@@ -100,7 +100,7 @@ var dogstatsdConfig = new StatsdConfig
     StatsdPort = 8125,
 };
 
-if (!service.Configure(dogstatsdConfig))
+if (!DogStatsd.Configure(dogstatsdConfig))
     throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
 DogStatsd.Increment("example_metric.increment", tags: new[] { "environment:dev" });
 DogStatsd.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
