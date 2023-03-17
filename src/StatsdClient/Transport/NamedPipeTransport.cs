@@ -9,14 +9,9 @@ namespace StatsdClient.Transport
     {
         private readonly NamedPipeClientStream _namedPipe;
         private readonly TimeSpan _timeout;
-        private byte[] _internalbuffer = new byte[0];
+        private readonly object _lock = new object();
 
-        // `SpinLock` is a struct. A struct marked as `readonly` is copied each time a mutating function is called.
-        // When calling `_lock.Enter` and `_lock.Exit()` the `SpinLock` instance is copied. Calling `_lock.Exit()` raises an
-        // error as the instance does not hold the lock (System.Threading.SynchronizationLockException : The calling
-        // thread does not hold the lock.)
-        // For this reason, `_lock` is not marked as `readonly`
-        private SpinLock _lock = new SpinLock(enableThreadOwnerTracking: true);
+        private byte[] _internalbuffer = Array.Empty<byte>();
 
         public NamedPipeTransport(string pipeName, TimeSpan? timeout = null)
         {
@@ -30,10 +25,8 @@ namespace StatsdClient.Transport
 
         public bool Send(byte[] buffer, int length)
         {
-            var gotLock = false;
-            try
+            lock (_lock)
             {
-                _lock.Enter(ref gotLock);
                 if (_internalbuffer.Length < length + 1)
                 {
                     _internalbuffer = new byte[length + 1];
@@ -44,13 +37,6 @@ namespace StatsdClient.Transport
                 _internalbuffer[length] = (byte)'\n';
 
                 return SendBuffer(_internalbuffer, length + 1, allowRetry: true);
-            }
-            finally
-            {
-                if (gotLock)
-                {
-                    _lock.Exit();
-                }
             }
         }
 
@@ -73,12 +59,11 @@ namespace StatsdClient.Transport
                 return false;
             }
 
-            var cts = new CancellationTokenSource(_timeout);
             bool ioException = false;
             try
             {
                 // WriteAsync overload with a CancellationToken instance seems to not work.
-                _namedPipe.WriteAsync(buffer, 0, length).Wait(cts.Token);
+                _namedPipe.WriteAsync(buffer, 0, length).Wait(_timeout);
                 return true;
             }
             catch (OperationCanceledException) { }
