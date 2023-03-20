@@ -67,8 +67,9 @@ namespace StatsdClient.Transport
             catch (IOException)
             {
             }
-            catch (AggregateException e) when (e.InnerException is IOException) // dotnet6.0 raises AggregateException when an IOException occurs.
+            catch (AggregateException e) when (e.InnerException is IOException)
             {
+                // dotnet6.0 raises AggregateException when an IOException occurs.
             }
 
             // When the server disconnects, IOException is raised with the message "Pipe is broken".
