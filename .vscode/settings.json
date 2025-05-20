@@ -1,0 +1,27 @@
+{
+    "cSpell.words": [
+        "Autobuild",
+        "CreateStatsBufferizeUDP",
+        "CreateStatsBufferizeUDS",
+        "Dgram",
+        "dogstasdService",
+        "GetUDPIPEndPoint",
+        "lifetheuniverseandeverything",
+        "MemoryDiagnoser",
+        "mscorlib",
+        "netcoreapp",
+        "NETFRAMEWORK",
+        "netstandard",
+        "NonParallelizable",
+        "objectname",
+        "pipename",
+        "Setting_prefix_starttimer",
+        "shemas-jetbrains-com",
+        "somebadcode",
+        "someevent",
+        "StatsBufferize",
+        "Statsd",
+        "StatsdClient.Bufferize",
+        "stylecop"
+    ]
+}
