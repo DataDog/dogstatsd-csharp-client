@@ -1,0 +1,61 @@
+---
+name: Build and Test
+
+on: [push]
+
+permissions: read-all
+
+jobs:
+  # build_unit_tests_net461:
+  #   runs-on: windows-latest
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup .NET Framework SDK
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: '8.x'
+  #     - name: Print .NET info
+  #       run: dotnet --info
+  #     - name: Install dependencies
+  #       run: dotnet restore
+  #     - name: Build with PowerShell script
+  #       shell: pwsh
+  #       run: dotnet build --no-restore /p:framework=net461 /p:TreatWarningsAsErrors=true /p:WarningsNotAsErrors=NU1903 /p:WarningsNotAsErrors=NETSDK1138
+  #     - name: Test with NUnit
+  #       run: dotnet test --no-restore --framework net461 --logger "console;verbosity=detailed"
+
+  build_unit_tests:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        dotnet-version:
+          - { version: '6.0.x', framework: 'net6.0' }
+          - { version: '7.0.x', framework: 'net7.0' }
+          # - { version: '8.0.x', framework: 'net8.0' }
+          # - { version: '8.0.x', framework: 'net461' }
+        # exclude:
+        #   - os: ubuntu-latest
+        #     dotnet-version: { version: '8.0.x', framework: 'net461' }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version.version }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version.version }}
+      - name: Install mono
+        run: sudo apt-get update && sudo apt-get install -y mono-runtime mono-complete
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Print .NET info
+        run: dotnet --info
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        shell: pwsh
+        run: dotnet build --no-restore /p:Framework=${{ matrix.dotnet-version.framework }} /p:CheckEolTargetFramework=false
+      - name: Test
+        # run: dotnet test --no-restore --framework ${{ matrix.dotnet-version.framework }}--logger "console;verbosity=detailed"
+        run: dotnet test --no-restore --logger "console;verbosity=normal"
