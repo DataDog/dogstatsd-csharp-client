@@ -8,12 +8,21 @@
         - net5.0 -> netcoreapp3.1
         - net6.0 -> net6.0
     -->
-    <TargetFrameworks>net461;netcoreapp2.1;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;netcoreapp3.1;netstandard2.0;net461;</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
     <NoWarn>0618</NoWarn>
     <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
+  <!--- Prevent the build from failing if the target framework is not supported (error NETSDK1045)-->
+  <Target Name="DisableNETCoreVersionCheck"
+          BeforeTargets="_CheckForUnsupportedNETCoreVersion">
+    <!-- Force the CLI to allow us to target higher netcoreapp than it may know about -->
+    <PropertyGroup>
+      <NETCoreAppMaximumVersion>99.0</NETCoreAppMaximumVersion>
+    </PropertyGroup>
+  </Target>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <DefineConstants>OS_WINDOWS</DefineConstants>

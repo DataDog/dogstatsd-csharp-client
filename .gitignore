@@ -17,3 +17,5 @@ src/.vs/
 *.crunchsolution.cache
 _NCrunch_*
 BenchmarkDotNet.Artifacts
+build.txt
+!.vscode
