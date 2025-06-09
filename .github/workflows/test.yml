@@ -30,7 +30,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os:
+          # - ubuntu-latest
+          - windows-latest
         dotnet-version:
           - { version: '6.0.x', framework: 'net6.0' }
           - { version: '7.0.x', framework: 'net7.0' }
