@@ -20,6 +20,7 @@ jobs:
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
+                  cache: true
                   dotnet-version: |
                       2.1.x
                       3.0.x
