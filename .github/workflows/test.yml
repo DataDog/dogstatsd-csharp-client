@@ -7,7 +7,7 @@ on:
         branches: [master]
 
 jobs:
-    analyze:
+    unit-tests-linux:
         name: Tests (Linux)
         runs-on: ubuntu-latest
         permissions:
@@ -29,5 +29,26 @@ jobs:
                       7.0.x
                       8.0.x
                       9.0.x
+            - name: Run tests
+              run: dotnet test tests/StatsdClient.Tests/
+    unit-tests-windows:
+        name: Tests (Windows)
+        runs-on: windows-latest
+        permissions:
+            actions: read
+            contents: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+            - name: Setup .NET Core
+              uses: actions/setup-dotnet@v4
+              with:
+                  # Windows runner images have more versions of .NET Core pre-installed than Linux.
+                  dotnet-version: |
+                      2.1.x
+                      3.0.x
+                      3.1.x
+                      5.0.x
             - name: Run tests
               run: dotnet test tests/StatsdClient.Tests/
