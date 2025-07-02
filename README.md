@@ -13,9 +13,9 @@ Grab the [package from NuGet](https://nuget.org/packages/DogStatsD-CSharp-Client
 ### Platforms
 
 DogStatsD-CSharp-Client supports the following platforms:
-* .NET Standard 1.3 or greater
-* .NET Core 1.0 or greater
-* .NET Framework 4.5.1 or greater
+* .NET Standard 2.0 or greater
+* .NET Core 2.0 or greater
+* .NET Framework 4.6.1 or greater
 
 ## Configuration
 
@@ -34,7 +34,7 @@ var dogstatsdConfig = new StatsdConfig
 };
 
 using (var service = new DogStatsdService())
-{    
+{
     if (!service.Configure(dogstatsdConfig))
         throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
 }
@@ -70,7 +70,7 @@ using (var service = new DogStatsdService())
 {
     if (!service.Configure(dogstatsdConfig))
         throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
-                    
+
     service.Increment("example_metric.increment", tags: new[] { "environment:dev" });
     service.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
     service.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
@@ -84,7 +84,7 @@ using (var service = new DogStatsdService())
         service.Histogram("example_metric.histogram", random.Next(20), tags: new[] { "environment:dev" });
         System.Threading.Thread.Sleep(random.Next(10000));
     }
-}  
+}
 ```
 
 Here is another example to submit different kinds of metrics with `DogStatsd`.
@@ -115,7 +115,7 @@ for (int i = 0; i < 10; i++)
     DogStatsd.Histogram("example_metric.histogram", random.Next(20), tags: new[] { "environment:dev" });
     System.Threading.Thread.Sleep(random.Next(10000));
 }
-  
+
 DogStatsd.Dispose(); // Flush all metrics not yet sent
 ```
 
@@ -154,26 +154,26 @@ You can use unix domain socket protocol by setting `StatsdServerName` property t
 
 ``` C#
 var dogstatsdConfig = new StatsdConfig
-{    
-    StatsdServerName = "unix:///tmp/dsd.socket"  
+{
+    StatsdServerName = "unix:///tmp/dsd.socket"
 };
 ```
 
 The property `StatsdMaxUnixDomainSocketPacketSize` of `StatsdConfig` defines the maximum size of the payload. Values higher than 8196 bytes are ignored.
 
 **The feature is not supported on Windows platform**.
-Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`). 
+Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`).
 
 On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPacketSize` is experimental.
 
 ## Client side aggregation
 
-By default, metrics for basic types (gauges, counts, sets) are aggregated before they are sent. For example, instead of sending 3 times `my_metric:10|c|#tag1:value`, DogStatsD client sends `my_metric:30|c|#tag1:value` once. 
+By default, metrics for basic types (gauges, counts, sets) are aggregated before they are sent. For example, instead of sending 3 times `my_metric:10|c|#tag1:value`, DogStatsD client sends `my_metric:30|c|#tag1:value` once.
 For more technical details about how client-side aggregation works see #134.
 
 Enabling client-side aggregation has the benefit of reducing the network usage and also reducing the load for DogStatsD server (Datadog Agent).
 
-When an application sends a lot of different contexts but each context appears with a very low frequency, enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag set and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation. 
+When an application sends a lot of different contexts but each context appears with a very low frequency, enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag set and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation.
 
 ### Configuration
 
