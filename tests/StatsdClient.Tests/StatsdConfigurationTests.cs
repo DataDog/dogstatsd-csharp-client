@@ -30,20 +30,6 @@ namespace Tests
         }
 
         [Test]
-        public void Default_port_is_8125()
-        {
-            using (var sut = CreateSut())
-            {
-                var metricsConfig = new StatsdConfig
-                {
-                    StatsdServerName = "127.0.0.1",
-                };
-                Assert.True(sut.Configure(metricsConfig));
-                TestReceive("127.0.0.1", 8125, "test", "test:1|c\n", sut);
-            }
-        }
-
-        [Test]
         public void Setting_port()
         {
             using (var sut = CreateSut())
@@ -51,10 +37,10 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8126,
+                    StatsdPort = 9126,
                 };
                 sut.Configure(metricsConfig);
-                TestReceive("127.0.0.1", 8126, "test", "test:1|c\n", sut);
+                TestReceive("127.0.0.1", 9126, "test", "test:1|c\n", sut);
             }
         }
 

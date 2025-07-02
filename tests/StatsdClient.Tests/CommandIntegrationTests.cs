@@ -230,11 +230,10 @@ namespace Tests
         public void Gauge_double_rounding()
         {
             _dogStatsdService.Gauge("gauge", 1.0 / 9);
-#if NEW_DOUBLE_FORMATTING
-            // double formating changed in .NET Core 3.0
-            AssertWasReceived("gauge:0.1111111111111111|g");
-#else
+#if OLD_DOUBLE_FORMATTING
             AssertWasReceived("gauge:0.111111111111111|g");
+#else
+            AssertWasReceived("gauge:0.1111111111111111|g");
 #endif
         }
 
