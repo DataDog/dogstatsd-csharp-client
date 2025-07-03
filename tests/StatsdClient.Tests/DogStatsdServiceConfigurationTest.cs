@@ -11,27 +11,6 @@ namespace Tests
     public class DogStatsdServiceConfigurationTest
     {
         [Test]
-        public void Default_port_is_8125()
-        {
-            using (var nonStaticServiceInstance = new DogStatsdService())
-            {
-                var metricsConfig = new StatsdConfig
-                {
-                    StatsdServerName = "127.0.0.1",
-                };
-
-                nonStaticServiceInstance.Configure(metricsConfig);
-                var receivedData = ReceiveData(
-                    nonStaticServiceInstance,
-                    "127.0.0.1",
-                    8125,
-                    () => { nonStaticServiceInstance.Increment("test"); });
-
-                Assert.AreEqual(new List<string> { "test:1|c\n" }, receivedData);
-            }
-        }
-
-        [Test]
         public void Setting_port()
         {
             using (var nonStaticServiceInstance = new DogStatsdService())
@@ -39,14 +18,14 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8126,
+                    StatsdPort = 8127,
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(
                     nonStaticServiceInstance,
                     "127.0.0.1",
-                    8126,
+                    8127,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(new List<string> { "test:1|c\n" }, receivedData);
@@ -61,13 +40,13 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
-                    StatsdPort = 8126,
+                    StatsdPort = 9128,
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(
                     nonStaticServiceInstance,
                     "127.0.0.1",
-                    8125,
+                    8128,
                     () => { nonStaticServiceInstance.Increment("test"); });
 
                 Assert.AreEqual(0, receivedData.Count);
@@ -206,6 +185,7 @@ namespace Tests
                 var metricsConfig = new StatsdConfig
                 {
                     StatsdServerName = "127.0.0.1",
+                    StatsdPort = 8133,
                     StatsdMaxUDPPacketSize = 10,
                 };
                 service.Configure(metricsConfig);
@@ -213,7 +193,7 @@ namespace Tests
                 var receivedData = ReceiveData(
                     service,
                     metricsConfig.StatsdServerName,
-                    8125,
+                    8133,
                     () =>
                 {
                     service.Increment("test");

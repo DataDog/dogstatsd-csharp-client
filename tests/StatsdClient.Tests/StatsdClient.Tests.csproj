@@ -17,13 +17,13 @@
     <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
     <DefineConstants>OS_WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <!-- See https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/numeric-format-parsing-handles-higher-precision -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net5.0' ">
-    <DefineConstants>$(DefineConstants);NEW_DOUBLE_FORMATTING</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48' OR '$(TargetFramework.TrimEnd(`0123456789.`))' == 'netcoreapp'">
+    <DefineConstants>$(DefineConstants);OLD_DOUBLE_FORMATTING</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
