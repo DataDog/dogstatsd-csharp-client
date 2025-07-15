@@ -139,5 +139,10 @@
         /// If the value is null, the client side aggregation is not enabled.
         /// </summary>
         public ClientSideAggregationConfig ClientSideAggregation { get; set; } = new ClientSideAggregationConfig();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not origin detection is enabled.
+        /// </summary>
+        public bool OriginDetection { get; set; } = true;
     }
 }

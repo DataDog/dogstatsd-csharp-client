@@ -59,6 +59,8 @@ namespace StatsdClient
             {
                 builder.AppendFormat(CultureInfo.InvariantCulture, "|T{0}", metricStats.Timestamp);
             }
+
+            _serializerHelper.AppendExternalData(builder);
         }
 
         private void AppendDouble(StringBuilder builder, double v)
