@@ -13,7 +13,7 @@ namespace StatsdClient.Benchmarks
         [GlobalSetup]
         public void GlobalSetup()
         {
-            var serializerHelper = new SerializerHelper(new[] { "constant_tags" });
+            var serializerHelper = new SerializerHelper(new[] { "constant_tags" }, null);
             _metricSerializer = new MetricSerializer(serializerHelper, "prefix");
             _serializedMetric = new SerializedMetric();
             _metricStats = new StatsMetric
