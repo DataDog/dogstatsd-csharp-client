@@ -41,6 +41,11 @@
         public const string ServiceEnvVar = "DD_SERVICE";
 
         /// <summary>
+        /// The name of the environment variable specifying if origin detection is enabled.
+        /// </summary>
+        public const string OriginDetectionEnabledEnvVar = "DD_ORIGIN_DETECTION_ENABLED";
+
+        /// <summary>
         /// The name of the environment variable defining the environment name
         /// </summary>
         public const string EnvironmentEnvVar = "DD_ENV";
@@ -139,5 +144,15 @@
         /// If the value is null, the client side aggregation is not enabled.
         /// </summary>
         public ClientSideAggregationConfig ClientSideAggregation { get; set; } = new ClientSideAggregationConfig();
+
+        /// <summary>
+        /// Gets or sets whether origin detection is enabled or not.
+        /// </summary>
+        public bool? OriginDetection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the container id to tag the telemetry with.
+        /// </summary>
+        public string ContainerID { get; set; }
     }
 }

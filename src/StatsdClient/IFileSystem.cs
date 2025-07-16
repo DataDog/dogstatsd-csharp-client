@@ -1,0 +1,117 @@
+using System.IO;
+using System.Runtime.InteropServices;
+
+namespace StatsdClient
+{
+    /// <summary>
+    /// Interface into the filesystem which allows us to mock out file access
+    /// in tests.
+    /// </summary>
+    public interface IFileSystem
+    {
+        /// <summary>
+        /// Attempts to read the entire file at path.
+        /// Returns true if successful.
+        /// </summary>
+        bool TryReadAllText(string path, out string contents);
+
+        /// <summary>
+        /// Attempts to get the inode of the file at the given path.
+        /// Returns true if successful.
+        /// </summary>
+        bool TryStat(string path, out ulong inode);
+
+        /// <summary>
+        /// Opens a reader at the given path.
+        /// Caller is responsible for disposing the returned TextReader.
+        /// </summary>
+        TextReader OpenText(string path);
+    }
+
+    /// <summary>
+    /// Implementation of IFileSystem that access the underlying file system.
+    /// </summary>
+    public class FileSystem : IFileSystem
+    {
+        /// <summary>
+        /// Attempts to read the entire file at path.
+        /// Returns true if successful.
+        /// </summary>
+        public bool TryReadAllText(string path, out string content)
+        {
+            try
+            {
+                content = File.ReadAllText(path);
+                return true;
+            }
+            catch
+            {
+                content = null;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a reader at the given path.
+        /// Caller is responsible for disposing the returned TextReader.
+        /// </summary>
+        public TextReader OpenText(string path)
+        {
+            return new StreamReader(File.OpenRead(path));
+        }
+
+        /// <summary>
+        /// Mirrors the POSIX struct timespec:
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Timespec
+        {
+            /// <summary>
+            /// seconds since the Epoch
+            /// </summary>
+            public long TvSec;
+
+            /// <summary>
+            /// nanoseconds past tv_sec
+            /// </summary>
+            public long TvNsec;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct Stat
+        {
+            public ulong StDev;
+            public ulong StIno;
+            public ulong StNlink;
+            public uint StMode;
+            public uint StUid;
+            public uint StGid;
+            public ulong StRdev;
+            public long StSize;
+            public long StBlksize;
+            public long StBlocks;
+            public Timespec StAtim;
+            public Timespec StMtim;
+            public Timespec StCtim;
+        }
+
+        [DllImport("libc", SetLastError = true)]
+        private static extern int Stat1(string path, out Stat stat);
+
+        /// <summary>
+        /// Attempts to get the inode of the file at the given path.
+        /// Returns true if successful.
+        /// </summary>
+        public bool TryStat(string path, out ulong inode)
+        {
+            inode = 0;
+            if (Stat1(path, out Stat st) != 0)
+            {
+                return false;
+            }
+
+            inode = st.StIno;
+            return true;
+        }
+    }
+}
