@@ -32,20 +32,20 @@ namespace Tests
             var originDetection = new OriginDetection(rawExternalData);
             return originDetection.ExternalData;
         }
-    }
 
-    public class ExternalDataSanitizeData
-    {
-        public static IEnumerable TestCases
+        class ExternalDataSanitizeData
         {
-            get
+            public static IEnumerable TestCases
             {
-                yield return new TestCaseData("weee").Returns("weee");
-                yield return new TestCaseData(" weee ").Returns("weee");
-                yield return new TestCaseData("weee ").Returns("weee");
-                yield return new TestCaseData(" weee").Returns("weee");
-                yield return new TestCaseData("weee|").Returns("weee");
-                yield return new TestCaseData("\t\n\rweee").Returns("weee");
+                get
+                {
+                    yield return new TestCaseData("weee").Returns("weee");
+                    yield return new TestCaseData(" weee ").Returns("weee");
+                    yield return new TestCaseData("weee ").Returns("weee");
+                    yield return new TestCaseData(" weee").Returns("weee");
+                    yield return new TestCaseData("weee|").Returns("weee");
+                    yield return new TestCaseData("\t\n\rweee").Returns("weee");
+                }
             }
         }
     }

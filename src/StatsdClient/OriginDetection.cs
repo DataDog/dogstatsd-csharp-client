@@ -5,8 +5,6 @@ namespace StatsdClient
 {
     internal class OriginDetection
     {
-        private string _externalData;
-
         internal OriginDetection()
         {
             // Read the external data from the environment variable called `DD_EXTERNAL_ENV`.
@@ -22,21 +20,18 @@ namespace StatsdClient
             Initialize(externalData);
         }
 
+        /// <summary>
+        /// Gets the detected External Data configuration if it exists.
+        /// </summary>
+        internal string ExternalData { get; private set; }
+
         private void Initialize(string externalData)
         {
             // If we have external data, trim any leading or trailing whitespace, remove all non-printable characters, and remove all `|` characters.
             if (!string.IsNullOrEmpty(externalData))
             {
-                _externalData = Regex.Replace(externalData.Trim(), @"[\p{Cc}|]+", "");
+                ExternalData = Regex.Replace(externalData.Trim(), @"[\p{Cc}|]+", string.Empty);
             }
-        }
-
-        /// <summary>
-        /// Gets the detected External Data configuration if it exists.
-        /// </summary>
-        internal string ExternalData
-        {
-            get => _externalData;
         }
     }
 }
