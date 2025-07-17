@@ -29,7 +29,8 @@ namespace StatsdClient
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
+            var originDetectionEnabled = IsOriginDetectionEnabled(config);
+            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue, originDetectionEnabled, config.ContainerID);
             var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
@@ -41,12 +42,37 @@ namespace StatsdClient
                 optionalExceptionHandler);
 
             var metricsSender = new MetricsSender(
-                statsBufferize,
-                new RandomGenerator(),
-                new StopWatchFactory(),
-                telemetry,
-                config.StatsdTruncateIfTooLong);
+                 statsBufferize,
+                 new RandomGenerator(),
+                 new StopWatchFactory(),
+                 telemetry,
+                 config.StatsdTruncateIfTooLong);
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
+        }
+
+        private static bool IsOriginDetectionEnabled(StatsdConfig config)
+        {
+            if (config.OriginDetection.HasValue && !config.OriginDetection.Value)
+            {
+                return false;
+            }
+
+            var value = Environment.GetEnvironmentVariable(StatsdConfig.OriginDetectionEnabledEnvVar);
+            if (!string.IsNullOrEmpty(value))
+            {
+                return IsTrue(value);
+            }
+
+            // Defaults to enabled.
+            return true;
+        }
+
+
+        private static bool IsTrue(string value)
+        {
+            return !(value.ToLower() == "0" ||
+                 value.ToLower() == "f" ||
+                 value.ToLower() == "false");
         }
 
         private static void AddTag(List<string> tags, string tagKey, string environmentVariableName, string originalValue = null)
@@ -93,9 +119,12 @@ namespace StatsdClient
         private static Serializers CreateSerializers(
             string prefix,
             string[] constantTags,
-            int maxMetricsInAsyncQueue)
+            int maxMetricsInAsyncQueue,
+            bool originDetectionEnabled,
+            string containerID)
         {
-            var serializerHelper = new SerializerHelper(constantTags);
+            var originDetection = new OriginDetection(new FileSystem(), containerID, originDetectionEnabled);
+            var serializerHelper = new SerializerHelper(constantTags, originDetection);
 
             return new Serializers
             {

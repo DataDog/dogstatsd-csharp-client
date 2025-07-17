@@ -43,6 +43,7 @@ namespace StatsdClient
             SerializerHelper.AppendIfNotNull(builder, "|t:", statsEvent.AlertType);
 
             _serializerHelper.AppendTags(builder, statsEvent.Tags);
+            _serializerHelper.AppendContainerID(builder);
 
             if (builder.Length > MaxSize)
             {

@@ -38,6 +38,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 9126,
+                    OriginDetection = false,
                 };
                 sut.Configure(metricsConfig);
                 TestReceive("127.0.0.1", 9126, "test", "test:1|c\n", sut);
@@ -70,6 +71,7 @@ namespace Tests
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8129,
                     Prefix = "prefix",
+                    OriginDetection = false,
                 };
 
                 sut.Configure(metricsConfig);

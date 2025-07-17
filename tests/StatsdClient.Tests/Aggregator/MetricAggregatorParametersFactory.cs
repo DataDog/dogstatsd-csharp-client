@@ -20,7 +20,7 @@ namespace StatsdClient.Tests.Aggregator
             TimeSpan flushInterval,
             int maxUniqueStatsBeforeFlush)
         {
-            var serializer = new MetricSerializer(new SerializerHelper(null), string.Empty);
+            var serializer = new MetricSerializer(new SerializerHelper(null, null), string.Empty);
             var bufferBuilder = new BufferBuilder(handler, bufferCapacity: 1000, "\n", Tools.ExceptionHandler);
 
             return new MetricAggregatorParameters(

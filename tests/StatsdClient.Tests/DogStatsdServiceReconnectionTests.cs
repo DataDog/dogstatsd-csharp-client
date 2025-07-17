@@ -17,6 +17,7 @@ namespace Tests
             {
                 StatsdServerName = "127.0.0.1",
                 StatsdPort = 1234,
+                OriginDetection = false,
             };
             config.ClientSideAggregation = null;
             CheckReconnection(c => new SocketServer(c), config);

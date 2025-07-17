@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using NUnit.Framework;
 using StatsdClient.Statistic;
@@ -160,7 +160,7 @@ namespace StatsdClient.Tests
 
         private static ServiceCheckSerializer CreateSerializer()
         {
-            var serializerHelper = new SerializerHelper(null);
+            var serializerHelper = new SerializerHelper(null, null);
             return new ServiceCheckSerializer(serializerHelper);
         }
     }

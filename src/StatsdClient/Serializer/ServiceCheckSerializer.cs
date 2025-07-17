@@ -46,6 +46,8 @@ namespace StatsdClient
                 sc.TruncateIfTooLong = true;
                 SerializeTo(ref sc, serializedMetric);
             }
+
+            _serializerHelper.AppendContainerID(builder);
         }
 
         private static string TruncateMessageIfRequired(
