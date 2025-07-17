@@ -14,12 +14,18 @@ namespace StatsdClient
         private IFileSystem _fs;
 
         /// <summary>
+        /// Container ID set in the configuration.
+        /// </summary>
+        public string ContainerID { get; private set };
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OriginDetection"/> class.
         /// Create the class
         /// </summary>
-        public OriginDetection(IFileSystem fs)
+        public OriginDetection(IFileSystem fs, string containerID, bool originDetectionEnabled)
         {
             _fs = fs;
+            ContainerID = GetContainerID(containerID, originDetectionEnabled);
         }
 
         /// <summary>

@@ -6,13 +6,12 @@ using Moq;
 using NUnit.Framework;
 using StatsdClient;
 
-namespace tests
+namespace Tests
 {
     [TestFixture]
     public class OriginDetectionTests
     {
         private Mock<IFileSystem> _fs;
-        private Func<bool> _isHostNs;
 
         [SetUp]
         public void SetUp()
@@ -23,34 +22,6 @@ namespace tests
             _fs
                   .Setup(fs => fs.TryStat(It.IsAny<string>(), out outNode))
                   .Returns(false);
-        }
-
-        // Helpers to wire up file-reads
-        private void StubFile(string path, string contents)
-        {
-            _fs
-              .Setup(fs => fs.OpenText(path))
-              .Returns(new StringReader(contents));
-
-            _fs
-              .Setup(fs => fs.TryReadAllText(path, out contents))
-              .Returns(true);
-        }
-
-        private void StubStatAlways(ulong inode = 0)
-        {
-            _fs
-              .Setup(fs => fs.TryStat(It.IsAny<string>(), out inode))
-              .Returns(true);
-        }
-
-        private void StubStat(string file, ulong inode = 0)
-        {
-            var outNode = inode;
-
-            _fs
-              .Setup(fs => fs.TryStat(file, out outNode))
-              .Returns(true);
         }
 
         [Test]
@@ -446,6 +417,33 @@ namespace tests
             var actual = detector.GetContainerID(string.Empty, true);
 
             Assert.AreEqual(expected, actual);
+        }
+
+        private void StubFile(string path, string contents)
+        {
+            _fs
+              .Setup(fs => fs.OpenText(path))
+              .Returns(new StringReader(contents));
+
+            _fs
+              .Setup(fs => fs.TryReadAllText(path, out contents))
+              .Returns(true);
+        }
+
+        private void StubStatAlways(ulong inode = 0)
+        {
+            _fs
+              .Setup(fs => fs.TryStat(It.IsAny<string>(), out inode))
+              .Returns(true);
+        }
+
+        private void StubStat(string file, ulong inode = 0)
+        {
+            var outNode = inode;
+
+            _fs
+              .Setup(fs => fs.TryStat(file, out outNode))
+              .Returns(true);
         }
     }
 }
