@@ -37,7 +37,7 @@ namespace StatsdClient
 
         public void AppendContainerID(StringBuilder builder)
         {
-            if (!string.IsNullOrEmpty(_originDetection.ContainerID))
+            if (!string.IsNullOrEmpty(_originDetection?.ContainerID))
             {
                 builder.Append("|c:");
                 builder.Append(_originDetection.ContainerID);

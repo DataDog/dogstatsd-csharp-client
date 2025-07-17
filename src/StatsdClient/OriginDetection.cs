@@ -16,7 +16,7 @@ namespace StatsdClient
         /// <summary>
         /// Container ID set in the configuration.
         /// </summary>
-        public string ContainerID { get; private set };
+        public string ContainerID { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OriginDetection"/> class.
@@ -26,6 +26,16 @@ namespace StatsdClient
         {
             _fs = fs;
             ContainerID = GetContainerID(containerID, originDetectionEnabled);
+        }
+
+
+        /// <summary>
+        /// Create the class without also fetching the container id.
+        /// Used for tests
+        /// </summary>
+        internal OriginDetection(IFileSystem fs)
+        {
+            _fs = fs;
         }
 
         /// <summary>
@@ -49,7 +59,7 @@ namespace StatsdClient
         /// Detect if we're in the host's cgroup namespace
         /// </summary>
         /// <returns></returns>
-        public bool IsHostCgroupNamespace()
+        private bool IsHostCgroupNamespace()
         {
             if (!_fs.TryStat("/proc/self/ns/cgroup", out ulong inode))
             {
@@ -63,7 +73,7 @@ namespace StatsdClient
         /// Parse lines of /proc/self/cgroup into controller→path
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, string> ParseCgroupNodePath(string content)
+        private Dictionary<string, string> ParseCgroupNodePath(string content)
         {
             var res = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var line in content.Split('\n'))
@@ -87,7 +97,7 @@ namespace StatsdClient
         /// Try each controller (v1 and v2) to get an inode-based fallback
         /// </summary>
         /// <returns></returns>
-        public string GetCgroupInode(string cgroupMountPath, string procSelfCgroupPath)
+        private string GetCgroupInode(string cgroupMountPath, string procSelfCgroupPath)
         {
             string content;
             if (!_fs.TryReadAllText(procSelfCgroupPath, out content))
@@ -156,7 +166,7 @@ namespace StatsdClient
         /// Attempt to read the container Id from /proc/self/cgroup.
         /// </summary>
         /// <returns></returns>
-        public string ReadContainerID(string path)
+        private string ReadContainerID(string path)
         {
             try
             {
@@ -186,12 +196,15 @@ namespace StatsdClient
             string line;
             while ((line = reader.ReadLine()) != null)
             {
+                Console.WriteLine(line);
                 var matches = MountInfoRegex.Matches(line);
                 if (matches.Count == 0)
                 {
+                    Console.WriteLine("No Matches found");
                     continue;
                 }
 
+                Console.WriteLine("Matches found");
                 var m = matches[matches.Count - 1];
                 var prefix = m.Groups[1].Value;
                 var id = m.Groups[2].Value;
@@ -208,7 +221,7 @@ namespace StatsdClient
         /// Attempt to read the container id from /proc/self/mountinfo.
         /// </summary>
         /// <returns></returns>
-        public string ReadMountInfo(string path)
+        private string ReadMountInfo(string path)
         {
             try
             {
@@ -231,7 +244,7 @@ namespace StatsdClient
         /// 5. Finally fallback to inode.
         /// </summary>
         /// <returns></returns>
-        public string GetContainerID(string userProvidedId, bool cgroupFallback)
+        private string GetContainerID(string userProvidedId, bool cgroupFallback)
         {
             if (!string.IsNullOrEmpty(userProvidedId))
             {

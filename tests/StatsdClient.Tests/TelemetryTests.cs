@@ -24,7 +24,7 @@ namespace Tests
                 .Callback<byte[], int>((bytes, l) => _metrics.Add(Encoding.UTF8.GetString(bytes, 0, l)));
             transport.SetupGet(s => s.TelemetryClientTransport).Returns("uds");
             _telemetry = new Telemetry(
-                new MetricSerializer(new SerializerHelper(null), string.Empty),
+                new MetricSerializer(new SerializerHelper(null, null), string.Empty),
                 "1.0.0.0",
                 TimeSpan.FromHours(1),
                 transport.Object,

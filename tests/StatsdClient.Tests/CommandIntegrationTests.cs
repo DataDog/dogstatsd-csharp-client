@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using NUnit.Framework;
 using StatsdClient;
@@ -42,7 +42,7 @@ namespace Tests
         {
             _listenThread = new Thread(new ParameterizedThreadStart(_udpListener.Listen));
             _listenThread.Start();
-            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort };
+            var metricsConfig = new StatsdConfig { StatsdServerName = serverName, StatsdPort = _serverPort, OriginDetection = false };
             metricsConfig.ClientSideAggregation = _optionalClientSideAggregationConfig;
             metricsConfig.Advanced.TelemetryFlushInterval = TimeSpan.FromDays(1);
             _dogStatsdService = new DogStatsdService();
@@ -393,17 +393,17 @@ namespace Tests
 
         [Test]
         public void Timer_sample_rate()
-            {
-                _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1);
-                AssertWasReceived("someevent:999|ms|@1.1");
-            }
+        {
+            _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1);
+            AssertWasReceived("someevent:999|ms|@1.1");
+        }
 
         [Test]
         public void Timer_sample_rate_tags()
-            {
-                _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
-                AssertWasReceived("someevent:999|ms|@1.1|#tag1:true,tag2");
-            }
+        {
+            _dogStatsdService.Timer("someevent", 999, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+            AssertWasReceived("someevent:999|ms|@1.1|#tag1:true,tag2");
+        }
 
         [Test]
         public void Timer_double()
@@ -421,17 +421,17 @@ namespace Tests
 
         [Test]
         public void Timer_double_sample_rate()
-            {
-                _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1);
-                AssertWasReceived("someevent:999.99|ms|@1.1");
-            }
+        {
+            _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1);
+            AssertWasReceived("someevent:999.99|ms|@1.1");
+        }
 
         [Test]
         public void Timer_double_sample_rate_tags()
-            {
-                _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
-                AssertWasReceived("someevent:999.99|ms|@1.1|#tag1:true,tag2");
-            }
+        {
+            _dogStatsdService.Timer("someevent", 999.99, sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+            AssertWasReceived("someevent:999.99|ms|@1.1|#tag1:true,tag2");
+        }
 
         [Test]
         public void Timer_method()
@@ -453,21 +453,21 @@ namespace Tests
 
         [Test]
         public void Timer_method_sample_rate()
-            {
-                _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1);
-                // Make sure that the received timer is of the right order of magnitude.
-                // The measured value will probably be a few ms longer than the sleep value.
-                AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
-            }
+        {
+            _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1);
+            // Make sure that the received timer is of the right order of magnitude.
+            // The measured value will probably be a few ms longer than the sleep value.
+            AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1");
+        }
 
         [Test]
         public void Timer_method_sample_rate_tags()
-            {
-                _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
-                // Make sure that the received timer is of the right order of magnitude.
-                // The measured value will probably be a few ms longer than the sleep value.
-                AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
-            }
+        {
+            _dogStatsdService.Time(() => Thread.Sleep(100), "timer", sampleRate: 1.1, tags: new[] { "tag1:true", "tag2" });
+            // Make sure that the received timer is of the right order of magnitude.
+            // The measured value will probably be a few ms longer than the sleep value.
+            AssertWasReceivedMatches(@"timer:\d{3}\|ms\|@1\.1\|#tag1:true,tag2");
+        }
 
         [Test]
         public void Timer_method_sets_return_value()
@@ -487,19 +487,19 @@ namespace Tests
 
         [Test]
         public void Timer_method_sets_return_value_sample_rate()
-            {
-                var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2);
-                AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2");
-                Assert.AreEqual(42, returnValue);
-            }
+        {
+            var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2);
+            AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2");
+            Assert.AreEqual(42, returnValue);
+        }
 
         [Test]
         public void Timer_method_sets_return_value_sample_rate_and_tag()
-            {
-                var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
-                AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2\|#fjords");
-                Assert.AreEqual(42, returnValue);
-            }
+        {
+            var returnValue = _dogStatsdService.Time(PauseAndReturnInt, "lifetheuniverseandeverything", sampleRate: 4.2, tags: new[] { "fjords" });
+            AssertWasReceivedMatches(@"lifetheuniverseandeverything:\d{3}\|ms\|@4\.2\|#fjords");
+            Assert.AreEqual(42, returnValue);
+        }
 
         [Test]
         public void Timer_method_doesnt_swallow_exception_and_submits_metric()

@@ -417,7 +417,7 @@ namespace StatsdClient.Tests
            ref StatsMetric statsMetric,
            string prefix)
         {
-            var serializerHelper = new SerializerHelper(null);
+            var serializerHelper = new SerializerHelper(null, null);
             var serializer = new MetricSerializer(serializerHelper, prefix);
             var serializedMetric = new SerializedMetric();
             serializer.SerializeTo(ref statsMetric, serializedMetric);

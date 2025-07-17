@@ -123,7 +123,6 @@ namespace StatsdClient
             bool originDetectionEnabled,
             string containerID)
         {
-            //var containerId = originDetection.GetContainerID(containerID, originDetectionEnabled);
             var originDetection = new OriginDetection(new FileSystem(), containerID, originDetectionEnabled);
             var serializerHelper = new SerializerHelper(constantTags, originDetection);
 

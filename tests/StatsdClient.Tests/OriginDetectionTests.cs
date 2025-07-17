@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,12 +32,11 @@ namespace Tests
             var content = "4:blkio:/kubepods/burstable/podfd52ef25-a87d-11e9-9423-0800271a638e/8c046cb0b72cd4c99f51b5591cd5b095967f58ee003710a45280c28ee1a9c7fa\n";
             StubFile(cgPath, content);
 
-            var detector = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object, string.Empty, true);
 
-            var id = detector.GetContainerID(string.Empty, true);
             Assert.AreEqual(
                 "8c046cb0b72cd4c99f51b5591cd5b095967f58ee003710a45280c28ee1a9c7fa",
-                id);
+                originDetection.ContainerID);
         }
 
         [TestCase(
@@ -65,27 +65,28 @@ namespace Tests
             "1:name=systemd:/docker/34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376",
             "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376")]
         [TestCase(
-        "1:name=systemd:/uuid/34dc0b5e-626f-2c5c-4c51-70e34b10e765",
-        "34dc0b5e-626f-2c5c-4c51-70e34b10e765")]
+            "1:name=systemd:/uuid/34dc0b5e-626f-2c5c-4c51-70e34b10e765",
+            "34dc0b5e-626f-2c5c-4c51-70e34b10e765")]
         [TestCase(
-        "1:name=systemd:/ecs/34dc0b5e626f2c5c4c5170e34b10e765-1234567890",
-        "34dc0b5e626f2c5c4c5170e34b10e765-1234567890")]
+            "1:name=systemd:/ecs/34dc0b5e626f2c5c4c5170e34b10e765-1234567890",
+            "34dc0b5e626f2c5c4c5170e34b10e765-1234567890")]
         [TestCase(
-        "1:name=systemd:/docker/34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376.scope",
-        "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376")]
+            "1:name=systemd:/docker/34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376.scope",
+            "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376")]
         [TestCase(
-        @"1:name=systemd:/nope
+            @"1:name=systemd:/nope
 2:pids:/docker/34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376
 3:cpu:/invalid",
-        "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376")]
+            "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376")]
         public void TestParseContainerID(string content, string expected)
         {
             var cgPath = "/proc/self/cgroup";
             StubFile(cgPath, content + "\n");
 
-            var detector = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object);
+            var readContainerID = typeof(OriginDetection).GetMethod("ReadContainerID", BindingFlags.NonPublic | BindingFlags.Instance);
+            var id = readContainerID.Invoke(originDetection, new object[] { cgPath });
 
-            var id = detector.ReadContainerID(cgPath);
             Assert.AreEqual(expected, id);
         }
 
@@ -98,12 +99,11 @@ namespace Tests
             StubFile(miPath, content);
             StubStatAlways(0);
 
-            var detector = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object, string.Empty, true);
 
-            var id = detector.GetContainerID(string.Empty, true);
             Assert.AreEqual(
                 "fc7038bc73a8d3850c66ddbfb0b2901afa378bfcbb942cc384b051767e4ac6b0",
-                id);
+                originDetection.ContainerID);
         }
 
         [TestCase(
@@ -272,9 +272,11 @@ namespace Tests
             StubFile(miPath, content);
             StubStatAlways(0);
 
-            var detector = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object);
 
-            var result = detector.ReadMountInfo(miPath);
+            var readMountInfo = typeof(OriginDetection).GetMethod("ReadMountInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var result = readMountInfo.Invoke(originDetection, new object[] { miPath });
+
             Assert.AreEqual(expected, result);
         }
 
@@ -283,9 +285,10 @@ namespace Tests
         [TestCase("12:pids:/docker/abc123\n0::/docker/abc123\n", ExpectedResult = new[] { "", "/docker/abc123" })]
         public string[] ParseCgroupNodePath_Works(string content)
         {
-            var detector = new OriginDetection(_fs.Object);
-            var dict = detector.ParseCgroupNodePath(content);
-            // flatten to [k0,v0,k1,v1,...]
+            var originDetection = new OriginDetection(_fs.Object);
+            var parseCgroupNodePath = typeof(OriginDetection).GetMethod("ParseCgroupNodePath", BindingFlags.NonPublic | BindingFlags.Instance);
+            var dict = parseCgroupNodePath.Invoke(originDetection, new object[] { content }) as Dictionary<string, string>;
+
             var flat = new List<string>();
             foreach (var kv in dict)
             {
@@ -347,9 +350,11 @@ namespace Tests
             var cgroupPath = "/proc/self/cgroup";
             StubFile(cgroupPath, cgroupContent);
 
-            var detector = new OriginDetection(_fs.Object);
-            var result = detector.GetCgroupInode(
-                "/sys/fs/cgroup", cgroupPath);
+            var originDetection = new OriginDetection(_fs.Object);
+            var getCgroupInode = typeof(OriginDetection).GetMethod("GetCgroupInode", BindingFlags.NonPublic | BindingFlags.Instance);
+            var result = getCgroupInode.Invoke(originDetection, new object[] {
+                "/sys/fs/cgroup", cgroupPath
+            });
 
             Assert.AreEqual(expected, result);
         }
@@ -413,10 +418,8 @@ namespace Tests
                 StubStat("/proc/self/ns/cgroup", 0xEFFFFFFB);
             }
 
-            var detector = new OriginDetection(_fs.Object);
-            var actual = detector.GetContainerID(string.Empty, true);
-
-            Assert.AreEqual(expected, actual);
+            var originDetection = new OriginDetection(_fs.Object, string.Empty, true);
+            Assert.AreEqual(expected, originDetection.ContainerID);
         }
 
         private void StubFile(string path, string contents)

@@ -19,6 +19,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8127,
+                    OriginDetection = false,
                 };
 
                 nonStaticServiceInstance.Configure(metricsConfig);
@@ -41,6 +42,7 @@ namespace Tests
                 {
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 9128,
+                    OriginDetection = false,
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(
@@ -63,6 +65,7 @@ namespace Tests
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8129,
                     Prefix = "prefix",
+                    OriginDetection = false,
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(
@@ -85,6 +88,7 @@ namespace Tests
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8130,
                     Prefix = "prefix",
+                    OriginDetection = false,
                 };
                 nonStaticServiceInstance.Configure(metricsConfig);
                 var receivedData = ReceiveData(
@@ -124,6 +128,7 @@ namespace Tests
         {
             Environment.SetEnvironmentVariable("DD_DOGSTATSD_PORT", "8131");
             Environment.SetEnvironmentVariable("DD_AGENT_HOST", "127.0.0.1");
+            Environment.SetEnvironmentVariable("DD_ORIGIN_DETECTION_ENABLED", "false");
             using (var nonStaticServiceInstance = new DogStatsdService())
             {
                 var metricsConfig = new StatsdConfig { };
@@ -158,6 +163,7 @@ namespace Tests
                     {
                         StatsdServerName = "127.0.0.1",
                         StatsdPort = 8132,
+                        OriginDetection = false,
                     };
 
                     nonStaticServiceInstance.Configure(metricsConfig);
@@ -187,6 +193,7 @@ namespace Tests
                     StatsdServerName = "127.0.0.1",
                     StatsdPort = 8133,
                     StatsdMaxUDPPacketSize = 10,
+                    OriginDetection = false,
                 };
                 service.Configure(metricsConfig);
 
