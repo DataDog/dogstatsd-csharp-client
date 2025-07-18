@@ -10,7 +10,7 @@ namespace Tests
         [Test]
         public void AppendTags()
         {
-            var helper = new SerializerHelper(null);
+            var helper = new SerializerHelper(null, null);
             var builder = new StringBuilder();
 
             helper.AppendTags(builder, new string[0]);
@@ -23,7 +23,7 @@ namespace Tests
         [Test]
         public void AppendTagsWithConstantTags()
         {
-            var helper = new SerializerHelper(new[] { "ctag1", "ctag2" });
+            var helper = new SerializerHelper(new[] { "ctag1", "ctag2" }, null);
             var builder = new StringBuilder();
 
             helper.AppendTags(builder, new string[0]);
@@ -50,6 +50,22 @@ namespace Tests
 
             SerializerHelper.AppendIfNotNull(builder, "prefix:", "value");
             Assert.AreEqual("prefix:value", builder.ToString());
+        }
+
+        [Test]
+        public void AppendExternalData()
+        {
+            var helperNoExternalData = new SerializerHelper(null, null);
+            var builder = new StringBuilder();
+
+            helperNoExternalData.AppendExternalData(builder);
+            Assert.AreEqual(0, builder.Length);
+
+            var originDetection = new OriginDetection("fake-external-data");
+            var helperExternalData = new SerializerHelper(null, originDetection);
+
+            helperExternalData.AppendExternalData(builder);
+            Assert.AreEqual("|e:fake-external-data", builder.ToString());
         }
     }
 }

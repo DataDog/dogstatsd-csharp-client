@@ -28,7 +28,7 @@ namespace Tests
             _bufferBuilder = new BufferBuilder(_handler, 1024, "\n", null);
             _serializers = new Serializers
             {
-                MetricSerializer = new MetricSerializer(new SerializerHelper(null), string.Empty),
+                MetricSerializer = new MetricSerializer(new SerializerHelper(null, null), string.Empty),
             };
 
             // a few metrics

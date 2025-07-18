@@ -44,6 +44,8 @@ namespace StatsdClient
 
             _serializerHelper.AppendTags(builder, statsEvent.Tags);
 
+            _serializerHelper.AppendExternalData(builder);
+
             if (builder.Length > MaxSize)
             {
                 if (statsEvent.TruncateIfTooLong)

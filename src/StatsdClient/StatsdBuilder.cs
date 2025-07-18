@@ -29,7 +29,7 @@ namespace StatsdClient
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
-            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue);
+            var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue, config.OriginDetection);
             var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler);
             var statsBufferize = CreateStatsBufferize(
                 telemetry,
@@ -93,9 +93,11 @@ namespace StatsdClient
         private static Serializers CreateSerializers(
             string prefix,
             string[] constantTags,
-            int maxMetricsInAsyncQueue)
+            int maxMetricsInAsyncQueue,
+            bool enableOriginDetection)
         {
-            var serializerHelper = new SerializerHelper(constantTags);
+            var originDetection = enableOriginDetection ? new OriginDetection() : null;
+            var serializerHelper = new SerializerHelper(constantTags, originDetection);
 
             return new Serializers
             {

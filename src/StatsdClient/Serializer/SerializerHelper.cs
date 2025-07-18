@@ -6,10 +6,12 @@ namespace StatsdClient
     {
         private static readonly string[] EmptyArray = new string[0];
         private readonly string _constantTags;
+        private readonly OriginDetection _originDetection;
 
-        public SerializerHelper(string[] constantTags)
+        public SerializerHelper(string[] constantTags, OriginDetection originDetection)
         {
             _constantTags = constantTags != null ? string.Join(",", constantTags) : string.Empty;
+            _originDetection = originDetection;
         }
 
         public static string EscapeContent(string content)
@@ -63,6 +65,16 @@ namespace StatsdClient
                     tagAppened = true;
                     builder.Append(tag);
                 }
+            }
+        }
+
+        public void AppendExternalData(StringBuilder builder)
+        {
+            var externalData = _originDetection?.ExternalData;
+            if (externalData != null)
+            {
+                builder.Append("|e:");
+                builder.Append(externalData);
             }
         }
     }
