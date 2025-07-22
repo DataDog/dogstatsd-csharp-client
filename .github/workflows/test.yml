@@ -40,7 +40,7 @@ jobs:
             # so we manually install it here. ¯\_(ツ)_/¯
             - name: Install libssl
               run: |
-                  curl -O http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb
+                  curl -O https://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
                   sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
