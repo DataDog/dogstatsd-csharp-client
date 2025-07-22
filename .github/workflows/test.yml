@@ -14,6 +14,7 @@ jobs:
             actions: read
             contents: read
         strategy:
+            fail-fast: false
             matrix:
                 dotnet:
                     - sdk_version: 2.1.x
@@ -38,7 +39,9 @@ jobs:
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
-                  dotnet-version: ${{ matrix.dotnet.sdk_version }}
+                  dotnet-version: |
+                      9.0.x
+                      ${{ matrix.dotnet.sdk_version }}
             - name: Run tests
               run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.dotnet.framework_version }} -- tests/StatsdClient.Tests/
     unit-tests-windows:
@@ -48,6 +51,7 @@ jobs:
             actions: read
             contents: read
         strategy:
+            fail-fast: false
             matrix:
                 dotnet:
                     - sdk_version: skip-install
