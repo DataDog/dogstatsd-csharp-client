@@ -17,22 +17,22 @@ jobs:
             fail-fast: false
             matrix:
                 dotnet:
-                    - sdk_version: 2.1.x
-                      framework_version: netcoreapp2.1
-                    - sdk_version: 3.0.x
-                      framework_version: netcoreapp3.0
-                    - sdk_version: 3.1.x
-                      framework_version: netcoreapp3.1
-                    - sdk_version: 5.0.x
-                      framework_version: net5.0
-                    - sdk_version: 6.0.x
-                      framework_version: net6.0
-                    - sdk_version: 7.0.x
-                      framework_version: net7.0
-                    - sdk_version: 8.0.x
-                      framework_version: net8.0
-                    - sdk_version: 9.0.x
-                      framework_version: net9.0
+                    - framework_version: netcoreapp2.1
+                      sdk_version: 2.1.x
+                    - framework_version: netcoreapp3.0
+                      sdk_version: 3.0.x
+                    - framework_version: netcoreapp3.1
+                      sdk_version: 3.1.x
+                    - framework_version: net5.0
+                      sdk_version: 5.0.x
+                    - framework_version: net6.0
+                      sdk_version: 6.0.x
+                    - framework_version: net7.0
+                      sdk_version: 7.0.x
+                    - framework_version: net8.0
+                      sdk_version: 8.0.x
+                    - framework_version: net9.0
+                      sdk_version: 9.0.x
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
@@ -54,24 +54,24 @@ jobs:
             fail-fast: false
             matrix:
                 dotnet:
-                    - sdk_version: skip-install
-                      framework_version: net48
-                    - sdk_version: 2.1.x
-                      framework_version: netcoreapp2.1
-                    - sdk_version: 3.0.x
-                      framework_version: netcoreapp3.0
-                    - sdk_version: 3.1.x
-                      framework_version: netcoreapp3.1
-                    - sdk_version: 5.0.x
-                      framework_version: net5.0
-                    - sdk_version: skip-install
-                      framework_version: net6.0
-                    - sdk_version: 7.0.x
-                      framework_version: net7.0
-                    - sdk_version: skip-install
-                      framework_version: net8.0
-                    - sdk_version: skip-install
-                      framework_version: net9.0
+                    - framework_version: net48
+                      sdk_version: skip-install
+                    - framework_version: netcoreapp2.1
+                      sdk_version: 2.1.x
+                    - framework_version: netcoreapp3.0
+                      sdk_version: 3.0.x
+                    - framework_version: netcoreapp3.1
+                      sdk_version: 3.1.x
+                    - framework_version: net5.0
+                      sdk_version: 5.0.x
+                    - framework_version: net6.0
+                      sdk_version: skip-install
+                    - framework_version: net7.0
+                      sdk_version: 7.0.x
+                    - framework_version: net8.0
+                      sdk_version: skip-install
+                    - framework_version: net9.0
+                      sdk_version: skip-install
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
