@@ -33,7 +33,7 @@ namespace Tests
             return originDetection.ExternalData;
         }
 
-        class ExternalDataSanitizeData
+        private class ExternalDataSanitizeData
         {
             public static IEnumerable TestCases
             {

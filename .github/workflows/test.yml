@@ -13,43 +13,78 @@ jobs:
         permissions:
             actions: read
             contents: read
-
+        strategy:
+            fail-fast: false
+            matrix:
+                dotnet:
+                    - framework_version: netcoreapp2.1
+                      sdk_version: 2.1.x
+                    - framework_version: netcoreapp3.0
+                      sdk_version: 3.0.x
+                    - framework_version: netcoreapp3.1
+                      sdk_version: 3.1.x
+                    - framework_version: net5.0
+                      sdk_version: 5.0.x
+                    - framework_version: net6.0
+                      sdk_version: 6.0.x
+                    - framework_version: net7.0
+                      sdk_version: 7.0.x
+                    - framework_version: net8.0
+                      sdk_version: 8.0.x
+                    - framework_version: net9.0
+                      sdk_version: 9.0.x
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
+            # The netcoreapp versions and .NET 5.0 want libssl v1, which is not available on Ubuntu 24.04 normally,
+            # so we manually install it here. ¯\_(ツ)_/¯
+            - name: Install libssl
+              run: |
+                  curl -O https://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+                  sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: |
-                      2.1.x
-                      3.0.x
-                      3.1.x
-                      5.0.x
-                      6.0.x
-                      7.0.x
-                      8.0.x
                       9.0.x
+                      ${{ matrix.dotnet.sdk_version }}
             - name: Run tests
-              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s -- tests/StatsdClient.Tests/
+              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.dotnet.framework_version }} -- tests/StatsdClient.Tests/
     unit-tests-windows:
         name: Tests (Windows)
         runs-on: windows-latest
         permissions:
             actions: read
             contents: read
-
+        strategy:
+            fail-fast: false
+            matrix:
+                dotnet:
+                    - framework_version: net48
+                      sdk_version: skip-install
+                    - framework_version: netcoreapp2.1
+                      sdk_version: 2.1.x
+                    - framework_version: netcoreapp3.0
+                      sdk_version: 3.0.x
+                    - framework_version: netcoreapp3.1
+                      sdk_version: 3.1.x
+                    - framework_version: net5.0
+                      sdk_version: 5.0.x
+                    - framework_version: net6.0
+                      sdk_version: skip-install
+                    - framework_version: net7.0
+                      sdk_version: 7.0.x
+                    - framework_version: net8.0
+                      sdk_version: skip-install
+                    - framework_version: net9.0
+                      sdk_version: skip-install
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
+              if: matrix.dotnet.sdk_version != 'skip-install'
               with:
-                  # Windows runner images have more versions of .NET Core pre-installed than Linux.
-                  dotnet-version: |
-                      2.1.x
-                      3.0.x
-                      3.1.x
-                      5.0.x
-                      7.0.x
+                  dotnet-version: ${{ matrix.dotnet.sdk_version }}
             - name: Run tests
-              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s -- tests/StatsdClient.Tests/
+              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.dotnet.framework_version }} -- tests/StatsdClient.Tests/
