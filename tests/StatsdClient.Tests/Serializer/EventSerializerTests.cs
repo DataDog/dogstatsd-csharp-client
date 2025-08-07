@@ -58,6 +58,12 @@ namespace StatsdClient.Tests
         }
 
         [Test]
+        public void SendEventWithExternalData()
+        {
+            AssertSerialize("_e{5,4}:title|text|e:event-external-data", "title", "text", externalData: "event-external-data");
+        }
+
+        [Test]
         public void SendEventWithMessageThatIsTooLong()
         {
             var length = (8 * 1024) - 16; // 16 is the number of characters in the final message that is not the title
@@ -138,9 +144,10 @@ namespace StatsdClient.Tests
             string priority = null,
             string hostname = null,
             string[] tags = null,
-            bool truncateIfTooLong = false)
+            bool truncateIfTooLong = false,
+            string externalData = null)
         {
-            var serializer = CreateSerializer();
+            var serializer = CreateSerializer(externalData);
             var statsEvent = new StatsEvent
             {
                 Title = title,
@@ -160,9 +167,11 @@ namespace StatsdClient.Tests
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
-        private static EventSerializer CreateSerializer()
+        private static EventSerializer CreateSerializer(string externalData = null)
         {
-            var serializerHelper = new SerializerHelper(null, null);
+            var originDetection = externalData != null ? new OriginDetection(externalData) : null;
+            var serializerHelper = new SerializerHelper(null, originDetection);
+
             return new EventSerializer(serializerHelper);
         }
     }

@@ -9,7 +9,7 @@ namespace StatsdClient
     /// <summary>
     /// Functions for detecting the origin via cgroups
     /// </summary>
-    public class OriginDetection
+    internal class OriginDetection
     {
         private IFileSystem _fs;
 
@@ -19,23 +19,41 @@ namespace StatsdClient
         public string ContainerID { get; private set; }
 
         /// <summary>
+        /// Gets the detected External Data configuration if it exists.
+        /// </summary>
+        internal string ExternalData { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OriginDetection"/> class.
         /// Create the class
         /// </summary>
-        public OriginDetection(IFileSystem fs, string containerID, bool originDetectionEnabled)
+        internal OriginDetection(IFileSystem fs, string containerID, bool originDetectionEnabled)
         {
             _fs = fs;
             ContainerID = GetContainerID(containerID, originDetectionEnabled);
+
+	    if (originDetectionEnabled) {
+		// Read the external data from the environment variable called `DD_EXTERNAL_ENV`.
+		//
+		// This is injected via admission controller, in Kubernetes environments, to provide origin detection information
+		// for clients that cannot otherwise detect their origin automatically.
+		var externalData = Environment.GetEnvironmentVariable("DD_EXTERNAL_ENV");
+		Initialize(externalData);
+	    }
         }
 
-
-        /// <summary>
-        /// Create the class without also fetching the container id.
-        /// Used for tests
-        /// </summary>
-        internal OriginDetection(IFileSystem fs)
+        internal OriginDetection(string externalData)
+	{
+	    Initialize(externalData);
+	}
+	
+        private void Initialize(string externalData)
         {
-            _fs = fs;
+            // If we have external data, trim any leading or trailing whitespace, remove all non-printable characters, and remove all `|` characters.
+            if (!string.IsNullOrEmpty(externalData))
+            {
+                ExternalData = Regex.Replace(externalData.Trim(), @"[\p{Cc}|]+", string.Empty);
+            }
         }
 
         /// <summary>
@@ -274,6 +292,7 @@ namespace StatsdClient
             }
 
             return string.Empty;
-        }
+	}
+
     }
 }

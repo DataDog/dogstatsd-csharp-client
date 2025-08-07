@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <!-- See https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/numeric-format-parsing-handles-higher-precision -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net48' OR '$(TargetFramework.TrimEnd(`0123456789.`))' == 'netcoreapp'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48' OR '$(TargetFramework)' == 'netcoreapp2.1'">
     <DefineConstants>$(DefineConstants);OLD_DOUBLE_FORMATTING</DefineConstants>
   </PropertyGroup>
 

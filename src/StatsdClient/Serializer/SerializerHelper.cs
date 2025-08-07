@@ -76,5 +76,15 @@ namespace StatsdClient
                 }
             }
         }
+
+        public void AppendExternalData(StringBuilder builder)
+        {
+            var externalData = _originDetection?.ExternalData;
+            if (externalData != null)
+            {
+                builder.Append("|e:");
+                builder.Append(externalData);
+            }
+        }
     }
 }

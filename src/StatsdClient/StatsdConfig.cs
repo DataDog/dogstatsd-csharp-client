@@ -146,13 +146,13 @@
         public ClientSideAggregationConfig ClientSideAggregation { get; set; } = new ClientSideAggregationConfig();
 
         /// <summary>
-        /// Gets or sets whether origin detection is enabled or not.
-        /// </summary>
-        public bool? OriginDetection { get; set; }
-
-        /// <summary>
         /// Gets or sets the container id to tag the telemetry with.
         /// </summary>
         public string ContainerID { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not origin detection is enabled.
+        /// </summary>
+        public bool? OriginDetection { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections;
 using Moq;
 using NUnit.Framework;
 using StatsdClient;
@@ -83,7 +84,7 @@ namespace Tests
             var cgPath = "/proc/self/cgroup";
             StubFile(cgPath, content + "\n");
 
-            var originDetection = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object, String.Empty, true);
             var readContainerID = typeof(OriginDetection).GetMethod("ReadContainerID", BindingFlags.NonPublic | BindingFlags.Instance);
             var id = readContainerID.Invoke(originDetection, new object[] { cgPath });
 
@@ -272,7 +273,7 @@ namespace Tests
             StubFile(miPath, content);
             StubStatAlways(0);
 
-            var originDetection = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object, string.Empty, true);
 
             var readMountInfo = typeof(OriginDetection).GetMethod("ReadMountInfo", BindingFlags.NonPublic | BindingFlags.Instance);
             var result = readMountInfo.Invoke(originDetection, new object[] { miPath });
@@ -285,7 +286,7 @@ namespace Tests
         [TestCase("12:pids:/docker/abc123\n0::/docker/abc123\n", ExpectedResult = new[] { "", "/docker/abc123" })]
         public string[] ParseCgroupNodePath_Works(string content)
         {
-            var originDetection = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object, string.Empty, true);
             var parseCgroupNodePath = typeof(OriginDetection).GetMethod("ParseCgroupNodePath", BindingFlags.NonPublic | BindingFlags.Instance);
             var dict = parseCgroupNodePath.Invoke(originDetection, new object[] { content }) as Dictionary<string, string>;
 
@@ -350,7 +351,7 @@ namespace Tests
             var cgroupPath = "/proc/self/cgroup";
             StubFile(cgroupPath, cgroupContent);
 
-            var originDetection = new OriginDetection(_fs.Object);
+            var originDetection = new OriginDetection(_fs.Object, string.Empty, true);
             var getCgroupInode = typeof(OriginDetection).GetMethod("GetCgroupInode", BindingFlags.NonPublic | BindingFlags.Instance);
             var result = getCgroupInode.Invoke(originDetection, new object[] {
                 "/sys/fs/cgroup", cgroupPath
@@ -447,6 +448,47 @@ namespace Tests
             _fs
               .Setup(fs => fs.TryStat(file, out outNode))
               .Returns(true);
+        }
+	
+        [Test]
+        public void ExternalDataNullOrEmpty()
+        {
+            var originDetectionNull = new OriginDetection(null);
+            Assert.Null(originDetectionNull.ExternalData);
+
+            var originDetectionEmpty = new OriginDetection(string.Empty);
+            Assert.Null(originDetectionEmpty.ExternalData);
+        }
+
+        [Test]
+        public void ExternalDataValid()
+        {
+            var expectedExternalData = "test";
+            var originDetection = new OriginDetection(expectedExternalData);
+            Assert.AreEqual(expectedExternalData, originDetection.ExternalData);
+        }
+
+        [TestCaseSource(typeof(ExternalDataSanitizeData), nameof(ExternalDataSanitizeData.TestCases))]
+        public string ExternalDataInvalidCharactersSanitized(string rawExternalData)
+        {
+            var originDetection = new OriginDetection(rawExternalData);
+            return originDetection.ExternalData;
+        }
+
+        private class ExternalDataSanitizeData
+        {
+            public static IEnumerable TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData("weee").Returns("weee");
+                    yield return new TestCaseData(" weee ").Returns("weee");
+                    yield return new TestCaseData("weee ").Returns("weee");
+                    yield return new TestCaseData(" weee").Returns("weee");
+                    yield return new TestCaseData("weee|").Returns("weee");
+                    yield return new TestCaseData("\t\n\rweee").Returns("weee");
+                }
+            }
         }
     }
 }

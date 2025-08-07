@@ -29,6 +29,7 @@ namespace StatsdClient
             var transportData = CreateTransportData(endPoint, config);
             var transport = transportData.Transport;
             var globalTags = GetGlobalTags(config);
+
             var originDetectionEnabled = IsOriginDetectionEnabled(config);
             var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue, originDetectionEnabled, config.ContainerID);
             var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler);
@@ -120,10 +121,10 @@ namespace StatsdClient
             string prefix,
             string[] constantTags,
             int maxMetricsInAsyncQueue,
-            bool originDetectionEnabled,
+            bool enableOriginDetection,
             string containerID)
         {
-            var originDetection = new OriginDetection(new FileSystem(), containerID, originDetectionEnabled);
+            var originDetection = new OriginDetection(new FileSystem(), containerID, enableOriginDetection);
             var serializerHelper = new SerializerHelper(constantTags, originDetection);
 
             return new Serializers
