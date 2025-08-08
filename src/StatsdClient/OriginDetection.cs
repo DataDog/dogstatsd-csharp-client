@@ -158,7 +158,7 @@ namespace StatsdClient
                 }
 		else
                 {
-		    Console.WriteLine("Couldnt read inode: " + full);
+		    Console.WriteLine("Couldnt read inode " + ino.ToString() + " : " + full);
                 }
             }
 
