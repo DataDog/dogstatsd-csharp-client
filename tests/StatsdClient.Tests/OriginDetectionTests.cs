@@ -1,4 +1,5 @@
 #pragma warning disable SA1118 // ParameterMustNotSpanMultipleLines
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -345,6 +346,7 @@ namespace Tests
             .ToArray();
             var path = Path.Combine(segments);
             StubFile(path, string.Empty);
+	    Console.WriteLine("Stubbing " + path);
             StubStat(path, 42);
 
             var cgroupPath = "/proc/self/cgroup";
