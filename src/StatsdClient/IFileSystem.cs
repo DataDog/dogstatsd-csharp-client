@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using Mono.Unix.Native;
 
 namespace StatsdClient
 {
@@ -76,52 +77,14 @@ namespace StatsdClient
         /// <param name="inode">The inode number if successful, 0 otherwise</param>
         public bool TryStat(string path, out ulong inode)
         {
-            inode = 0;
-            if (stat(path, out Stat st) != 0)
+            if (Syscall.stat(path, out var stat) > 0)
             {
-                return false;
+                inode = stat.st_ino;
+                return true;
             }
 
-            inode = st.StIno;
-            return true;
-        }
-
-        [DllImport("libc", EntryPoint = "stat", SetLastError = true)]
-        private static extern int stat(string path, out Stat stat);
-
-        /// <summary>
-        /// Mirrors the POSIX struct timespec:
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        private struct Timespec
-        {
-            /// <summary>
-            /// seconds since the Epoch
-            /// </summary>
-            public long TvSec;
-
-            /// <summary>
-            /// nanoseconds past tv_sec
-            /// </summary>
-            public long TvNsec;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct Stat
-        {
-            public ulong StDev;
-            public ulong StIno;
-            public ulong StNlink;
-            public uint StMode;
-            public uint StUid;
-            public uint StGid;
-            public ulong StRdev;
-            public long StSize;
-            public long StBlksize;
-            public long StBlocks;
-            public Timespec StAtim;
-            public Timespec StMtim;
-            public Timespec StCtim;
+            inode = 0;
+            return false;
         }
     }
 }
