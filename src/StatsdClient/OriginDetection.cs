@@ -148,6 +148,10 @@ namespace StatsdClient
                 };
                 var full = Path.Combine(segments.FindAll(s => !string.IsNullOrEmpty(s)).ToArray());
 
+                Console.WriteLine($"Attempting TryStat on path: '{full}'");
+                Console.WriteLine($"Path bytes: [{string.Join(", ", System.Text.Encoding.UTF8.GetBytes(full))}]");
+                Console.WriteLine($"Path length: {full.Length}");
+                
                 if (_fs.TryStat(full, out ulong ino))
                 {
                     return "in-" + ino;

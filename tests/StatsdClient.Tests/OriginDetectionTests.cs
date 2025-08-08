@@ -472,6 +472,10 @@ namespace Tests
         {
             var outNode = inode;
 
+            Console.WriteLine($"Setting up mock for path: '{file}'");
+            Console.WriteLine($"Path bytes: [{string.Join(", ", System.Text.Encoding.UTF8.GetBytes(file))}]");
+            Console.WriteLine($"Path length: {file.Length}");
+
             _fs
               .Setup(fs => fs.TryStat(file, out outNode))
               .Returns(true);
