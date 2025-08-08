@@ -1,5 +1,5 @@
+using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using Mono.Unix.Native;
 
 namespace StatsdClient
@@ -77,7 +77,8 @@ namespace StatsdClient
         /// <param name="inode">The inode number if successful, 0 otherwise</param>
         public bool TryStat(string path, out ulong inode)
         {
-            if (Syscall.stat(path, out var stat) > 0)
+            if (Environment.OSVersion.Platform == PlatformID.Unix &&
+                Syscall.stat(path, out var stat) > 0)
             {
                 inode = stat.st_ino;
                 return true;
