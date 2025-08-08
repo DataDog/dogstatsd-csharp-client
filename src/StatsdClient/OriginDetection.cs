@@ -110,7 +110,7 @@ namespace StatsdClient
 
                 if (tokens[1] == CgroupV1BaseController || tokens[1].Length == 0)
                 {
-                    res[tokens[1]] = tokens[2];
+                    res[tokens[1]] = tokens[2].TrimEnd();
                 }
             }
 
