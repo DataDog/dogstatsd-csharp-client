@@ -126,10 +126,12 @@ namespace StatsdClient
             string content;
             if (!_fs.TryReadAllText(procSelfCgroupPath, out content))
             {
+		Console.WriteLine("Couldnt read text");
                 return string.Empty;
             }
 
             var paths = ParseCgroupNodePath(content);
+            Console.WriteLine(paths);
 
             foreach (var controller in new[] { CgroupV1BaseController, string.Empty })
             {
@@ -150,7 +152,13 @@ namespace StatsdClient
                 {
                     return "in-" + ino;
                 }
+		else
+                {
+		    Console.WriteLine("Couldnt read inode");
+                }
             }
+
+            Console.WriteLine("Failed");
 
             return string.Empty;
         }
