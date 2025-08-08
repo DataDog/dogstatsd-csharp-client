@@ -77,7 +77,7 @@ namespace StatsdClient
         public bool TryStat(string path, out ulong inode)
         {
             inode = 0;
-            if (Stat1(path, out Stat st) != 0)
+            if (stat(path, out Stat st) != 0)
             {
                 return false;
             }
@@ -86,8 +86,8 @@ namespace StatsdClient
             return true;
         }
 
-        [DllImport("libc", SetLastError = true)]
-        private static extern int Stat1(string path, out Stat stat);
+        [DllImport("libc", EntryPoint = "stat", SetLastError = true)]
+        private static extern int stat(string path, out Stat stat);
 
         /// <summary>
         /// Mirrors the POSIX struct timespec:
