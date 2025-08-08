@@ -343,7 +343,7 @@ namespace Tests
             var segments = items
             .Where(item => item != null)
             .ToArray();
-            var path = string.Join("/", segments);
+            var path = Path.Combine(segments);
             StubFile(path, string.Empty);
             StubStat(path, 42);
 
