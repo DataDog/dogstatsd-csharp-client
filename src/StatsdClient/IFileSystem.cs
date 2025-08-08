@@ -13,18 +13,23 @@ namespace StatsdClient
         /// Attempts to read the entire file at path.
         /// Returns true if successful.
         /// </summary>
+        /// <param name="path">The file path to read from</param>
+        /// <param name="contents">The file contents if successful, null otherwise</param>
         bool TryReadAllText(string path, out string contents);
 
         /// <summary>
         /// Attempts to get the inode of the file at the given path.
         /// Returns true if successful.
         /// </summary>
+        /// <param name="path">The file path to get inode for</param>
+        /// <param name="inode">The inode number if successful, 0 otherwise</param>
         bool TryStat(string path, out ulong inode);
 
         /// <summary>
         /// Opens a reader at the given path.
         /// Caller is responsible for disposing the returned TextReader.
         /// </summary>
+        /// <param name="path">The file path to open for reading</param>
         TextReader OpenText(string path);
     }
 
@@ -37,6 +42,8 @@ namespace StatsdClient
         /// Attempts to read the entire file at path.
         /// Returns true if successful.
         /// </summary>
+        /// <param name="path">The file path to read from</param>
+        /// <param name="content">The file contents if successful, null otherwise</param>
         public bool TryReadAllText(string path, out string content)
         {
             try
@@ -55,16 +62,38 @@ namespace StatsdClient
         /// Opens a reader at the given path.
         /// Caller is responsible for disposing the returned TextReader.
         /// </summary>
+        /// <param name="path">The file path to open for reading</param>
         public TextReader OpenText(string path)
         {
             return new StreamReader(File.OpenRead(path));
         }
 
         /// <summary>
+        /// Attempts to get the inode of the file at the given path.
+        /// Returns true if successful.
+        /// </summary>
+        /// <param name="path">The file path to get inode for</param>
+        /// <param name="inode">The inode number if successful, 0 otherwise</param>
+        public bool TryStat(string path, out ulong inode)
+        {
+            inode = 0;
+            if (Stat1(path, out Stat st) != 0)
+            {
+                return false;
+            }
+
+            inode = st.StIno;
+            return true;
+        }
+
+        [DllImport("libc", SetLastError = true)]
+        private static extern int Stat1(string path, out Stat stat);
+
+        /// <summary>
         /// Mirrors the POSIX struct timespec:
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct Timespec
+        private struct Timespec
         {
             /// <summary>
             /// seconds since the Epoch
@@ -93,25 +122,6 @@ namespace StatsdClient
             public Timespec StAtim;
             public Timespec StMtim;
             public Timespec StCtim;
-        }
-
-        [DllImport("libc", SetLastError = true)]
-        private static extern int Stat1(string path, out Stat stat);
-
-        /// <summary>
-        /// Attempts to get the inode of the file at the given path.
-        /// Returns true if successful.
-        /// </summary>
-        public bool TryStat(string path, out ulong inode)
-        {
-            inode = 0;
-            if (Stat1(path, out Stat st) != 0)
-            {
-                return false;
-            }
-
-            inode = st.StIno;
-            return true;
         }
     }
 }

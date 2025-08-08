@@ -1,9 +1,9 @@
-using System;
-using System.Reflection;
+#pragma warning disable SA1118 // ParameterMustNotSpanMultipleLines
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections;
+using System.Reflection;
 using Moq;
 using NUnit.Framework;
 using StatsdClient;
@@ -108,7 +108,6 @@ namespace Tests
         }
 
         [TestCase(
-        // typical Docker overlay mounts
         @"608 554 0:42 / / rw,relatime master:289 - overlay overlay rw,lowerdir=/var/lib/docker/overlay2/l/RQH52YWGJKBXL6THNS7EASIUNY:/var/lib/docker/overlay2/l/EHJME4ZW2BP2W7SGOCNTKY76NI,upperdir=/var/lib/docker/overlay2/241a77e9a6a048e54d5b5700afaeab6071cb5ffef1fd2acbebbf19935a429897/diff,workdir=/var/lib/docker/overlay2/241a77e9a6a048e54d5b5700afaeab6071cb5ffef1fd2acbebbf19935a429897/work
 609 608 0:46 / /proc rw,nosuid,nodev,noexec,relatime - proc proc rw
 610 608 0:47 / /dev rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755,inode64
@@ -132,8 +131,8 @@ namespace Tests
 564 609 0:52 / /proc/scsi ro,relatime - tmpfs tmpfs ro,inode64
 565 615 0:53 / /sys/firmware ro,relatime - tmpfs tmpfs ro,inode64",
         "0cfa82bf3ab29da271548d6a044e95c948c6fd2f7578fb41833a44ca23da425f")]
-        [TestCase(
         // no hostname entries → empty
+        [TestCase(
         @"2775 2588 0:310 / / rw,relatime master:760 - overlay overlay rw,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/163/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/164/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/164/work
 2776 2775 0:312 / /proc rw,nosuid,nodev,noexec,relatime - proc proc rw
 2777 2775 0:313 / /dev rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
@@ -158,7 +157,7 @@ namespace Tests
 2610 2776 0:313 /null /proc/keys rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
 2611 2776 0:313 /null /proc/timer_list rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
 2612 2776 0:316 / /proc/scsi ro,relatime - tmpfs tmpfs ro
-2613 2780 0:317 / /sys/firmware ro,relatime - tmpfs tmpfs ro
+2612 2780 0:317 / /sys/firmware ro,relatime - tmpfs tmpfs ro
 ",
         "")]
         [TestCase(
@@ -353,8 +352,9 @@ namespace Tests
 
             var originDetection = new OriginDetection(_fs.Object, "container", true);
             var getCgroupInode = typeof(OriginDetection).GetMethod("GetCgroupInode", BindingFlags.NonPublic | BindingFlags.Instance);
-            var result = getCgroupInode.Invoke(originDetection, new object[] {
-                "/sys/fs/cgroup", cgroupPath
+            var result = getCgroupInode.Invoke(originDetection, new object[]
+            {
+                "/sys/fs/cgroup", cgroupPath,
             });
 
             Assert.AreEqual(expected, result);
@@ -423,6 +423,31 @@ namespace Tests
             Assert.AreEqual(expected, originDetection.ContainerID);
         }
 
+        [Test]
+        public void ExternalDataNullOrEmpty()
+        {
+            var originDetectionNull = new OriginDetection(null);
+            Assert.Null(originDetectionNull.ExternalData);
+
+            var originDetectionEmpty = new OriginDetection(string.Empty);
+            Assert.Null(originDetectionEmpty.ExternalData);
+        }
+
+        [Test]
+        public void ExternalDataValid()
+        {
+            var expectedExternalData = "test";
+            var originDetection = new OriginDetection(expectedExternalData);
+            Assert.AreEqual(expectedExternalData, originDetection.ExternalData);
+        }
+
+        [TestCaseSource(typeof(ExternalDataSanitizeData), nameof(ExternalDataSanitizeData.TestCases))]
+        public string ExternalDataInvalidCharactersSanitized(string rawExternalData)
+        {
+            var originDetection = new OriginDetection(rawExternalData);
+            return originDetection.ExternalData;
+        }
+
         private void StubFile(string path, string contents)
         {
             _fs
@@ -448,31 +473,6 @@ namespace Tests
             _fs
               .Setup(fs => fs.TryStat(file, out outNode))
               .Returns(true);
-        }
-	
-        [Test]
-        public void ExternalDataNullOrEmpty()
-        {
-            var originDetectionNull = new OriginDetection(null);
-            Assert.Null(originDetectionNull.ExternalData);
-
-            var originDetectionEmpty = new OriginDetection(string.Empty);
-            Assert.Null(originDetectionEmpty.ExternalData);
-        }
-
-        [Test]
-        public void ExternalDataValid()
-        {
-            var expectedExternalData = "test";
-            var originDetection = new OriginDetection(expectedExternalData);
-            Assert.AreEqual(expectedExternalData, originDetection.ExternalData);
-        }
-
-        [TestCaseSource(typeof(ExternalDataSanitizeData), nameof(ExternalDataSanitizeData.TestCases))]
-        public string ExternalDataInvalidCharactersSanitized(string rawExternalData)
-        {
-            var originDetection = new OriginDetection(rawExternalData);
-            return originDetection.ExternalData;
         }
 
         private class ExternalDataSanitizeData
