@@ -1,4 +1,4 @@
-﻿namespace StatsdClient
+namespace StatsdClient
 {
     /// <summary>
     /// The configuration options for DogStatsdService.
@@ -146,7 +146,7 @@
         public ClientSideAggregationConfig ClientSideAggregation { get; set; } = new ClientSideAggregationConfig();
 
         /// <summary>
-        /// Gets or sets the container id to tag the telemetry with.
+        /// Gets or sets the container ID to tag the telemetry with.
         /// </summary>
         public string ContainerID { get; set; }
 
