@@ -346,7 +346,6 @@ namespace Tests
             .ToArray();
             var path = Path.Combine(segments);
             StubFile(path, string.Empty);
-	    Console.WriteLine("Stubbing " + path);
             StubStat(path, 42);
 
             var cgroupPath = "/proc/self/cgroup";
@@ -471,10 +470,6 @@ namespace Tests
         private void StubStat(string file, ulong inode = 0)
         {
             var outNode = inode;
-
-            Console.WriteLine($"Setting up mock for path: '{file}'");
-            Console.WriteLine($"Path bytes: [{string.Join(", ", System.Text.Encoding.UTF8.GetBytes(file))}]");
-            Console.WriteLine($"Path length: {file.Length}");
 
             _fs
               .Setup(fs => fs.TryStat(file, out outNode))

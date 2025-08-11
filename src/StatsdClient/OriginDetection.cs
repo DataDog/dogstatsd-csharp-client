@@ -11,6 +11,35 @@ namespace StatsdClient
     /// </summary>
     internal class OriginDetection
     {
+        /// <summary>
+        /// The controller used to identify the container-id for cgroup v1
+        /// </summary>
+        private const string CgroupV1BaseController = "memory";
+
+        /// <summary>
+        /// Host namespace inode number (hardcoded in the Linux kernel)
+        /// </summary>
+        private const ulong HostCgroupNamespaceInode = 0xEFFFFFFB;
+
+        private const string UuidSource = @"[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}";
+        private const string ContainerSource = @"[0-9a-f]{64}";
+        private const string TaskSource = @"[0-9a-f]{32}-\d+";
+
+        private static readonly Regex ExpLine = new Regex(@"^\d+:[^:]*:(.+)$", RegexOptions.Compiled);
+        private static readonly Regex ExpContainerId = new Regex(
+            "(" + UuidSource + "|" + ContainerSource + "|" + TaskSource + @")(?:\.scope)?$",
+            RegexOptions.Compiled);
+
+        // --- mountinfo fallback for cgroup v2 / containerd ---
+        private static readonly string MountInfoPattern =
+            @".*/([^\s/]+)/(" +
+             @"[0-9a-f]{64}" + "|" +
+             @"[0-9a-f]{32}-\d+" + "|" +
+             @"[0-9a-f]{8}(?:-[0-9a-f]{4}){4}" +
+             @")/[\S]*hostname";
+
+        private static readonly Regex MountInfoRegex = new Regex(MountInfoPattern, RegexOptions.Compiled);
+
         private IFileSystem _fs;
 
         /// <summary>
@@ -34,9 +63,8 @@ namespace StatsdClient
         }
 
         /// <summary>
-        /// Initialize a new instance of the <see cref="OriginDetection"/> class
-        /// with the externalData hardcoded.
-        /// Used for tests.
+        /// Initializes a new instance of the <see cref="OriginDetection"/> class.
+        /// externalData is hardcoded for use in tests.
         /// </summary>
         internal OriginDetection(string externalData)
         {
@@ -63,26 +91,9 @@ namespace StatsdClient
         }
 
         /// <summary>
-        /// The controller used to identify the container-id for cgroup v1
-        /// </summary>
-        public const string CgroupV1BaseController = "memory";
-
-        /// <summary>
-        /// Host namespace inode number (hardcoded in the Linux kernel)
-        /// </summary>
-        public const ulong HostCgroupNamespaceInode = 0xEFFFFFFB;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct Timespec
-        {
-            public long TvSec;
-            public long TvNsec;
-        }
-
-        /// <summary>
         /// Detect if we're in the host's cgroup namespace
         /// </summary>
-        /// <returns></returns>
+        /// <returns>true if the inode matches the host's cgroup namespace inode.</returns>
         private bool IsHostCgroupNamespace()
         {
             if (!_fs.TryStat("/proc/self/ns/cgroup", out ulong inode))
@@ -96,7 +107,7 @@ namespace StatsdClient
         /// <summary>
         /// Parse lines of /proc/self/cgroup into controller→path
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A dictionary of the node paths.</returns>
         private Dictionary<string, string> ParseCgroupNodePath(string content)
         {
             var res = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -120,18 +131,19 @@ namespace StatsdClient
         /// <summary>
         /// Try each controller (v1 and v2) to get an inode-based fallback
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// The inode number for the processes cgroup directory, or empty
+        /// string if it is unable to resolve the directory.
+        /// </returns>
         private string GetCgroupInode(string cgroupMountPath, string procSelfCgroupPath)
         {
             string content;
             if (!_fs.TryReadAllText(procSelfCgroupPath, out content))
             {
-		Console.WriteLine("Couldnt read text");
                 return string.Empty;
             }
 
             var paths = ParseCgroupNodePath(content);
-            Console.WriteLine(paths);
 
             foreach (var controller in new[] { CgroupV1BaseController, string.Empty })
             {
@@ -148,34 +160,16 @@ namespace StatsdClient
                 };
                 var full = Path.Combine(segments.FindAll(s => !string.IsNullOrEmpty(s)).ToArray());
 
-                Console.WriteLine($"Attempting TryStat on path: '{full}'");
-                Console.WriteLine($"Path bytes: [{string.Join(", ", System.Text.Encoding.UTF8.GetBytes(full))}]");
-                Console.WriteLine($"Path length: {full.Length}");
-                
                 if (_fs.TryStat(full, out ulong ino))
                 {
                     return "in-" + ino;
                 }
-		else
-                {
-		    Console.WriteLine("Couldnt read inode " + ino.ToString() + " : " + full);
-                }
             }
-
-            Console.WriteLine("Failed");
 
             return string.Empty;
         }
 
         // --- Container ID parsing ---
-        private static readonly Regex ExpLine = new Regex(@"^\d+:[^:]*:(.+)$", RegexOptions.Compiled);
-        private const string UuidSource = @"[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}";
-        private const string ContainerSource = @"[0-9a-f]{64}";
-        private const string TaskSource = @"[0-9a-f]{32}-\d+";
-        private static readonly Regex ExpContainerId = new Regex(
-            "(" + UuidSource + "|" + ContainerSource + "|" + TaskSource + @")(?:\.scope)?$",
-            RegexOptions.Compiled);
-
         private string ParseContainerID(TextReader reader)
         {
             string line;
@@ -199,9 +193,9 @@ namespace StatsdClient
         }
 
         /// <summary>
-        /// Attempt to read the container Id from /proc/self/cgroup.
+        /// Attempt to read the container ID from /proc/self/cgroup.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The container ID.</returns>
         private string ReadContainerID(string path)
         {
             try
@@ -216,16 +210,6 @@ namespace StatsdClient
                 return string.Empty;
             }
         }
-
-        // --- mountinfo fallback for cgroup v2 / containerd ---
-        private static readonly string MountInfoPattern =
-            @".*/([^\s/]+)/(" +
-             @"[0-9a-f]{64}" + "|" +
-             @"[0-9a-f]{32}-\d+" + "|" +
-             @"[0-9a-f]{8}(?:-[0-9a-f]{4}){4}" +
-             @")/[\S]*hostname";
-
-        private static readonly Regex MountInfoRegex = new Regex(MountInfoPattern, RegexOptions.Compiled);
 
         private string ParseMountInfo(TextReader reader)
         {
@@ -251,9 +235,9 @@ namespace StatsdClient
         }
 
         /// <summary>
-        /// Attempt to read the container id from /proc/self/mountinfo.
+        /// Attempt to read the container ID from /proc/self/mountinfo.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The container ID.</returns>
         private string ReadMountInfo(string path)
         {
             try
@@ -276,7 +260,7 @@ namespace StatsdClient
         /// 4. If host ns, bail.
         /// 5. Finally fallback to inode.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The container ID.</returns>
         private string GetContainerID(string userProvidedId, bool cgroupFallback)
         {
             if (!string.IsNullOrEmpty(userProvidedId))

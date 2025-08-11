@@ -12,18 +12,18 @@ namespace StatsdClient
     {
         /// <summary>
         /// Attempts to read the entire file at path.
-        /// Returns true if successful.
         /// </summary>
         /// <param name="path">The file path to read from</param>
         /// <param name="contents">The file contents if successful, null otherwise</param>
+        /// <returns>True if the file was successfully read, false otherwise</returns>
         bool TryReadAllText(string path, out string contents);
 
         /// <summary>
         /// Attempts to get the inode of the file at the given path.
-        /// Returns true if successful.
         /// </summary>
         /// <param name="path">The file path to get inode for</param>
         /// <param name="inode">The inode number if successful, 0 otherwise</param>
+        /// <returns>True if the file stat was successful, false otherwise</returns>
         bool TryStat(string path, out ulong inode);
 
         /// <summary>
@@ -31,6 +31,7 @@ namespace StatsdClient
         /// Caller is responsible for disposing the returned TextReader.
         /// </summary>
         /// <param name="path">The file path to open for reading</param>
+        /// <returns>A TextReader for the specified file</returns>
         TextReader OpenText(string path);
     }
 
@@ -41,10 +42,10 @@ namespace StatsdClient
     {
         /// <summary>
         /// Attempts to read the entire file at path.
-        /// Returns true if successful.
         /// </summary>
         /// <param name="path">The file path to read from</param>
         /// <param name="content">The file contents if successful, null otherwise</param>
+        /// <returns>True if the file was successfully read, false otherwise</returns>
         public bool TryReadAllText(string path, out string content)
         {
             try
@@ -64,6 +65,9 @@ namespace StatsdClient
         /// Caller is responsible for disposing the returned TextReader.
         /// </summary>
         /// <param name="path">The file path to open for reading</param>
+        /// <returns>A TextReader for the specified file</returns>
+        /// <exception cref="System.IO.FileNotFoundException">Thrown when the file cannot be found</exception>
+        /// <exception cref="System.UnauthorizedAccessException">Thrown when access to the file is denied</exception>
         public TextReader OpenText(string path)
         {
             return new StreamReader(File.OpenRead(path));
@@ -71,10 +75,10 @@ namespace StatsdClient
 
         /// <summary>
         /// Attempts to get the inode of the file at the given path.
-        /// Returns true if successful.
         /// </summary>
         /// <param name="path">The file path to get inode for</param>
         /// <param name="inode">The inode number if successful, 0 otherwise</param>
+        /// <returns>True if the file stat was successful, false otherwise</returns>
         public bool TryStat(string path, out ulong inode)
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix &&

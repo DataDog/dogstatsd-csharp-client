@@ -68,7 +68,6 @@ namespace StatsdClient
             return true;
         }
 
-
         private static bool IsTrue(string value)
         {
             return !(value.ToLower() == "0" ||
