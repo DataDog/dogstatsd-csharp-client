@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace StatsdClient
 {
     /// <summary>
-    /// Functions for detecting the origin via cgroups
+    /// Functions for detecting the origin via cgroups or the `DD_EXTERNAL_ENV` environment variable.
     /// </summary>
     internal class OriginDetection
     {
@@ -66,9 +65,14 @@ namespace StatsdClient
         /// Initializes a new instance of the <see cref="OriginDetection"/> class.
         /// externalData is hardcoded for use in tests.
         /// </summary>
-        internal OriginDetection(string externalData)
+        internal OriginDetection(string externalData) : this(externalData, string.Empty)
+        {
+        }
+
+        internal OriginDetection(string externalData, string containerID)
         {
             Initialize(externalData);
+            this.ContainerID = containerID;
         }
 
         /// <summary>

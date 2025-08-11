@@ -43,6 +43,12 @@ namespace StatsdClient.Tests
         }
 
         [Test]
+        public void SendServiceCheckWithContainerID()
+        {
+            AssertSerialize("_sc|name|0|c:container|m:message", "name", 0, serviceCheckMessage: "message", containerID: "container");
+        }
+
+        [Test]
         public void SendServiceCheckWithMessage()
         {
             AssertSerialize("_sc|name|0|m:message", "name", 0, serviceCheckMessage: "message");
@@ -134,9 +140,10 @@ namespace StatsdClient.Tests
             string[] tags = null,
             string serviceCheckMessage = null,
             bool truncateIfTooLong = false,
-            string externalData = null)
+            string externalData = null,
+            string containerID = null)
         {
-            var serializedMetric = Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong, externalData);
+            var serializedMetric = Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong, externalData, containerID);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
@@ -148,7 +155,8 @@ namespace StatsdClient.Tests
                     string[] tags = null,
                     string serviceCheckMessage = null,
                     bool truncateIfTooLong = false,
-                    string externalData = null)
+                    string externalData = null,
+                    string containerID = null)
         {
             var statsServiceCheck = new StatsServiceCheck
             {
@@ -160,15 +168,15 @@ namespace StatsdClient.Tests
                 TruncateIfTooLong = truncateIfTooLong,
                 Tags = tags,
             };
-            var serializer = CreateSerializer(externalData);
+            var serializer = CreateSerializer(externalData, containerID);
             var serializedMetric = new SerializedMetric();
             serializer.SerializeTo(ref statsServiceCheck, serializedMetric);
             return serializedMetric;
         }
 
-        private static ServiceCheckSerializer CreateSerializer(string externalData)
+        private static ServiceCheckSerializer CreateSerializer(string externalData, string containerID)
         {
-            var originDetection = externalData != null ? new OriginDetection(externalData) : null;
+            var originDetection = new OriginDetection(externalData, containerID);
             var serializerHelper = new SerializerHelper(null, originDetection);
             return new ServiceCheckSerializer(serializerHelper);
         }
