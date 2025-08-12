@@ -100,6 +100,29 @@ namespace StatsdClient.Tests
                 externalData: "counter-external-data");
         }
 
+        [Test]
+        public void SendCounterWithContainerID()
+        {
+            AssertSerialize(
+                "the.counter:5|c|c:container",
+                MetricType.Count,
+                "the.counter",
+                5,
+                containerID: "container");
+        }
+
+        [Test]
+        public void SendCounterWithExternalDataAndContainerID()
+        {
+            AssertSerialize(
+                "the.counter:5|c|c:container|e:counter-external-data",
+                MetricType.Count,
+                "the.counter",
+                5,
+                externalData: "counter-external-data",
+                containerID: "container");
+        }
+
         // =-=-=-=- TIMER -=-=-=-=
 
         [Test]
@@ -432,6 +455,27 @@ namespace StatsdClient.Tests
                 externalData: "set-external-data");
         }
 
+        [Test]
+        public void SendSetStringWithContainerID()
+        {
+            AssertSetSerialize(
+                "set:objectname|s|c:container",
+                "set",
+                "objectname",
+                containerID: "container");
+        }
+
+        [Test]
+        public void SendSetStringWithExternalDataAndContainerID()
+        {
+            AssertSetSerialize(
+                "set:objectname|s|c:container|e:set-external-data",
+                "set",
+                "objectname",
+                containerID: "container",
+                externalData: "set-external-data");
+        }
+
         private static void AssertSerialize(
             string expectValue,
             MetricType metricType,
@@ -441,7 +485,8 @@ namespace StatsdClient.Tests
             string[] tags = null,
             string prefix = null,
             DateTimeOffset? timestamp = null,
-            string externalData = null)
+            string externalData = null,
+            string containerID = null)
         {
             var statsMetric = new StatsMetric
             {
@@ -456,7 +501,7 @@ namespace StatsdClient.Tests
                 statsMetric.Timestamp = timestamp.Value.ToUnixTimeSeconds();
             }
 
-            AssertSerialize(expectValue, ref statsMetric, prefix, externalData);
+            AssertSerialize(expectValue, ref statsMetric, prefix, externalData, containerID);
         }
 
         private static void AssertSetSerialize(
@@ -466,7 +511,8 @@ namespace StatsdClient.Tests
            double sampleRate = 1.0,
            string[] tags = null,
            string prefix = null,
-           string externalData = null)
+           string externalData = null,
+           string containerID = null)
         {
             var statsMetric = new StatsMetric
             {
@@ -476,16 +522,17 @@ namespace StatsdClient.Tests
                 StringValue = value.ToString(),
                 Tags = tags,
             };
-            AssertSerialize(expectValue, ref statsMetric, prefix, externalData);
+            AssertSerialize(expectValue, ref statsMetric, prefix, externalData, containerID);
         }
 
         private static void AssertSerialize(
            string expectValue,
            ref StatsMetric statsMetric,
            string prefix,
-           string externalData)
+           string externalData,
+       string containerID)
         {
-            var originDetection = externalData != null ? new OriginDetection(externalData) : null;
+            var originDetection = new OriginDetection(externalData, containerID);
             var serializerHelper = new SerializerHelper(null, originDetection);
             var serializer = new MetricSerializer(serializerHelper, prefix);
             var serializedMetric = new SerializedMetric();

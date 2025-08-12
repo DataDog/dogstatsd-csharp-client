@@ -37,6 +37,7 @@ namespace StatsdClient
 
             _serializerHelper.AppendTags(builder, sc.Tags);
 
+            _serializerHelper.AppendContainerID(builder);
             _serializerHelper.AppendExternalData(builder);
 
             // Note: this must always be appended to the result last.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using Moq;
 using NUnit.Framework;
@@ -61,6 +61,12 @@ namespace StatsdClient.Tests
         public void SendEventWithExternalData()
         {
             AssertSerialize("_e{5,4}:title|text|e:event-external-data", "title", "text", externalData: "event-external-data");
+        }
+
+        [Test]
+        public void SendEventWithContainerID()
+        {
+            AssertSerialize("_e{5,4}:title|text|c:container", "title", "text", containerID: "container");
         }
 
         [Test]
@@ -145,9 +151,10 @@ namespace StatsdClient.Tests
             string hostname = null,
             string[] tags = null,
             bool truncateIfTooLong = false,
-            string externalData = null)
+            string externalData = null,
+            string containerID = null)
         {
-            var serializer = CreateSerializer(externalData);
+            var serializer = CreateSerializer(externalData, containerID);
             var statsEvent = new StatsEvent
             {
                 Title = title,
@@ -167,10 +174,11 @@ namespace StatsdClient.Tests
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
-        private static EventSerializer CreateSerializer(string externalData = null)
+        private static EventSerializer CreateSerializer(string externalData = null, string containerID = null)
         {
-            var originDetection = externalData != null ? new OriginDetection(externalData) : null;
+            var originDetection = new OriginDetection(externalData, containerID);
             var serializerHelper = new SerializerHelper(null, originDetection);
+
             return new EventSerializer(serializerHelper);
         }
     }

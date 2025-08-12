@@ -34,6 +34,7 @@ namespace StatsdClient.Tests.Aggregator
             {
                 StatsdServerName = "127.0.0.1",
                 StatsdPort = 1234,
+                OriginDetection = false,
             };
             config.ClientSideAggregation = new ClientSideAggregationConfig { };
 

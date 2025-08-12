@@ -1,4 +1,4 @@
-﻿namespace StatsdClient
+namespace StatsdClient
 {
     /// <summary>
     /// The configuration options for DogStatsdService.
@@ -39,6 +39,11 @@
         /// The name of the environment variable defining the service name
         /// </summary>
         public const string ServiceEnvVar = "DD_SERVICE";
+
+        /// <summary>
+        /// The name of the environment variable specifying if origin detection is enabled.
+        /// </summary>
+        public const string OriginDetectionEnabledEnvVar = "DD_ORIGIN_DETECTION_ENABLED";
 
         /// <summary>
         /// The name of the environment variable defining the environment name
@@ -141,8 +146,13 @@
         public ClientSideAggregationConfig ClientSideAggregation { get; set; } = new ClientSideAggregationConfig();
 
         /// <summary>
+        /// Gets or sets the container ID to tag the telemetry with.
+        /// </summary>
+        public string ContainerID { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether or not origin detection is enabled.
         /// </summary>
-        public bool OriginDetection { get; set; } = true;
+        public bool? OriginDetection { get; set; }
     }
 }
