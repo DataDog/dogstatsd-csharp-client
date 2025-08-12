@@ -81,7 +81,7 @@ namespace StatsdClient.Aggregator
                 throw new ArgumentException($"Metric type is {metric.MetricType} instead of {_expectedMetricType}.");
             }
 
-            return new MetricStatsKey(metric.StatName, metric.Tags);
+            return new MetricStatsKey(metric.StatName, metric.Tags, metric.Cardinality);
         }
     }
 }

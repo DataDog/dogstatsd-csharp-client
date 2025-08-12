@@ -80,10 +80,11 @@ namespace StatsdClient
         /// <param name="dateHappened">The epoch timestamp for the event (defaults to the current time from the DogStatsD server).</param>
         /// <param name="priority">Specifies the priority of the event (normal or low).</param>
         /// <param name="hostname">The name of the host.</param>
+        /// <param name="cardinality">The cardinality for tags added to this event.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null)
+        public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, Cardinality? cardinality = null, string[] tags = null)
         {
-            _metricsSender?.SendEvent(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags);
+            _metricsSender?.SendEvent(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, cardinality, tags);
         }
 
         /// <summary>
@@ -94,9 +95,10 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
-        public void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Counter(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags, timestamp);
+            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags, timestamp, cardinality);
         }
 
         /// <summary>
@@ -107,9 +109,10 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
-        public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Increment(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags, timestamp);
+            _metricsSender?.SendMetric(MetricType.Count, statName, value, sampleRate, tags, timestamp, cardinality);
         }
 
         /// <summary>
@@ -120,9 +123,10 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
-        public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Decrement(string statName, int value = 1, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Count, statName, -value, sampleRate, tags, timestamp);
+            _metricsSender?.SendMetric(MetricType.Count, statName, -value, sampleRate, tags, timestamp, cardinality);
         }
 
         /// <summary>
@@ -133,9 +137,10 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the gauge has been seen with the given value. This value is sent without any aggregation.</param>
-        public void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Gauge(string statName, double value, double sampleRate = 1.0, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Gauge, statName, value, sampleRate, tags, timestamp);
+            _metricsSender?.SendMetric(MetricType.Gauge, statName, value, sampleRate, tags, timestamp, cardinality);
         }
 
         /// <summary>
@@ -145,9 +150,10 @@ namespace StatsdClient
         /// <param name="value">The value of the histogram.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Histogram(string statName, double value, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Histogram(string statName, double value, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Histogram, statName, value, sampleRate, tags, null);
+            _metricsSender?.SendMetric(MetricType.Histogram, statName, value, sampleRate, tags, null, cardinality);
         }
 
         /// <summary>
@@ -157,9 +163,10 @@ namespace StatsdClient
         /// <param name="value">The value of the distribution.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Distribution(string statName, double value, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Distribution(string statName, double value, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Distribution, statName, value, sampleRate, tags, null);
+            _metricsSender?.SendMetric(MetricType.Distribution, statName, value, sampleRate, tags, null, cardinality);
         }
 
         /// <summary>
@@ -169,11 +176,12 @@ namespace StatsdClient
         /// <param name="value">The value to set.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <typeparam name="T">The type of the value.</typeparam>
-        public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null)
+        public void Set<T>(string statName, T value, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
             var strValue = string.Format(CultureInfo.InvariantCulture, "{0}", value);
-            _metricsSender?.SendSetMetric(statName, strValue, sampleRate, tags);
+            _metricsSender?.SendSetMetric(statName, strValue, sampleRate, tags, cardinality);
         }
 
         /// <summary>
@@ -183,9 +191,10 @@ namespace StatsdClient
         /// <param name="value">The value to set.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Set(string statName, string value, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Set(string statName, string value, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendSetMetric(statName, value, sampleRate, tags);
+            _metricsSender?.SendSetMetric(statName, value, sampleRate, tags, cardinality);
         }
 
         /// <summary>
@@ -195,9 +204,10 @@ namespace StatsdClient
         /// <param name="value">The time in millisecond.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Timer(string statName, double value, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Timer(string statName, double value, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendMetric(MetricType.Timing, statName, value, sampleRate, tags, null);
+            _metricsSender?.SendMetric(MetricType.Timing, statName, value, sampleRate, tags, null, cardinality);
         }
 
         /// <summary>
@@ -206,10 +216,11 @@ namespace StatsdClient
         /// <param name="name">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <returns>A disposable object that records the execution time until Dispose is called.</returns>
-        public IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null)
+        public IDisposable StartTimer(string name, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
-            return new MetricsTimer(this, name, sampleRate, tags);
+            return new MetricsTimer(this, name, sampleRate, tags, cardinality);
         }
 
         /// <summary>
@@ -219,7 +230,8 @@ namespace StatsdClient
         /// <param name="statName">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null)
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        public void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
             if (_metricsSender == null)
             {
@@ -227,7 +239,7 @@ namespace StatsdClient
             }
             else
             {
-                _metricsSender.Send(action, statName, sampleRate, tags);
+                _metricsSender.Send(action, statName, sampleRate, tags, cardinality);
             }
         }
 
@@ -238,16 +250,17 @@ namespace StatsdClient
         /// <param name="statName">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <typeparam name="T">The type of the returned value of <paramref name="func"/>.</typeparam>
         /// <returns>The returned value of <paramref name="func"/>.</returns>
-        public T Time<T>(Func<T> func, string statName, double sampleRate = 1.0, string[] tags = null)
+        public T Time<T>(Func<T> func, string statName, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
             if (_metricsSender == null)
             {
                 return func();
             }
 
-            using (StartTimer(statName, sampleRate, tags))
+            using (StartTimer(statName, sampleRate, tags, cardinality))
             {
                 return func();
             }
@@ -262,9 +275,10 @@ namespace StatsdClient
         /// <param name="hostname">The hostname to associate with the service check.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="message">Additional information or a description of why the status occurred.</param>
-        public void ServiceCheck(string name, Status status, int? timestamp = null, string hostname = null, string[] tags = null, string message = null)
+        /// <param name="cardinality">The cardinality for tags added to this service check.</param>
+        public void ServiceCheck(string name, Status status, int? timestamp = null, string hostname = null, string[] tags = null, string message = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendServiceCheck(name, (int)status, timestamp, hostname, tags, message);
+            _metricsSender?.SendServiceCheck(name, (int)status, timestamp, hostname, tags, message, cardinality);
         }
 
         /// <summary>

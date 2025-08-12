@@ -27,6 +27,8 @@ namespace StatsdClient.Statistic
 
         public string[] Tags { get; set; }
 
+        public Cardinality? Cardinality { get; set; }
+
         public override bool Equals(object obj)
         {
             throw new NotSupportedException("The default implementation has performance issues.");

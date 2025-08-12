@@ -11,22 +11,25 @@ namespace StatsdClient
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
+        private readonly Cardinality? _defaultCardinality;
 
         internal MetricsSender(
                     StatsBufferize statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
                     Telemetry optionalTelemetry,
-                    bool truncateIfTooLong)
+                    bool truncateIfTooLong,
+                    Cardinality? defaultCardinality = null)
         {
             _stopwatchFactory = stopwatchFactory;
             _statsBufferize = statsBufferize;
             _randomGenerator = randomGenerator;
             _optionalTelemetry = optionalTelemetry;
             _truncateIfTooLong = truncateIfTooLong;
+            _defaultCardinality = defaultCardinality;
         }
 
-        public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, bool truncateIfTooLong = false)
+        public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, Cardinality? cardinality = null, string[] tags = null, bool truncateIfTooLong = false)
         {
             if (TryDequeueStats(out var stats))
             {
@@ -40,6 +43,7 @@ namespace StatsdClient
                 stats.Event.DateHappened = dateHappened;
                 stats.Event.Priority = priority;
                 stats.Event.Hostname = hostname;
+                stats.Event.Cardinality = cardinality ?? _defaultCardinality;
                 stats.Event.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
 
                 Send(stats);
@@ -47,7 +51,7 @@ namespace StatsdClient
             }
         }
 
-        public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, bool truncateIfTooLong = false)
+        public void SendServiceCheck(string name, int status, int? timestamp = null, string hostname = null, string[] tags = null, string serviceCheckMessage = null, Cardinality? cardinality = null, bool truncateIfTooLong = false)
         {
             if (TryDequeueStats(out var stats))
             {
@@ -58,6 +62,7 @@ namespace StatsdClient
                 stats.ServiceCheck.Timestamp = timestamp;
                 stats.ServiceCheck.Hostname = hostname;
                 stats.ServiceCheck.ServiceCheckMessage = serviceCheckMessage;
+                stats.ServiceCheck.Cardinality = cardinality ?? _defaultCardinality;
                 stats.ServiceCheck.TruncateIfTooLong = truncateIfTooLong || _truncateIfTooLong;
 
                 Send(stats);
@@ -65,7 +70,7 @@ namespace StatsdClient
             }
         }
 
-        public void SendMetric(MetricType metricType, string name, double value, double sampleRate, string[] tags, DateTimeOffset? timestamp)
+        public void SendMetric(MetricType metricType, string name, double value, double sampleRate, string[] tags, DateTimeOffset? timestamp, Cardinality? cardinality = null)
         {
             if (metricType == MetricType.Set)
             {
@@ -82,6 +87,7 @@ namespace StatsdClient
                     stats.Metric.StatName = name;
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.NumericValue = value;
+                    stats.Metric.Cardinality = cardinality ?? _defaultCardinality;
 
                     if (timestamp == null)
                     {
@@ -98,7 +104,7 @@ namespace StatsdClient
             }
         }
 
-        public void SendSetMetric(string name, string value, double sampleRate = 1.0, string[] tags = null)
+        public void SendSetMetric(string name, string value, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
             if (_randomGenerator.ShouldSend(sampleRate))
             {
@@ -110,6 +116,7 @@ namespace StatsdClient
                     stats.Metric.StatName = name;
                     stats.Metric.SampleRate = sampleRate;
                     stats.Metric.StringValue = value;
+                    stats.Metric.Cardinality = cardinality ?? _defaultCardinality;
 
                     Send(stats);
                     _optionalTelemetry?.OnMetricSent();
@@ -117,7 +124,7 @@ namespace StatsdClient
             }
         }
 
-        public void Send(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null)
+        public void Send(Action actionToTime, string statName, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
             var stopwatch = _stopwatchFactory.Get();
 
@@ -129,7 +136,7 @@ namespace StatsdClient
             finally
             {
                 stopwatch.Stop();
-                SendMetric(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags, null);
+                SendMetric(MetricType.Timing, statName, stopwatch.ElapsedMilliseconds(), sampleRate, tags, null, cardinality);
             }
         }
 

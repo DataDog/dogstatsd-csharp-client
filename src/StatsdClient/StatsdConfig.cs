@@ -154,5 +154,11 @@ namespace StatsdClient
         /// Gets or sets a value indicating whether or not origin detection is enabled.
         /// </summary>
         public bool? OriginDetection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default cardinality for tags added to events and metrics.
+        /// This value is used when no cardinality is explicitly specified.
+        /// </summary>
+        public Cardinality? Cardinality { get; set; }
     }
 }

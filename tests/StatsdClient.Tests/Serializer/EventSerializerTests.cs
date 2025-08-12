@@ -128,6 +128,53 @@ namespace StatsdClient.Tests
                 truncateIfTooLong: true);
         }
 
+        [Test]
+        public void SendEventWithCardinalityLow()
+        {
+            AssertSerialize("_e{5,4}:title|text|card:low", "title", "text", cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendEventWithCardinalityHigh()
+        {
+            AssertSerialize("_e{5,4}:title|text|card:high", "title", "text", cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendEventWithCardinalityOrchestrator()
+        {
+            AssertSerialize("_e{5,4}:title|text|card:orchestrator", "title", "text", cardinality: Cardinality.Orchestrator);
+        }
+
+        [Test]
+        public void SendEventWithCardinalityNone()
+        {
+            AssertSerialize("_e{5,4}:title|text|card:none", "title", "text", cardinality: Cardinality.None);
+        }
+
+        [Test]
+        public void SendEventWithCardinalityAndTags()
+        {
+            AssertSerialize("_e{5,4}:title|text|#tag1,tag2|card:low", "title", "text", cardinality: Cardinality.Low, tags: new[] { "tag1", "tag2" });
+        }
+
+        [Test]
+        public void SendEventWithCardinalityAndMultipleFields()
+        {
+            AssertSerialize(
+                "_e{5,4}:title|text|d:123456|h:hostname|k:key|p:low|s:source|t:warning|#tag1,tag2|card:high",
+                "title",
+                "text",
+                alertType: "warning",
+                aggregationKey: "key",
+                sourceType: "source",
+                dateHappened: 123456,
+                priority: "low",
+                hostname: "hostname",
+                cardinality: Cardinality.High,
+                tags: new[] { "tag1", "tag2" });
+        }
+
         private static string BuildLongString(int length)
         {
             var builder = new StringBuilder();
@@ -152,7 +199,8 @@ namespace StatsdClient.Tests
             string[] tags = null,
             bool truncateIfTooLong = false,
             string externalData = null,
-            string containerID = null)
+            string containerID = null,
+            Cardinality? cardinality = null)
         {
             var serializer = CreateSerializer(externalData, containerID);
             var statsEvent = new StatsEvent
@@ -167,6 +215,7 @@ namespace StatsdClient.Tests
                 Hostname = hostname,
                 TruncateIfTooLong = truncateIfTooLong,
                 Tags = tags,
+                Cardinality = cardinality,
             };
 
             var serializedMetric = new SerializedMetric();

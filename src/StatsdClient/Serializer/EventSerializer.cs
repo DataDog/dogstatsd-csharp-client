@@ -46,6 +46,8 @@ namespace StatsdClient
             _serializerHelper.AppendContainerID(builder);
             _serializerHelper.AppendExternalData(builder);
 
+            SerializerHelper.AppendIfNotNull(builder, "|card:", statsEvent.Cardinality?.ToString().ToLowerInvariant());
+
             if (builder.Length > MaxSize)
             {
                 if (statsEvent.TruncateIfTooLong)
