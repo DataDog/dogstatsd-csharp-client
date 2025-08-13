@@ -38,10 +38,25 @@ namespace StatsdClient
     /// </summary>
     public enum Cardinality
     {
-	None,
-	Low,
-	Orchestrator,
-	High
+        /// <summary>
+        /// Cardinality None
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Cardinality Low
+        /// </summary>
+        Low,
+
+        /// <summary>
+        /// Cardinality Orchestrator
+        /// </summary>
+        Orchestrator,
+
+        /// <summary>
+        /// Cardinality High
+        /// </summary>
+        High,
     }
 
     /// <summary>
@@ -81,8 +96,8 @@ namespace StatsdClient
         /// <param name="dateHappened">The epoch timestamp for the event (defaults to the current time from the DogStatsD server).</param>
         /// <param name="priority">Specifies the priority of the event (normal or low).</param>
         /// <param name="hostname">The name of the host.</param>
-        /// <param name="cardinality">The cardinality for tags added to this event.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this event.</param>
         public static void Event(
             string title,
             string text,
@@ -93,7 +108,7 @@ namespace StatsdClient
             string priority = null,
             string hostname = null,
             string[] tags = null,
-	    Cardinality? cardinality = null)
+            Cardinality? cardinality = null)
             =>
                 _dogStatsdService.Event(
                     title: title,
@@ -104,7 +119,7 @@ namespace StatsdClient
                     dateHappened: dateHappened,
                     priority: priority,
                     hostname: hostname,
-		    cardinality: cardinality,
+                    cardinality: cardinality,
                     tags: tags);
 
         /// <summary>
@@ -229,6 +244,7 @@ namespace StatsdClient
         /// <param name="statName">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         public static void Time(Action action, string statName, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null) =>
             _dogStatsdService.Time(action: action, statName: statName, sampleRate: sampleRate, tags: tags, cardinality: cardinality);
 
@@ -239,6 +255,7 @@ namespace StatsdClient
         /// <param name="statName">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <typeparam name="T">The type of the returned value of <paramref name="func"/>.</typeparam>
         /// <returns>The returned value of <paramref name="func"/>.</returns>
         public static T Time<T>(Func<T> func, string statName, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null) =>

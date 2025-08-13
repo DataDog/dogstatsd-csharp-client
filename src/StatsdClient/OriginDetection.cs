@@ -65,7 +65,8 @@ namespace StatsdClient
         /// Initializes a new instance of the <see cref="OriginDetection"/> class.
         /// externalData is hardcoded for use in tests.
         /// </summary>
-        internal OriginDetection(string externalData) : this(externalData, string.Empty)
+        internal OriginDetection(string externalData)
+             : this(externalData, string.Empty)
         {
         }
 

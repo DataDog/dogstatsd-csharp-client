@@ -38,6 +38,7 @@ namespace StatsdClient.Aggregator
                     hashCode = (hashCode * -1521134295) + tag.GetHashCode();
                 }
             }
+
             hashCode = (hashCode * -1521134295) + _cardinality.GetHashCode();
 
             return hashCode;
