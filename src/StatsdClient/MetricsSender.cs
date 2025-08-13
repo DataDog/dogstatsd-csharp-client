@@ -29,7 +29,7 @@ namespace StatsdClient
             _defaultCardinality = defaultCardinality;
         }
 
-        public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, Cardinality? cardinality = null, string[] tags = null, bool truncateIfTooLong = false)
+        public void SendEvent(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, Cardinality? cardinality = null, bool truncateIfTooLong = false)
         {
             if (TryDequeueStats(out var stats))
             {

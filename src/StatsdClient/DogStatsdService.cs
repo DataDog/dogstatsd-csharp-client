@@ -80,11 +80,11 @@ namespace StatsdClient
         /// <param name="dateHappened">The epoch timestamp for the event (defaults to the current time from the DogStatsD server).</param>
         /// <param name="priority">Specifies the priority of the event (normal or low).</param>
         /// <param name="hostname">The name of the host.</param>
-        /// <param name="cardinality">The cardinality for tags added to this event.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, Cardinality? cardinality = null, string[] tags = null)
+        /// <param name="cardinality">The cardinality for tags added to this event.</param>
+        public void Event(string title, string text, string alertType = null, string aggregationKey = null, string sourceType = null, int? dateHappened = null, string priority = null, string hostname = null, string[] tags = null, Cardinality? cardinality = null)
         {
-            _metricsSender?.SendEvent(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, cardinality, tags);
+            _metricsSender?.SendEvent(title, text, alertType, aggregationKey, sourceType, dateHappened, priority, hostname, tags, cardinality);
         }
 
         /// <summary>
