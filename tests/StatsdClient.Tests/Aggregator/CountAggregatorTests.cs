@@ -60,18 +60,75 @@ namespace StatsdClient.Tests.Aggregator
             }
         }
 
-        private static void AddStatsMetric(CountAggregator aggregator, string statName, double value)
+        [Test]
+        public void AggregatesByCardinality()
+        {
+            var handler = new BufferBuilderHandlerMock();
+            var aggregator = new CountAggregator(MetricAggregatorParametersFactory.Create(handler.Object));
+
+            // Add metrics with same name/tags but different cardinalities
+            AddStatsMetric(aggregator, "requests", 1, Cardinality.Low);
+            AddStatsMetric(aggregator, "requests", 2, Cardinality.Low); // Should aggregate with above
+            AddStatsMetric(aggregator, "requests", 3, Cardinality.High); // Should NOT aggregate with above
+            AddStatsMetric(aggregator, "requests", 4, Cardinality.High); // Should aggregate with previous High
+            AddStatsMetric(aggregator, "requests", 5, null); // Should NOT aggregate with any above
+
+            aggregator.TryFlush(force: true);
+
+            var output = handler.Value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    "requests:3|c|card:low",
+                    "requests:5|c",
+                    "requests:7|c|card:high",
+                }, output);
+        }
+
+        [Test]
+        public void AggregatesByCardinalityWithTags()
+        {
+            var handler = new BufferBuilderHandlerMock();
+            var aggregator = new CountAggregator(MetricAggregatorParametersFactory.Create(handler.Object));
+
+            // Add metrics with same name/cardinality but different tags
+            AddStatsMetric(aggregator, "requests", 1, Cardinality.Low, new[] { "env:prod" });
+            AddStatsMetric(aggregator, "requests", 2, Cardinality.Low, new[] { "env:prod" }); // Should aggregate
+            AddStatsMetric(aggregator, "requests", 3, Cardinality.Low, new[] { "env:staging" }); // Different tags - should NOT aggregate
+            AddStatsMetric(aggregator, "requests", 4, Cardinality.High, new[] { "env:prod" }); // Different cardinality - should NOT aggregate
+
+            aggregator.TryFlush(force: true);
+
+            var output = handler.Value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    "requests:3|c|#env:prod|card:low",
+                    "requests:3|c|#env:staging|card:low",
+                    "requests:4|c|#env:prod|card:high",
+                }, output);
+        }
+
+        private static void AddStatsMetric(CountAggregator aggregator, string statName, double value, Cardinality? cardinality = null, string[] tags = null)
         {
             var statsMetric = new StatsMetric
             {
-                MetricType = MetricType.
-                Count,
+                MetricType = MetricType.Count,
                 StatName = statName,
                 NumericValue = value,
                 SampleRate = 1,
+                Cardinality = cardinality,
+                Tags = tags,
             };
 
             aggregator.OnNewValue(ref statsMetric);
+        }
+
+        private static void AddStatsMetric(CountAggregator aggregator, string statName, double value)
+        {
+            AddStatsMetric(aggregator, statName, value, null, null);
         }
     }
 }

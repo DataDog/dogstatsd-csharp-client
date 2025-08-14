@@ -9,20 +9,22 @@ namespace StatsdClient
         private readonly DogStatsdService _dogStatsd;
         private readonly Stopwatch _stopWatch;
         private readonly double _sampleRate;
+        private readonly Cardinality? _cardinality;
         private bool _disposed;
 
-        public MetricsTimer(string name, double sampleRate = 1.0, string[] tags = null)
-            : this(null, name, sampleRate, tags)
+        public MetricsTimer(string name, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
+            : this(null, name, sampleRate, tags, cardinality)
         {
         }
 
-        public MetricsTimer(DogStatsdService dogStatsd, string name, double sampleRate = 1.0, string[] tags = null)
+        public MetricsTimer(DogStatsdService dogStatsd, string name, double sampleRate = 1.0, string[] tags = null, Cardinality? cardinality = null)
         {
             _name = name;
             _dogStatsd = dogStatsd;
             _stopWatch = new Stopwatch();
             _stopWatch.Start();
             _sampleRate = sampleRate;
+            _cardinality = cardinality;
             Tags = new List<string>();
             if (tags != null)
             {
@@ -41,11 +43,11 @@ namespace StatsdClient
 
                 if (_dogStatsd == null)
                 {
-                    DogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, Tags.ToArray());
+                    DogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, Tags.ToArray(), _cardinality);
                 }
                 else
                 {
-                    _dogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, Tags.ToArray());
+                    _dogStatsd.Timer(_name, _stopWatch.ElapsedMilliseconds(), _sampleRate, Tags.ToArray(), _cardinality);
                 }
             }
         }

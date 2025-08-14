@@ -32,7 +32,8 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
-        void Counter(string statName, double value, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Counter(string statName, double value, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Decrements the specified counter.
@@ -42,7 +43,8 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
-        void Decrement(string statName, int value = 1, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Decrement(string statName, int value = 1, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records an event.
@@ -56,6 +58,7 @@ namespace StatsdClient
         /// <param name="priority">Specifies the priority of the event (normal or low).</param>
         /// <param name="hostname">The name of the host.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this event.</param>
         void Event(
             string title,
             string text,
@@ -65,7 +68,8 @@ namespace StatsdClient
             int? dateHappened = null,
             string priority = null,
             string hostname = null,
-            string[] tags = null);
+            string[] tags = null,
+            Cardinality? cardinality = null);
 
         /// <summary>
         /// Records the latest fixed value for the specified named gauge.
@@ -75,7 +79,8 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the gauge has been seen with the given value. This value is sent without any aggregation.</param>
-        void Gauge(string statName, double value, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Gauge(string statName, double value, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records a value for the specified named histogram.
@@ -84,7 +89,8 @@ namespace StatsdClient
         /// <param name="value">The value of the histogram.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Histogram(string statName, double value, double sampleRate = 1, string[] tags = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Histogram(string statName, double value, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records a value for the specified named distribution.
@@ -93,7 +99,8 @@ namespace StatsdClient
         /// <param name="value">The value of the distribution.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Distribution(string statName, double value, double sampleRate = 1, string[] tags = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Distribution(string statName, double value, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Increments the specified counter.
@@ -103,7 +110,8 @@ namespace StatsdClient
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="timestamp">BETA - Please contact our support team for more information to use this feature: https://www.datadoghq.com/support/ - Timestamp at which the counter has been seen with the given value. This value is sent without any aggregation.</param>
-        void Increment(string statName, int value = 1, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Increment(string statName, int value = 1, double sampleRate = 1, string[] tags = null, DateTimeOffset? timestamp = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records a value for the specified set.
@@ -112,8 +120,9 @@ namespace StatsdClient
         /// <param name="value">The value to set.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <typeparam name="T">The type of the value.</typeparam>
-        void Set<T>(string statName, T value, double sampleRate = 1, string[] tags = null);
+        void Set<T>(string statName, T value, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records a value for the specified set.
@@ -122,7 +131,8 @@ namespace StatsdClient
         /// <param name="value">The value to set.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Set(string statName, string value, double sampleRate = 1, string[] tags = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Set(string statName, string value, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Creates a timer that records the execution time until Dispose is called on the returned value.
@@ -130,8 +140,9 @@ namespace StatsdClient
         /// <param name="name">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <returns>A disposable object that records the execution time until Dispose is called.</returns>
-        IDisposable StartTimer(string name, double sampleRate = 1, string[] tags = null);
+        IDisposable StartTimer(string name, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records an execution time for the given action.
@@ -140,7 +151,8 @@ namespace StatsdClient
         /// <param name="statName">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Time(Action action, string statName, double sampleRate = 1, string[] tags = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Time(Action action, string statName, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records an execution time for the given function.
@@ -149,9 +161,10 @@ namespace StatsdClient
         /// <param name="statName">The name of the metric.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
         /// <typeparam name="T">The type of the returned value of <paramref name="func"/>.</typeparam>
         /// <returns>The returned value of <paramref name="func"/>.</returns>
-        T Time<T>(Func<T> func, string statName, double sampleRate = 1, string[] tags = null);
+        T Time<T>(Func<T> func, string statName, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records an execution time in milliseconds.
@@ -160,7 +173,8 @@ namespace StatsdClient
         /// <param name="value">The time in millisecond.</param>
         /// <param name="sampleRate">Percentage of metric to be sent.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
-        void Timer(string statName, double value, double sampleRate = 1, string[] tags = null);
+        /// <param name="cardinality">The cardinality for tags added to this metric.</param>
+        void Timer(string statName, double value, double sampleRate = 1, string[] tags = null, Cardinality? cardinality = null);
 
         /// <summary>
         /// Records a run status for the specified named service check.
@@ -171,13 +185,15 @@ namespace StatsdClient
         /// <param name="hostname">The hostname to associate with the service check.</param>
         /// <param name="tags">Array of tags to be added to the data.</param>
         /// <param name="message">Additional information or a description of why the status occurred.</param>
+        /// <param name="cardinality">The cardinality for tags added to this service check.</param>
         void ServiceCheck(
             string name,
             Status status,
             int? timestamp = null,
             string hostname = null,
             string[] tags = null,
-            string message = null);
+            string message = null,
+            Cardinality? cardinality = null);
 
         /// <summary>
         /// Flushes all metrics.

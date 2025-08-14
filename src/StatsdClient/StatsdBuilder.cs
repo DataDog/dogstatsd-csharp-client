@@ -47,7 +47,8 @@ namespace StatsdClient
                  new RandomGenerator(),
                  new StopWatchFactory(),
                  telemetry,
-                 config.StatsdTruncateIfTooLong);
+                 config.StatsdTruncateIfTooLong,
+                 config.Cardinality);
             return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
         }
 

@@ -40,6 +40,8 @@ namespace StatsdClient
             _serializerHelper.AppendContainerID(builder);
             _serializerHelper.AppendExternalData(builder);
 
+            SerializerHelper.AppendIfNotNull(builder, "|card:", sc.Cardinality?.ToString().ToLowerInvariant());
+
             // Note: this must always be appended to the result last.
             SerializerHelper.AppendIfNotNull(builder, "|m:", processedMessage);
 

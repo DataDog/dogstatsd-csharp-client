@@ -62,6 +62,8 @@ namespace StatsdClient
 
             _serializerHelper.AppendContainerID(builder);
             _serializerHelper.AppendExternalData(builder);
+
+            SerializerHelper.AppendIfNotNull(builder, "|card:", metricStats.Cardinality?.ToString().ToLowerInvariant());
         }
 
         private void AppendDouble(StringBuilder builder, double v)

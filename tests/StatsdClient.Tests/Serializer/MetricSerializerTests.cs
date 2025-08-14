@@ -476,6 +476,139 @@ namespace StatsdClient.Tests
                 externalData: "set-external-data");
         }
 
+        [Test]
+        public void SendCounterWithCardinalityLow()
+        {
+            AssertSerialize("counter:5|c|card:low", MetricType.Count, "counter", 5, cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityHigh()
+        {
+            AssertSerialize("counter:5|c|card:high", MetricType.Count, "counter", 5, cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityOrchestrator()
+        {
+            AssertSerialize("counter:5|c|card:orchestrator", MetricType.Count, "counter", 5, cardinality: Cardinality.Orchestrator);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityNone()
+        {
+            AssertSerialize("counter:5|c|card:none", MetricType.Count, "counter", 5, cardinality: Cardinality.None);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityAndTags()
+        {
+            AssertSerialize(
+                "counter:5|c|#tag1:true,tag2|card:low",
+                MetricType.Count,
+                "counter",
+                5,
+                tags: new[] { "tag1:true", "tag2" },
+                cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityAndSampleRate()
+        {
+            AssertSerialize(
+                "counter:5|c|@0.1|card:high",
+                MetricType.Count,
+                "counter",
+                5,
+                sampleRate: 0.1,
+                cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityTagsAndSampleRate()
+        {
+            AssertSerialize(
+                "counter:5|c|@0.1|#tag1:true,tag2|card:orchestrator",
+                MetricType.Count,
+                "counter",
+                5,
+                sampleRate: 0.1,
+                tags: new[] { "tag1:true", "tag2" },
+                cardinality: Cardinality.Orchestrator);
+        }
+
+        [Test]
+        public void SendCounterWithCardinalityAndTimestamp()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "counter:5|c|T1367433000|card:low",
+                MetricType.Count,
+                "counter",
+                5,
+                timestamp: dto,
+                cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendGaugeWithCardinalityAndTimestamp()
+        {
+            var dto = new DateTimeOffset(2013, 05, 01, 18, 30, 00, new TimeSpan(0, 0, 0));
+            AssertSerialize(
+                "gauge:5|g|T1367433000|card:high",
+                MetricType.Gauge,
+                "gauge",
+                5,
+                timestamp: dto,
+                cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendHistogramWithCardinality()
+        {
+            AssertSerialize("histogram:5|h|card:low", MetricType.Histogram, "histogram", 5, cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendDistributionWithCardinality()
+        {
+            AssertSerialize("distribution:5|d|card:high", MetricType.Distribution, "distribution", 5, cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendTimerWithCardinality()
+        {
+            AssertSerialize("timer:5|ms|card:orchestrator", MetricType.Timing, "timer", 5, cardinality: Cardinality.Orchestrator);
+        }
+
+        [Test]
+        public void SendSetWithCardinality()
+        {
+            AssertSetSerialize("set:value|s|card:low", "set", "value", cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendSetWithCardinalityAndTags()
+        {
+            AssertSetSerialize(
+                "set:value|s|#tag1:true|card:high",
+                "set",
+                "value",
+                tags: new[] { "tag1:true" },
+                cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendSetWithCardinalityAndSampleRate()
+        {
+            AssertSetSerialize(
+                "set:value|s|@0.5|card:none",
+                "set",
+                "value",
+                sampleRate: 0.5,
+                cardinality: Cardinality.None);
+        }
+
         private static void AssertSerialize(
             string expectValue,
             MetricType metricType,
@@ -486,7 +619,8 @@ namespace StatsdClient.Tests
             string prefix = null,
             DateTimeOffset? timestamp = null,
             string externalData = null,
-            string containerID = null)
+            string containerID = null,
+            Cardinality? cardinality = null)
         {
             var statsMetric = new StatsMetric
             {
@@ -495,6 +629,7 @@ namespace StatsdClient.Tests
                 SampleRate = sampleRate,
                 NumericValue = value,
                 Tags = tags,
+                Cardinality = cardinality,
             };
             if (timestamp != null)
             {
@@ -512,7 +647,8 @@ namespace StatsdClient.Tests
            string[] tags = null,
            string prefix = null,
            string externalData = null,
-           string containerID = null)
+           string containerID = null,
+           Cardinality? cardinality = null)
         {
             var statsMetric = new StatsMetric
             {
@@ -521,6 +657,7 @@ namespace StatsdClient.Tests
                 SampleRate = sampleRate,
                 StringValue = value.ToString(),
                 Tags = tags,
+                Cardinality = cardinality,
             };
             AssertSerialize(expectValue, ref statsMetric, prefix, externalData, containerID);
         }
@@ -530,7 +667,7 @@ namespace StatsdClient.Tests
            ref StatsMetric statsMetric,
            string prefix,
            string externalData,
-       string containerID)
+           string containerID)
         {
             var originDetection = new OriginDetection(externalData, containerID);
             var serializerHelper = new SerializerHelper(null, originDetection);

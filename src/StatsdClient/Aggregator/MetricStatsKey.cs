@@ -10,18 +10,21 @@ namespace StatsdClient.Aggregator
     {
         private readonly string _metricName;
         private readonly string[] _tags;
+        private readonly Cardinality? _cardinality;
 
-        public MetricStatsKey(string metricName, string[] tags)
+        public MetricStatsKey(string metricName, string[] tags, Cardinality? cardinality = null)
         {
             _metricName = metricName;
             _tags = tags;
+            _cardinality = cardinality;
         }
 
         public override bool Equals(object obj)
         {
             return obj is MetricStatsKey key
                 && _metricName == key._metricName
-                && AreEquals(_tags, key._tags);
+                && AreEquals(_tags, key._tags)
+                && _cardinality == key._cardinality;
         }
 
         public override int GetHashCode()
@@ -35,6 +38,8 @@ namespace StatsdClient.Aggregator
                     hashCode = (hashCode * -1521134295) + tag.GetHashCode();
                 }
             }
+
+            hashCode = (hashCode * -1521134295) + _cardinality.GetHashCode();
 
             return hashCode;
         }

@@ -120,6 +120,50 @@ namespace StatsdClient.Tests
             Assert.That(exception.Message, Contains.Substring("payload is too big"));
         }
 
+        [Test]
+        public void SendServiceCheckWithCardinalityLow()
+        {
+            AssertSerialize("_sc|name|0|card:low", "name", 0, cardinality: Cardinality.Low);
+        }
+
+        [Test]
+        public void SendServiceCheckWithCardinalityHigh()
+        {
+            AssertSerialize("_sc|name|0|card:high", "name", 0, cardinality: Cardinality.High);
+        }
+
+        [Test]
+        public void SendServiceCheckWithCardinalityOrchestrator()
+        {
+            AssertSerialize("_sc|name|0|card:orchestrator", "name", 0, cardinality: Cardinality.Orchestrator);
+        }
+
+        [Test]
+        public void SendServiceCheckWithCardinalityNone()
+        {
+            AssertSerialize("_sc|name|0|card:none", "name", 0, cardinality: Cardinality.None);
+        }
+
+        [Test]
+        public void SendServiceCheckWithCardinalityAndTags()
+        {
+            AssertSerialize("_sc|name|0|#tag1,tag2|card:low", "name", 0, cardinality: Cardinality.Low, tags: new[] { "tag1", "tag2" });
+        }
+
+        [Test]
+        public void SendServiceCheckWithCardinalityAndAllOptional()
+        {
+            AssertSerialize(
+                "_sc|name|0|d:1|h:hostname|#tag1,tag2|card:high|m:message",
+                "name",
+                0,
+                timestamp: 1,
+                hostname: "hostname",
+                cardinality: Cardinality.High,
+                tags: new[] { "tag1", "tag2" },
+                serviceCheckMessage: "message");
+        }
+
         private static string BuildLongString(int length)
         {
             var builder = new StringBuilder();
@@ -141,9 +185,10 @@ namespace StatsdClient.Tests
             string serviceCheckMessage = null,
             bool truncateIfTooLong = false,
             string externalData = null,
-            string containerID = null)
+            string containerID = null,
+            Cardinality? cardinality = null)
         {
-            var serializedMetric = Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong, externalData, containerID);
+            var serializedMetric = Serialize(name, status, timestamp, hostname, tags, serviceCheckMessage, truncateIfTooLong, externalData, containerID, cardinality);
             Assert.AreEqual(expectValue, serializedMetric.ToString());
         }
 
@@ -156,7 +201,8 @@ namespace StatsdClient.Tests
                     string serviceCheckMessage = null,
                     bool truncateIfTooLong = false,
                     string externalData = null,
-                    string containerID = null)
+                    string containerID = null,
+                    Cardinality? cardinality = null)
         {
             var statsServiceCheck = new StatsServiceCheck
             {
@@ -167,6 +213,7 @@ namespace StatsdClient.Tests
                 ServiceCheckMessage = serviceCheckMessage,
                 TruncateIfTooLong = truncateIfTooLong,
                 Tags = tags,
+                Cardinality = cardinality,
             };
             var serializer = CreateSerializer(externalData, containerID);
             var serializedMetric = new SerializedMetric();
