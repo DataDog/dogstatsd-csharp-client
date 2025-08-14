@@ -75,7 +75,7 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+            var output = handler.Value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -100,7 +100,7 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+            var output = handler.Value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
 
             Assert.AreEqual(
                 new[]

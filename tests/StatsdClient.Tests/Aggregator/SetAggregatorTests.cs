@@ -59,7 +59,7 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+            var output = handler.Value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -84,7 +84,7 @@ namespace StatsdClient.Tests.Aggregator
             AddStatsMetric(aggregator, "session_ids", "session4", Cardinality.High, new[] { "region:us" }); // Different cardinality - different key
 
             aggregator.TryFlush(force: true);
-            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+            var output = handler.Value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
 
             Assert.AreEqual(
                 new[]
