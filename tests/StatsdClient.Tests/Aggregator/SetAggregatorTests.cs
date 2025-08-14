@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NUnit.Framework;
 using StatsdClient.Aggregator;
 using StatsdClient.Statistic;
@@ -58,37 +59,16 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value;
-            // Should have separate sets for each cardinality
-            // Low cardinality: user1, user2 (2 unique values)
-            // High cardinality: user1 (1 unique value)
-            // Null cardinality: user3 (1 unique value)
-            var lowCardinalityLines = 0;
-            var highCardinalityLines = 0;
-            var nullCardinalityLines = 0;
+            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
 
-            foreach (var line in output.Split('\n'))
-            {
-                if (line.Contains("unique_users:") && line.Contains("|s"))
+            Assert.AreEqual(
+                new[]
                 {
-                    if (line.Contains("card:low"))
-                    {
-                        lowCardinalityLines++;
-                    }
-                    else if (line.Contains("card:high"))
-                    {
-                        highCardinalityLines++;
-                    }
-                    else if (!line.Contains("card:"))
-                    {
-                        nullCardinalityLines++;
-                    }
-                }
-            }
-
-            Assert.AreEqual(2, lowCardinalityLines, "Expected 2 unique values in Low cardinality set");
-            Assert.AreEqual(1, highCardinalityLines, "Expected 1 unique value in High cardinality set");
-            Assert.AreEqual(1, nullCardinalityLines, "Expected 1 unique value in null cardinality set");
+                    "unique_users:user1|s|@0|card:high",
+                    "unique_users:user1|s|@0|card:low",
+                    "unique_users:user2|s|@0|card:low",
+                    "unique_users:user3|s|@0",
+                }, output);
         }
 
         [Test]
@@ -104,35 +84,16 @@ namespace StatsdClient.Tests.Aggregator
             AddStatsMetric(aggregator, "session_ids", "session4", Cardinality.High, new[] { "region:us" }); // Different cardinality - different key
 
             aggregator.TryFlush(force: true);
+            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
 
-            var output = handler.Value;
-
-            var usLowCount = 0;
-            var euLowCount = 0;
-            var usHighCount = 0;
-
-            foreach (var line in output.Split('\n'))
-            {
-                if (line.Contains("session_ids:") && line.Contains("|s"))
+            Assert.AreEqual(
+                new[]
                 {
-                    if (line.Contains("card:low") && line.Contains("region:us"))
-                    {
-                        usLowCount++;
-                    }
-                    else if (line.Contains("card:low") && line.Contains("region:eu"))
-                    {
-                        euLowCount++;
-                    }
-                    else if (line.Contains("card:high") && line.Contains("region:us"))
-                    {
-                        usHighCount++;
-                    }
-                }
-            }
-
-            Assert.AreEqual(2, usLowCount, "Expected 2 unique values in Low cardinality, US region set");
-            Assert.AreEqual(1, euLowCount, "Expected 1 unique value in Low cardinality, EU region set");
-            Assert.AreEqual(1, usHighCount, "Expected 1 unique value in High cardinality, US region set");
+                    "session_ids:session1|s|@0|#region:us|card:low",
+                    "session_ids:session2|s|@0|#region:us|card:low",
+                    "session_ids:session3|s|@0|#region:eu|card:low",
+                    "session_ids:session4|s|@0|#region:us|card:high",
+                }, output);
         }
 
         private static void AddStatsMetric(SetAggregator aggregator, string statName, string value, Cardinality? cardinality = null, string[] tags = null)

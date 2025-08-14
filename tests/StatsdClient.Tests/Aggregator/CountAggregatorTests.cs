@@ -75,11 +75,15 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value;
-            // Should have 3 separate metrics: Low (1+2=3), High (3+4=7), null (5)
-            Assert.True(output.Contains("requests:3|c|card:low"), "Expected Low cardinality metric with value 3");
-            Assert.True(output.Contains("requests:7|c|card:high"), "Expected High cardinality metric with value 7");
-            Assert.True(output.Contains("requests:5|c") && !output.Contains("requests:5|c|card:"), "Expected null cardinality metric with value 5");
+            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    "requests:3|c|card:low",
+                    "requests:5|c",
+                    "requests:7|c|card:high",
+                }, output);
         }
 
         [Test]
@@ -96,17 +100,15 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value;
-            // Should have 3 separate metrics based on different key combinations
-            Assert.True(
-                output.Contains("requests:3|c") && (output.Contains("#card:low") || output.Contains("env:prod")),
-                "Expected Low cardinality metric with env:prod tag and value 3");
-            Assert.True(
-                output.Contains("requests:3|c") && (output.Contains("#card:low") || output.Contains("env:staging")),
-                "Expected Low cardinality metric with env:staging tag and value 3");
-            Assert.True(
-                output.Contains("requests:4|c") && (output.Contains("#card:high") || output.Contains("env:prod")),
-                "Expected High cardinality metric with env:prod tag and value 4");
+            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    "requests:3|c|#env:prod|card:low",
+                    "requests:3|c|#env:staging|card:low",
+                    "requests:4|c|#env:prod|card:high",
+                }, output);
         }
 
         private static void AddStatsMetric(CountAggregator aggregator, string statName, double value, Cardinality? cardinality = null, string[] tags = null)

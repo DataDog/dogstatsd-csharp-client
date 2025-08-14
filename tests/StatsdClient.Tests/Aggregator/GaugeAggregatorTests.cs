@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using NUnit.Framework;
 using StatsdClient.Aggregator;
 using StatsdClient.Statistic;
@@ -35,11 +37,15 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value;
-            // Should have 3 separate gauge metrics: Low=20.0, High=30.0, null=40.0
-            Assert.True(output.Contains("cpu_usage:20|g") && output.Contains("card:low"), "Expected Low cardinality gauge with value 20.0");
-            Assert.True(output.Contains("cpu_usage:30|g") && output.Contains("card:high"), "Expected High cardinality gauge with value 30.0");
-            Assert.True(output.Contains("cpu_usage:40|g") && !output.Contains("cpu_usage:40|g|card:"), "Expected null cardinality gauge with value 40.0");
+            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    "cpu_usage:20|g|@0|card:low",
+                    "cpu_usage:30|g|@0|card:high",
+                    "cpu_usage:40|g|@0",
+                }, output);
         }
 
         [Test]
@@ -56,17 +62,15 @@ namespace StatsdClient.Tests.Aggregator
 
             aggregator.TryFlush(force: true);
 
-            var output = handler.Value;
-            // Should have 3 separate gauge metrics
-            Assert.True(
-                output.Contains("memory:200|g") && (output.Contains("card:low") || output.Contains("host:server1")),
-                "Expected Low cardinality gauge with host:server1 and value 200.0");
-            Assert.True(
-                output.Contains("memory:150|g") && (output.Contains("card:low") || output.Contains("host:server2")),
-                "Expected Low cardinality gauge with host:server2 and value 150.0");
-            Assert.True(
-                output.Contains("memory:300|g") && (output.Contains("card:high") || output.Contains("host:server1")),
-                "Expected High cardinality gauge with host:server1 and value 300.0");
+            var output = handler.Value.Split('\n', StringSplitOptions.RemoveEmptyEntries).OrderBy(s => s).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    "memory:150|g|@0|#host:server2|card:low",
+                    "memory:200|g|@0|#host:server1|card:low",
+                    "memory:300|g|@0|#host:server1|card:high",
+                }, output);
         }
 
         private static void AddStatsMetric(GaugeAggregator aggregator, string statName, double value, Cardinality? cardinality = null, string[] tags = null)
