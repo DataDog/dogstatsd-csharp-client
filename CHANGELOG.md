@@ -1,6 +1,21 @@
 CHANGELOG
 =========
 
+# 9.0.0 / 2025-08-18
+
+## Breaking Changes
+
+* [FEATURE] Added support for tag cardinality, both globally and per-metric. ([DogStatsD protocol v1.6](https://docs.datadoghq.com/developers/dogstatsd/datagram_shell/?tab=metrics#dogstatsd-protocol-v16)).
+  This allows for specifying the tag cardinality for enriched tags that are attached to metrics based on origin detection. A new field, `Cardinality`, is available on `StatsdConfig` to specify the default tag cardinality for all metrics. Additionally, a new parameter, `cardinality`, is now exposed on the main methods in `DogStatsd` and `IDogStatsd`, which allows for specifying the tag cardinality on a per-metric basis. See [#213][].
+
+## Changes
+
+* [FEATURE] Added support for cgroups-based origin detection. ([DogStatsD protocol v1.4](https://docs.datadoghq.com/developers/dogstatsd/datagram_shell/?tab=metrics#dogstatsd-protocol-v14)).
+  This allows for detecting the origin of DogStatsD clients based on self-discovery of any cgroups that the application is running in. Applicable only to Linux. See [#211][].
+
+* [FEATURE] Added support for External Data-based origin detection ([DogStatsD protocol v1.5](https://docs.datadoghq.com/developers/dogstatsd/datagram_shell/?tab=metrics#dogstatsd-protocol-v15)).
+  This allows for detecting the origin of DogStatsD clients based on information attached to workload pods from the Datadog Agent Admission Controller. See [#209][].
+
 # 8.0.0 / 10-26-2022
 ## Breaking changes
 
@@ -12,9 +27,9 @@ This PR updates the targeted frameworks from `netstandard1.3;netstandard2.0;nets
 It means `netstandard1.3` and `net45` are not supported anymore.
 
 * [IMPROVEMENT] Add an exception handler. See [#183][] and [#187][].
-These PRs add a default parameter to `DogStatsdService.Configure`, `DogStatsd.Configure` and `IDogStatsd.Configure` 
+These PRs add a default parameter to `DogStatsdService.Configure`, `DogStatsd.Configure` and `IDogStatsd.Configure`
 
-* [IMPROVEMENT] Add a `Flush` method to `IDogStatsd`. See [#182][]. 
+* [IMPROVEMENT] Add a `Flush` method to `IDogStatsd`. See [#182][].
 This PR adds a new method to `IDogStatsd`.
 
 ## Changes
@@ -34,7 +49,7 @@ For more details about how client-side aggregation works see [#134][].
 
 Enabling client-side aggregation has the benefit of reducing the network usage and also reducing the load for DogStatsD server (Core Agent).
 
-When an application sends a lot of different contexts but each context appear with a very low frequency, then enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag sets and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation. 
+When an application sends a lot of different contexts but each context appear with a very low frequency, then enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag sets and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation.
 
 ### Set good default values for UDS and UDP buffer sizes. See [#170][].
 This PR changes the default values for unix domain socket and UDP buffer sizes.
@@ -65,7 +80,7 @@ In most cases, this change should work out of the box. Unlike Windows and Linux,
   * Remove `Statsd`, `IStatsd` and `IStatsdUDP`.
 * Rename environment variable `DD_AGENT_PIPE_NAME` to `DD_DOGSTATSD_PIPE_NAME`.
 
-## Changes 
+## Changes
 * [IMPROVEMENT] Add `Flush` method. See [#144][].
 * [FEATURE] Add client side aggregation for Count, Gauge and Set metrics. See [#133][], [#134][] and [#143][].
 * [FEATURE] Add support for universal service tagging. See [#139][] (Thanks [@kevingosse][])
@@ -88,10 +103,10 @@ In most cases, this change should work out of the box. Unlike Windows and Linux,
 Significant improvements of `DogStatsdService` and `DogStatsd` performance.
 
 ## Breaking changes
-**You must call `DogStatsdService.Dispose()` or `DogStatsd.Dispose()` before your program termination in order to flush metrics not yet sent.** 
+**You must call `DogStatsdService.Dispose()` or `DogStatsd.Dispose()` before your program termination in order to flush metrics not yet sent.**
 `Statsd` is marked as obsolete.
 
-## Changes 
+## Changes
 * [IMPROVEMENT] Both `DogStatsdService` and `DogStatsd` methods do not block anymore and batch several metrics automatically in one UDP or UDS message. See [#108][] and [#109][].
 * [IMPROVEMENT] Send telemetry metrics. See [#110][] and [#114][].
 * [IMPROVEMENT] Enable StyleCop. See [#111][], [#112][] and [#113][].
@@ -104,7 +119,7 @@ Significant improvements of `DogStatsdService` and `DogStatsd` performance.
 Version `3.4.0` uses a strong-named assembly that may introduce a [breaking change](https://github.com/DataDog/dogstatsd-csharp-client/pull/96#issuecomment-561379859).
 This major version change makes this breaking change explicit. No other breaking changes are expected.
 
-## Changes 
+## Changes
 * [IMPROVEMENT] Add Async methods to Statsd. See [#59][] (Thanks [@alistair][])
 * [IMPROVEMENT] Add Unix domain socket support. See [#92][]
 
