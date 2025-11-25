@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>DogStatsD-CSharp-Client</PackageId>
-    <Description>A DogStatsD client for C#. DogStatsD is an extension of the StatsD metric server for use with Datadog. For more information visit http://datadoghq.com.</Description>
+    <Description>A DogStatsD client for .NET. DogStatsD is an extension of the StatsD metric server for use with Datadog. For more information visit https://datadoghq.com.</Description>
     <Authors>Datadog</Authors>
     <TargetFrameworks>net461;netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>
     <PackageVersion>9.0.0</PackageVersion>
