@@ -1,4 +1,4 @@
-name: "Test"
+name: "Tests"
 
 on:
     push:
@@ -7,84 +7,67 @@ on:
         branches: [master]
 
 jobs:
-    unit-tests-linux:
-        name: Tests (Linux)
-        runs-on: ubuntu-latest
+    unit-tests:
+        name: ${{ matrix.framework }} on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
         permissions:
             actions: read
             contents: read
         strategy:
             fail-fast: false
             matrix:
-                dotnet:
-                    - framework_version: netcoreapp2.1
+                os: [ubuntu-latest, windows-latest]
+                framework: [netcoreapp2.1, netcoreapp3.0, netcoreapp3.1, net5.0, net6.0, net7.0, net8.0, net9.0, net10.0, net48]
+                include:
+                    - framework: netcoreapp2.1
                       sdk_version: 2.1.x
-                    - framework_version: netcoreapp3.0
+                    - framework: netcoreapp3.0
                       sdk_version: 3.0.x
-                    - framework_version: netcoreapp3.1
+                    - framework: netcoreapp3.1
                       sdk_version: 3.1.x
-                    - framework_version: net5.0
+                    - framework: net5.0
                       sdk_version: 5.0.x
-                    - framework_version: net6.0
+                    - framework: net6.0
                       sdk_version: 6.0.x
-                    - framework_version: net7.0
+                    - framework: net7.0
                       sdk_version: 7.0.x
-                    - framework_version: net8.0
+                    - framework: net8.0
                       sdk_version: 8.0.x
-                    - framework_version: net9.0
+                    - framework: net9.0
                       sdk_version: 9.0.x
+                    - framework: net10.0
+                      sdk_version: 10.0.x
+                    - framework: net48
+                      sdk_version: 10.0.x
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
-            # The netcoreapp versions and .NET 5.0 want libssl v1, which is not available on Ubuntu 24.04 normally,
-            # so we manually install it here. ¯\_(ツ)_/¯
-            - name: Install libssl
+              uses: actions/checkout@v4
+
+            - name: Install libssl on Linux
+              # .NET 5.0 and below want libssl v1, which is not available on Ubuntu 24.04 normally,
+              # so we manually install it here. ¯\_(ツ)_/¯
+              if: runner.os == 'Linux'
               run: |
                   curl -O https://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
                   sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
-            - name: Setup .NET Core
+
+            - name: Setup .NET SDK 10.0.x
+              # Always install SDK 10.0.x (needed for building since test project has net10.0 in TargetFrameworks)
+              # Skip net48 on Linux (Windows only)
+              if: ${{ !(matrix.framework == 'net48' && runner.os == 'Linux') }}
               uses: actions/setup-dotnet@v4
               with:
-                  dotnet-version: |
-                      9.0.x
-                      ${{ matrix.dotnet.sdk_version }}
-            - name: Run tests
-              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.dotnet.framework_version }} -- tests/StatsdClient.Tests/
-    unit-tests-windows:
-        name: Tests (Windows)
-        runs-on: windows-latest
-        permissions:
-            actions: read
-            contents: read
-        strategy:
-            fail-fast: false
-            matrix:
-                dotnet:
-                    - framework_version: net48
-                      sdk_version: skip-install
-                    - framework_version: netcoreapp2.1
-                      sdk_version: 2.1.x
-                    - framework_version: netcoreapp3.0
-                      sdk_version: 3.0.x
-                    - framework_version: netcoreapp3.1
-                      sdk_version: 3.1.x
-                    - framework_version: net5.0
-                      sdk_version: 5.0.x
-                    - framework_version: net6.0
-                      sdk_version: skip-install
-                    - framework_version: net7.0
-                      sdk_version: 7.0.x
-                    - framework_version: net8.0
-                      sdk_version: skip-install
-                    - framework_version: net9.0
-                      sdk_version: skip-install
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v3
-            - name: Setup .NET Core
+                  dotnet-version: 10.0.x
+
+            - name: Setup framework-specific .NET SDK
+              # Install the .NET SDK if it's not 10.0.x (we need the runtime to run tests)
+              # Skip net48 on Linux (Windows only)
+              if: matrix.sdk_version != '10.0.x' && !(matrix.framework == 'net48' && runner.os == 'Linux')
               uses: actions/setup-dotnet@v4
-              if: matrix.dotnet.sdk_version != 'skip-install'
               with:
-                  dotnet-version: ${{ matrix.dotnet.sdk_version }}
+                  dotnet-version: ${{ matrix.sdk_version }}
+
             - name: Run tests
-              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.dotnet.framework_version }} -- tests/StatsdClient.Tests/
+              # Skip net48 on Linux (Windows only)
+              if: ${{ !(matrix.framework == 'net48' && runner.os == 'Linux') }}
+              run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.framework }}
