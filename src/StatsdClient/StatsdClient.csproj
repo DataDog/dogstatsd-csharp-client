@@ -16,10 +16,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <!-- See https://learn.microsoft.com/en-us/dotnet/api/system.span-1?view=net-6.0 -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'net6.0' ">
-    <DefineConstants>HAS_SPAN</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Unix" Version="7.1.0-final.1.21458.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
