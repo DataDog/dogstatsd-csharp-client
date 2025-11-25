@@ -1,5 +1,8 @@
-[bB]in
-[oO]bj
+.vs/
+.vscode/
+.idea/
+[bB]in/
+[oO]bj/
 *.user
 *.suo
 _ReSharper*
@@ -11,9 +14,7 @@ tests/StatsdClient.Tests/TestResults
 .DS_Store
 src/StatsdClient.userprefs
 src/packages/
-src/.vs/
 *.ncrunchsolution
-.vs/
 *.ncrunchproject
 *.crunchsolution.cache
 _NCrunch_*
