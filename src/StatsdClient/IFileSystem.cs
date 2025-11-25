@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Mono.Unix.Native;
+using System.Runtime.InteropServices;
 
 namespace StatsdClient
 {
@@ -81,15 +81,21 @@ namespace StatsdClient
         /// <returns>True if the file stat was successful, false otherwise</returns>
         public bool TryStat(string path, out ulong inode)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Unix &&
-                Syscall.stat(path, out var stat) > 0)
-            {
-                inode = stat.st_ino;
-                return true;
-            }
-
+#if NET461
+            // Unix Domain Sockets not supported on .NET Framework (always runs on Windows).
             inode = 0;
             return false;
+#else
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // P/Invoke to libc
+                return NativeMethods.TryStat(path, out inode);
+            }
+
+            // Unsupported OS
+            inode = 0;
+            return false;
+#endif
         }
     }
 }
