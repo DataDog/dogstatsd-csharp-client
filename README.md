@@ -200,6 +200,6 @@ To suggest a feature, report a bug, or general discussion, [create a new issue](
 
 `dogstatsd-csharp-client` is forked from Goncalo Pereira's [original StatsD client](https://github.com/goncalopereira/statsd-csharp-client).
 
-Copyright (c) 2012 Goncalo Pereira and all contributors. See MIT-LICENCE.md for further details.
+Copyright (c) 2012 Goncalo Pereira and all contributors. See LICENSE.md for further details.
 
 Thanks to Goncalo Pereira, Anthony Steele, Darrell Mozingo, Antony Denyer, and Tim Skauge for their contributions to the original client.
