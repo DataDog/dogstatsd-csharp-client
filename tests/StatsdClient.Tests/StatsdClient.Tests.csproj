@@ -18,11 +18,6 @@
     <DefineConstants>OS_WINDOWS</DefineConstants>
   </PropertyGroup>
 
-  <!-- See https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/numeric-format-parsing-handles-higher-precision -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net48' OR '$(TargetFramework)' == 'netcoreapp2.1'">
-    <DefineConstants>$(DefineConstants);OLD_DOUBLE_FORMATTING</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="Moq" Version="4.7.137" />
