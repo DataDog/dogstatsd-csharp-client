@@ -1,4 +1,4 @@
-name: "Tests"
+name: "Build and Test"
 
 on:
     push:
@@ -86,3 +86,29 @@ jobs:
 
             - name: Run tests
               run: dotnet test --blame-hang --blame-hang-dump-type none --blame-hang-timeout 60s --framework ${{ matrix.framework }}
+
+    build-nuget:
+        name: Build NuGet Package
+        runs-on: ubuntu-latest
+        permissions:
+            actions: read
+            contents: read
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup .NET SDK 10.0.x
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 10.0.x
+
+            - name: Build NuGet package
+              run: dotnet pack src/StatsdClient/StatsdClient.csproj --configuration Release --output ./nuget-packages
+
+            - name: Upload NuGet package artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: nuget-package
+                  path: ./nuget-packages/*.nupkg
+                  if-no-files-found: error
+                  retention-days: 30
