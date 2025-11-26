@@ -1,6 +1,9 @@
 .vs/
 .vscode/
 .idea/
+runtimes/
+artifacts/
+build/
 [bB]in/
 [oO]bj/
 artifacts/
