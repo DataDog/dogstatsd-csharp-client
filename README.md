@@ -1,8 +1,8 @@
-# DogStatsD for C#
+# DogStatsD client library for .NET
 
 [![Build status](https://ci.appveyor.com/api/projects/status/bg8e39b5f9iiavvj/branch/master?svg=true)](https://ci.appveyor.com/project/Datadog/dogstatsd-csharp-client/branch/master)
 
-A C# [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET) client. DogStatsD is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/) metric server for [Datadog](http://datadoghq.com).
+A .NET [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET) client. DogStatsD is an extension of the [StatsD](http://codeascraft.com/2011/02/15/measure-anything-measure-everything/) metric server for [Datadog](http://datadoghq.com).
 
 See [CHANGELOG](CHANGELOG.md) for details.
 
@@ -19,7 +19,7 @@ DogStatsD-CSharp-Client supports the following platforms:
 
 ## Configuration
 
-At start of your application, configure an instance of `DogStatsdService` class like this:
+During application startup, configure an instance of `DogStatsdService` class like this:
 
 ```csharp
 // The code is located under the StatsdClient namespace
@@ -36,22 +36,24 @@ var dogstatsdConfig = new StatsdConfig
 using (var service = new DogStatsdService())
 {
     if (!service.Configure(dogstatsdConfig))
-        throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
+    {
+        throw new InvalidOperationException("Cannot initialize DogStatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
+    }
 }
 ```
 
-See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET#client-instantiation-parameters).
+See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?tab=dotnet#client-instantiation-parameters).
 
 Supported environment variables:
 
 * The client can use the `DD_AGENT_HOST` and (optionally) the `DD_DOGSTATSD_PORT` environment variables to build the target address if the `StatsdServerName` and/or `StatsdPort` parameters are empty.
-* If the `DD_ENTITY_ID` enviroment variable is found, its value will be injected as a global `dd.internal.entity_id` tag. This tag will be used by the Datadog Agent to insert container tags to the metrics.
+* If the `DD_ENTITY_ID` environment variable is found, its value will be injected as a global `dd.internal.entity_id` tag. This tag will be used by the Datadog Agent to insert container tags to the metrics.
 
 Where `StatsdServerName` is the hostname or address of the StatsD server, `StatsdPort` is the optional DogStatsD port number, and `Prefix` is an optional string that is prepended to all metrics.
 
-## Usage via the DogStatsdService class or the static DogStatsd class.
+## Usage via the `DogStatsdService` class or the static `DogStatsd` class
 
-For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=.NET#setup).
+For usage of DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=dotnet#setup).
 
 Here is an example to submit different kinds of metrics with `DogStatsdService`.
 ```csharp
@@ -69,7 +71,7 @@ var dogstatsdConfig = new StatsdConfig
 using (var service = new DogStatsdService())
 {
     if (!service.Configure(dogstatsdConfig))
-        throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
+        throw new InvalidOperationException("Cannot initialize DogStatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
 
     service.Increment("example_metric.increment", tags: new[] { "environment:dev" });
     service.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
@@ -101,7 +103,10 @@ var dogstatsdConfig = new StatsdConfig
 };
 
 if (!DogStatsd.Configure(dogstatsdConfig))
-    throw new InvalidOperationException("Cannot initialize DogstatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
+{
+    throw new InvalidOperationException("Cannot initialize DogStatsD. Set optionalExceptionHandler argument in the `Configure` method for more information.");
+}
+
 DogStatsd.Increment("example_metric.increment", tags: new[] { "environment:dev" });
 DogStatsd.Decrement("example_metric.decrement", tags: new[] { "environment:dev" });
 DogStatsd.Counter("example_metric.count", 2, tags: new[] { "environment:dev" });
@@ -125,11 +130,11 @@ After the client is created, you can start sending custom metrics to Datadog. Se
 
 * [Submit a COUNT metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#count).
 * [Submit a GAUGE metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#gauge).
-* [Submit a SET metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#set)
-* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#histogram)
-* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#distribution)
+* [Submit a SET metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#set).
+* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#histogram).
+* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#distribution).
 
-Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#metric-submission-options) or [Tagging your metrics with your custom Tags](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#metric-tagging).
+Some options are supported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#metric-submission-options) or [Tagging your metrics with your custom Tags](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=.NET#metric-tagging).
 
 ### Events
 
@@ -138,7 +143,6 @@ After the client is created, you can start sending events to your Datadog Event 
 ### Service Checks
 
 After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?code-lang=.NET) to see how to submit a Service Check to Datadog.
-
 
 ## Usage via the Statsd class
 
@@ -152,7 +156,7 @@ The version 6 (and above) of the Agent accepts packets through a Unix Socket dat
 
 You can use unix domain socket protocol by setting `StatsdServerName` property to `unix://YOUR_FULL_PATH`, for example `unix:///tmp/dsd.socket`. Note that there are three `/` as the path of the socket is `/tmp/dsd.socket`.
 
-``` C#
+```csharp
 var dogstatsdConfig = new StatsdConfig
 {
     StatsdServerName = "unix:///tmp/dsd.socket"
@@ -162,18 +166,18 @@ var dogstatsdConfig = new StatsdConfig
 The property `StatsdMaxUnixDomainSocketPacketSize` of `StatsdConfig` defines the maximum size of the payload. Values higher than 8196 bytes are ignored.
 
 **The feature is not supported on Windows platform**.
-Windows has support for [unix domain socket](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for unix domain socket of type Dgram (`SocketType.Dgram`).
+Windows has support for [Unix Domain Sockets](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/), but not for Unix Domain Sockets of type Dgram (`SocketType.Dgram`).
 
 On MacOS Mojave, setting more than `2048` bytes for `StatsdMaxUnixDomainSocketPacketSize` is experimental.
 
-## Client side aggregation
+## Client-side aggregation
 
-By default, metrics for basic types (gauges, counts, sets) are aggregated before they are sent. For example, instead of sending 3 times `my_metric:10|c|#tag1:value`, DogStatsD client sends `my_metric:30|c|#tag1:value` once.
-For more technical details about how client-side aggregation works see #134.
+By default, metrics for basic types (gauges, counts, sets) are aggregated before they are sent. For example, instead of sending `my_metric:10|c|#tag1:value` 3 times, the DogStatsD client sends `my_metric:30|c|#tag1:value` once.
+For more technical details about how client-side aggregation works see [PR #134](https://github.com/DataDog/dogstatsd-csharp-client/pull/134).
 
-Enabling client-side aggregation has the benefit of reducing the network usage and also reducing the load for DogStatsD server (Datadog Agent).
+Enabling client-side aggregation has the benefit of reducing network usage and reducing the load for the DogStatsD server in the Datadog Agent.
 
-When an application sends a lot of different contexts but each context appears with a very low frequency, enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag set and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by DogStatsD C# client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation.
+When an application sends a lot of different contexts but each context appears with a very low frequency, enabling client-side aggregation may take more memory and more CPU. A context identifies a metric name, a tag set, and a metric type. The metric `datadog.dogstatsd.client.aggregated_context` reported by the DogStatsD .NET client counts the number of contexts in memory used for client-side aggregation. There is also the metric `datadog.dogstatsd.client.metrics_by_type` that represents the number of metrics submitted by the client before aggregation.
 
 ### Configuration
 
@@ -194,7 +198,7 @@ To disable client-side aggregation set [ClientSideAggregation](https://github.co
 
 ## Feedback
 
-To suggest a feature, report a bug, or general discussion, [create a new issue](https://github.com/DataDog/statsd-csharp-client/issues) in the Github repo.
+To suggest a feature, report a bug, or general discussion, [create a new issue](https://github.com/DataDog/statsd-csharp-client/issues) in the GitHub repo.
 
 ## Credits
 
