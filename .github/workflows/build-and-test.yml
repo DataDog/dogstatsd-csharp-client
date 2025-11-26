@@ -8,9 +8,59 @@ on:
     workflow_dispatch:
 
 jobs:
+    build-native-linux:
+        name: Build libfs for ${{ matrix.libc }}-${{ matrix.arch }}
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - arch: x64
+                      libc: glibc
+                      container: mcr.microsoft.com/dotnet/sdk:8.0
+                      install_cmd: apt-get update && apt-get install -y cmake build-essential
+                    - arch: x64
+                      libc: musl
+                      container: mcr.microsoft.com/dotnet/sdk:8.0-alpine
+                      install_cmd: apk add cmake make gcc g++ musl-dev
+                    - arch: arm64
+                      libc: glibc
+                      container: mcr.microsoft.com/dotnet/sdk:8.0-arm64v8
+                      install_cmd: apt-get update && apt-get install -y cmake build-essential
+                    - arch: arm64
+                      libc: musl
+                      container: mcr.microsoft.com/dotnet/sdk:8.0-alpine-arm64v8
+                      install_cmd: apk add cmake make gcc g++ musl-dev
+
+        container: ${{ matrix.container }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Install build tools
+              run: ${{ matrix.install_cmd }}
+
+            - name: Build native library
+              run: |
+                  mkdir -p build && cd build
+                  cmake ../src/StatsdClient.Native
+                  cmake --build . --config Release
+                  cd ..
+
+                  mkdir -p runtimes/linux-${{ matrix.libc }}-${{ matrix.arch }}/native
+                  cp build/libfs.so runtimes/linux-${{ matrix.libc }}-${{ matrix.arch }}/native/
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: native-linux-${{ matrix.libc }}-${{ matrix.arch }}
+                  path: runtimes/
+
     unit-tests:
         name: ${{ matrix.framework }} on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
+        needs: build-native-linux
         permissions:
             actions: read
             contents: read
@@ -66,6 +116,13 @@ jobs:
               uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
               with:
                 fetch-depth: 0
+
+            - name: Download native libraries
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: native-linux-*
+                  path: runtimes/
+                  merge-multiple: true
 
             - name: Install libssl on Linux
               # .NET 5.0 and below want libssl v1, which is not available on Ubuntu 24.04 normally
