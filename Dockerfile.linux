@@ -1,0 +1,74 @@
+# Multi-stage Dockerfile for building and testing libfs for all Linux variants
+# Usage: See build-and-test.sh
+
+ARG BASE_IMAGE
+ARG DOTNET_TEST_ARGS=""
+FROM ${BASE_IMAGE} AS builder
+
+# Install build tools based on the base image
+RUN if command -v apt-get > /dev/null 2>&1; then \
+        apt-get update && apt-get install -y cmake build-essential && rm -rf /var/lib/apt/lists/*; \
+    elif command -v apk > /dev/null 2>&1; then \
+        apk add --no-cache cmake make gcc g++ musl-dev bash; \
+    fi
+
+WORKDIR /build
+
+# Copy only the native library source
+COPY src/StatsdClient.Native/ ./src/StatsdClient.Native/
+
+# Build the library using the build script
+ARG RID
+RUN chmod +x src/StatsdClient.Native/build.sh && \
+    bash src/StatsdClient.Native/build.sh "$RID"
+
+# The output libfs.so is in /build/runtimes/${RID}/native/libfs.so
+
+# ============================================================
+# Test stage (optional - only built with --target tester)
+# ============================================================
+FROM ${BASE_IMAGE} AS tester
+
+WORKDIR /build
+
+# Copy only project files for restore (better caching)
+COPY src/StatsdClient/StatsdClient.csproj ./src/StatsdClient/
+COPY tests/StatsdClient.Tests/StatsdClient.Tests.csproj ./tests/StatsdClient.Tests/
+
+# Restore dependencies (cached separately from source changes)
+RUN dotnet restore src/StatsdClient/StatsdClient.csproj
+RUN dotnet restore tests/StatsdClient.Tests/StatsdClient.Tests.csproj
+
+# Copy remaining source files
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY stylecop.json stylecop.ruleset ./
+
+# Copy the pre-built native library from builder stage
+ARG RID
+COPY --from=builder /build/runtimes/${RID}/native/libfs.so /build/runtimes/${RID}/native/libfs.so
+
+# Build the .NET project (without restore since already done)
+RUN dotnet build src/StatsdClient/StatsdClient.csproj -c Release --no-restore
+
+# Build the test project (without restore since already done)
+RUN dotnet build tests/StatsdClient.Tests/StatsdClient.Tests.csproj -c Release --no-restore
+
+# Copy library to the location where .NET runtime will find it during tests
+# The library is already in the correct RID directory (linux-x64, linux-musl-x64, etc.)
+# .NET runtime will automatically select the correct variant based on the environment
+# As a workaround for testing, also copy to the root of the test output directory
+ARG RID
+RUN cp /build/tests/StatsdClient.Tests/bin/Release/net8.0/runtimes/${RID}/native/libfs.so \
+       /build/tests/StatsdClient.Tests/bin/Release/net8.0/libfs.so || true
+
+# Run the native library tests
+# DOTNET_TEST_ARGS can be used to pass additional arguments (e.g., --filter)
+ARG DOTNET_TEST_ARGS="--filter FullyQualifiedName~NativeLibraryTests"
+RUN dotnet test tests/StatsdClient.Tests/StatsdClient.Tests.csproj \
+    --framework net8.0 \
+    -c Release \
+    -v normal \
+    --no-build \
+    --logger 'console;verbosity=normal' \
+    ${DOTNET_TEST_ARGS}

@@ -1,0 +1,38 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# Native build outputs
+**/build/
+runtimes/
+
+# IDE / Editor
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Misc
+.git/
+.gitignore
+.github/
+*.md
+*.log
+*.zip
+
+# Keep these files
+!README.md
+!CLAUDE.md
