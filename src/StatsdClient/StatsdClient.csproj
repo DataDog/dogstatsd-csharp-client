@@ -47,4 +47,41 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\README.md" Pack="true" Visible="false" PackagePath="/" />
     <None Include="$(MSBuildThisFileDirectory)..\..\datadog-logo-128x128.png" Pack="true" Visible="false" PackagePath="packageIcon.png" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Native libraries for Linux (glibc and musl) -->
+    <!-- Only copy to output if the file exists (allows building/testing with a subset of variants) -->
+    <!-- Use None with TargetPath to preserve the runtimes directory structure in output -->
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-x64\native\libfs.so"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\..\runtimes\linux-x64\native\libfs.so')"
+          PackagePath="runtimes/linux-x64/native"
+          Pack="true"
+          CopyToOutputDirectory="PreserveNewest"
+          TargetPath="runtimes/linux-x64/native/libfs.so" />
+
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-musl-x64\native\libfs.so"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\..\runtimes\linux-musl-x64\native\libfs.so')"
+          PackagePath="runtimes/linux-musl-x64/native"
+          Pack="true"
+          CopyToOutputDirectory="PreserveNewest"
+          TargetPath="runtimes/linux-musl-x64/native/libfs.so" />
+
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-arm64\native\libfs.so"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\..\runtimes\linux-arm64\native\libfs.so')"
+          PackagePath="runtimes/linux-arm64/native"
+          Pack="true"
+          CopyToOutputDirectory="PreserveNewest"
+          TargetPath="runtimes/linux-arm64/native/libfs.so" />
+
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-musl-arm64\native\libfs.so"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\..\runtimes\linux-musl-arm64\native\libfs.so')"
+          PackagePath="runtimes/linux-musl-arm64/native"
+          Pack="true"
+          CopyToOutputDirectory="PreserveNewest"
+          TargetPath="runtimes/linux-musl-arm64/native/libfs.so" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Native\" />
+  </ItemGroup>
 </Project>
