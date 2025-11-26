@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using StatsdClient;
@@ -19,38 +20,50 @@ namespace Tests
                 StatsdPort = 1234,
                 OriginDetection = false,
             };
+
             config.ClientSideAggregation = null;
             CheckReconnection(c => new SocketServer(c), config);
         }
 
-#if !OS_WINDOWS
         [Test]
         public void UDSReconnection()
         {
+            // Skip on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Test relies on Unix Domain Sockets and does not run on Windows.");
+            }
+
             using (var temporaryPath = new TemporaryPath())
             {
                 var config = new StatsdConfig
                 {
                     StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path,
                 };
+
                 config.ClientSideAggregation = null;
                 CheckReconnection(c => new SocketServer(c), config);
             }
         }
-#else
 
         [Test]
         public void NamedPipeReconnection()
         {
+            // Only run on Windows
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Test relies on Named Pipes and only runs on Windows.");
+            }
+
             var config = new StatsdConfig
             {
                 PipeName = "TestPipe",
             };
+
             config.Advanced.TelemetryFlushInterval = null;
             config.ClientSideAggregation = null;
             CheckReconnection(c => new NamedPipeServer(c.PipeName, 1000, TimeSpan.FromSeconds(1)), config);
         }
-#endif
 
         private static void CheckReconnection(
             Func<StatsdConfig, AbstractServer> serverFactory,
@@ -61,6 +74,7 @@ namespace Tests
             try
             {
                 server = serverFactory(config);
+
                 using (var service = new DogStatsdService())
                 {
                     service.Configure(config);

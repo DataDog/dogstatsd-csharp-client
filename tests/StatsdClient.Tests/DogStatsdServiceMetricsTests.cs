@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using NUnit.Framework;
 using StatsdClient;
 using Tests.Utils;
@@ -18,6 +19,7 @@ namespace Tests
                 StatsdServerName = "127.0.0.1",
                 StatsdPort = 8132,
             };
+
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
             config.Advanced.TelemetryFlushInterval = null;
@@ -28,10 +30,15 @@ namespace Tests
                 metricToSendCount);
         }
 
-#if !OS_WINDOWS
         [Test]
         public void UnixDomainSocketBlockingQueue()
         {
+            // Skip on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Test relies on Unix Domain Sockets and does not run on Windows.");
+            }
+
             var metricToSendCount = 100 * 1000;
 
             using (var temporaryPath = new TemporaryPath())
@@ -41,6 +48,7 @@ namespace Tests
                     StatsdServerName = StatsdBuilder.UnixDomainSocketPrefix + temporaryPath.Path,
                     StatsdMaxUnixDomainSocketPacketSize = 2048,
                 };
+
                 config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.UDSBufferFullBlockDuration = TimeSpan.FromSeconds(3);
                 config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
@@ -52,23 +60,29 @@ namespace Tests
                     metricToSendCount);
             }
         }
-#endif
 
         [Test]
         public void NamedPipe()
         {
-#if !OS_WINDOWS
+            int metricToSendCount;
+
             // On Windows, named pipe behaves like Unix domain socket. Messages are rarely dropped.
             // On Unix, named pipe behaves like UDP and messages can be dropped.
             // On Unix platform, less metrics are sent to not having a failed unit test.
-            var metricToSendCount = 1 * 100;
-#else
-            var metricToSendCount = 100 * 1000;
-#endif
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                metricToSendCount = 100 * 1000;
+            }
+            else
+            {
+                metricToSendCount = 1 * 100;
+            }
+
             var config = new StatsdConfig
             {
                 PipeName = "TestPipe",
             };
+
             config.Advanced.MaxBlockDuration = TimeSpan.FromSeconds(3);
             config.Advanced.MaxMetricsInAsyncQueue = metricToSendCount / 10;
             config.Advanced.TelemetryFlushInterval = null;
@@ -86,6 +100,7 @@ namespace Tests
                 using (var service = new DogStatsdService())
                 {
                     service.Configure(config);
+
                     for (int i = 0; i < metricToSendCount; ++i)
                     {
                         service.Increment($"test{i}", tags: new[] { "KEY:VALUE" });
@@ -94,6 +109,7 @@ namespace Tests
                     service.Flush();
                     var metricsReceived = server.Stop();
                     Assert.AreEqual(metricToSendCount, metricsReceived.Count);
+
                     for (int i = 0; i < metricToSendCount; ++i)
                     {
                         Assert.AreEqual($"test{i}:1|c|#KEY:VALUE", metricsReceived[i]);

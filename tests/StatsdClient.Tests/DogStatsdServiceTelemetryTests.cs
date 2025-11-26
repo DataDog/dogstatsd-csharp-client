@@ -1,5 +1,6 @@
 using System;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mono.Unix;
 using NUnit.Framework;
@@ -76,11 +77,16 @@ namespace Tests
             Assert.AreEqual(9, _service.TelemetryCounters.BytesSent);
         }
 
-#if !OS_WINDOWS
         [Test]
         [Ignore("test is currently failing inexplicably")]
         public async Task PacketsDropped()
         {
+            // Skip on Windows
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Test relies on Unix Domain Sockets and does not run on Windows.");
+            }
+
             using (var temporaryPath = new TemporaryPath())
             {
                 using (var server = new Socket(AddressFamily.Unix, SocketType.Dgram, ProtocolType.IP))
@@ -103,6 +109,5 @@ namespace Tests
                 }
             }
         }
-#endif
     }
 }
