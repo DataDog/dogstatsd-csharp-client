@@ -111,6 +111,6 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: nuget-package
-                  path: ./nuget-packages/*.nupkg
+                  path: ./nuget-packages/*.*nupkg
                   if-no-files-found: error
                   retention-days: 30
