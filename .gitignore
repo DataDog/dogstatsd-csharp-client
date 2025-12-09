@@ -3,6 +3,8 @@
 .idea/
 [bB]in/
 [oO]bj/
+artifacts/
+packages/
 *.user
 *.suo
 _ReSharper*
