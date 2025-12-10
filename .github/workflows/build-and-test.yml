@@ -63,7 +63,9 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+              with:
+                fetch-depth: 0
 
             - name: Install libssl on Linux
               # .NET 5.0 and below want libssl v1, which is not available on Ubuntu 24.04 normally
@@ -74,7 +76,7 @@ jobs:
 
             - name: Setup .NET SDK 10.0.x
               # Always install SDK 10.0.x for building
-              uses: actions/setup-dotnet@v5
+              uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
               with:
                   dotnet-version: 10.0.x
 
@@ -82,7 +84,7 @@ jobs:
               # Install the version-specific .NET SDK because need the matching runtime version to run tests
               # (ideally we would install only the runtime, not the full SDK, but `actions/setup-dotnet` can only install SDKs)
               if: matrix.sdk_version != '10.0.x'
-              uses: actions/setup-dotnet@v5
+              uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
               with:
                   dotnet-version: ${{ matrix.sdk_version }}
 
