@@ -71,7 +71,7 @@ namespace StatsdClient
             var intValue = (int)v;
             var provider = CultureInfo.InvariantCulture;
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
             Span<char> span = numericBuffer;
             bool tryFormatSuccess;
             int charsWritten;
