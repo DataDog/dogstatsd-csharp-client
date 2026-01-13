@@ -2,33 +2,49 @@
 
   <PropertyGroup>
     <PackageId>DogStatsD-CSharp-Client</PackageId>
-    <Description>A DogStatsD client for C#. DogStatsD is an extension of the StatsD metric server for use with Datadog. For more information visit http://datadoghq.com.</Description>
-    <Authors>Datadog</Authors>
     <TargetFrameworks>net461;netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>
-    <PackageVersion>9.0.0</PackageVersion>
+    <LangVersion>latest</LangVersion>
     <Version>9.0.0</Version>
-    <PackageLicenseUrl>https://github.com/DataDog/dogstatsd-csharp-client/blob/master/MIT-LICENCE.md</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/DataDog/dogstatsd-csharp-client</PackageProjectUrl>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
-    <NoWarn>0618</NoWarn>
     <CodeAnalysisRuleSet>../../stylecop.ruleset</CodeAnalysisRuleSet>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Code analysis -->
+    <AnalysisLevel>latest</AnalysisLevel>
+
+    <!-- NuGet package properties -->
+    <Description>A DogStatsD client library for .NET. DogStatsD is an extension of the StatsD metric server for use with Datadog. For more information visit https://datadoghq.com.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/DataDog/dogstatsd-csharp-client</PackageProjectUrl>
+    <PackageIcon>packageIcon.png</PackageIcon>
+    <PackageIconUrl>https://github.com/DataDog/dogstatsd-csharp-client/raw/master/datadog-logo-64x64.png</PackageIconUrl> <!-- deprecated but keeping for backwards compat -->
+    <PackageReleaseNotes>See release notes at https://github.com/DataDog/dogstatsd-csharp-client/releases.</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>Datadog;DogStatsD;StatsD;metrics;monitoring;telemetry</PackageTags>
+    <Authors>Datadog</Authors>
+    <Company>Datadog</Company>
+    <Owners>Datadog</Owners>
+    <Copyright>Copyright 2013 Datadog, Inc.</Copyright>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryUrl>https://github.com/DataDog/dogstatsd-csharp-client.git</RepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Deterministic builds -->
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true' OR '$(TF_BUILD)' == 'true' OR '$(GITLAB_CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <!-- See https://learn.microsoft.com/en-us/dotnet/api/system.span-1?view=net-6.0 -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'net6.0' ">
-    <DefineConstants>HAS_SPAN</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Unix" Version="7.1.0-final.1.21458.1" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="All" />
+
     <AdditionalFiles Include="../../stylecop.json" />
+
+    <!-- additional files for NuGet package  -->
+    <None Include="$(MSBuildThisFileDirectory)..\..\README.md" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\datadog-logo-128x128.png" Pack="true" Visible="false" PackagePath="packageIcon.png" />
   </ItemGroup>
 </Project>

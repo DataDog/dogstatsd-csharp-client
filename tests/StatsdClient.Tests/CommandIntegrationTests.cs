@@ -230,10 +230,14 @@ namespace Tests
         public void Gauge_double_rounding()
         {
             _dogStatsdService.Gauge("gauge", 1.0 / 9);
-#if OLD_DOUBLE_FORMATTING
-            AssertWasReceived("gauge:0.111111111111111|g");
-#else
+
+            // "Starting with .NET Core 3.0, floating-point parsing and formatting operations are IEEE 754-compliant."
+            // See https://learn.microsoft.com/en-us/dotnet/core/compatibility/3.0#floating-point-formatting-and-parsing-behavior-changed
+            // and https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/
+#if NETCOREAPP3_0_OR_GREATER
             AssertWasReceived("gauge:0.1111111111111111|g");
+#else
+            AssertWasReceived("gauge:0.111111111111111|g");
 #endif
         }
 

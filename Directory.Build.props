@@ -1,0 +1,11 @@
+﻿<Project>
+    <PropertyGroup>
+        <UseArtifactsOutput>true</UseArtifactsOutput>
+
+        <!--
+        Suppress warning NETSDK1138
+        "The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy."
+        -->
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    </PropertyGroup>
+</Project>

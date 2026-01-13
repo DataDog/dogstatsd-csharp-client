@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using Mono.Unix;
 using Moq;
 using NUnit.Framework;
@@ -100,10 +101,15 @@ namespace StatsdClient.Tests
             Assert.AreEqual(3, GetUDPPort(CreateConfig(statsdPort: 3)));
         }
 
-#if !OS_WINDOWS
         [Test]
         public void UDSStatsdServerName()
         {
+            // Skip on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Test relies on Unix Domain Sockets and does not run on Windows.");
+            }
+
             Environment.SetEnvironmentVariable(StatsdConfig.AgentHostEnvVar, null);
             Assert.AreEqual("server1", GetUDSStatsdServerName(CreateUDSConfig("server1")));
 
@@ -114,7 +120,6 @@ namespace StatsdClient.Tests
 
             Assert.AreEqual("server3", GetUDSStatsdServerName(CreateUDSConfig("server3")));
         }
-#endif
 
         [Test]
         public void CreateStatsBufferizeUDP()
@@ -142,10 +147,15 @@ namespace StatsdClient.Tests
                 It.IsAny<Aggregators>()));
         }
 
-#if !OS_WINDOWS
         [Test]
         public void CreateStatsBufferizeUDS()
         {
+            // Skip on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Test relies on Unix Domain Sockets and does not run on Windows.");
+            }
+
             var config = CreateUDSConfig("server1");
             config.StatsdMaxUnixDomainSocketPacketSize = 20;
 
@@ -162,7 +172,6 @@ namespace StatsdClient.Tests
                 It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUnixDomainSocketPacketSize),
                 It.IsAny<Aggregators>()));
         }
-#endif
 
         [Test]
         public void CreateTelemetry()
