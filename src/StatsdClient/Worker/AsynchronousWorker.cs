@@ -85,11 +85,31 @@ namespace StatsdClient.Worker
             }
         }
 
+        public async Task DisposeAsync()
+        {
+            if (!_terminate)
+            {
+                Flush();
+                _terminate = true;
+                try
+                {
+                    await Task.WhenAll(_workers).ConfigureAwait(false);
+                    _flushEvent.Dispose();
+                }
+                catch (Exception e)
+                {
+                    _optionalExceptionHandler?.Invoke(e);
+                }
+
+                _workers.Clear();
+            }
+        }
+
         private void Dequeue()
         {
             var waitDuration = MinWaitDuration;
 
-            while (true)
+            while (!_terminate)
             {
                 try
                 {

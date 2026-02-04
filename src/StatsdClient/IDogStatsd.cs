@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace StatsdClient
 {
@@ -200,5 +201,12 @@ namespace StatsdClient
         /// </summary>
         /// <param name="flushTelemetry">The value indicating whether the telemetry must be flushed.</param>
         void Flush(bool flushTelemetry = true);
+
+        /// <summary>
+        /// Asynchronously disposes the instance.
+        /// Flushes all metrics.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous dispose operation.</returns>
+        Task DisposeAsync();
     }
 }

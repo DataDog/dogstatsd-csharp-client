@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Threading.Tasks;
 using StatsdClient.Bufferize;
 
 namespace StatsdClient
@@ -298,6 +299,21 @@ namespace StatsdClient
         {
             _statsdData?.Dispose();
             _statsdData = null;
+        }
+
+        /// <summary>
+        /// Asynchronously disposes an instance of DogStatsdService.
+        /// Flushes all metrics.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous dispose operation.</returns>
+        public async Task DisposeAsync()
+        {
+            var statsdData = _statsdData;
+            if (statsdData != null)
+            {
+                _statsdData = null;
+                await statsdData.DisposeAsync().ConfigureAwait(false);
+            }
         }
     }
 }

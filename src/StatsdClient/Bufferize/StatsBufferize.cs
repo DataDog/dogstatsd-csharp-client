@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using StatsdClient.Statistic;
 using StatsdClient.Worker;
 
@@ -44,6 +45,8 @@ namespace StatsdClient.Bufferize
         {
             this._worker.Dispose();
         }
+
+        public Task DisposeAsync() => this._worker.DisposeAsync();
 
         private class WorkerHandler : IAsynchronousWorkerHandler<Stats>
         {
