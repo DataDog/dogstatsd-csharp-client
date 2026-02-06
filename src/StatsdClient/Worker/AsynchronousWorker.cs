@@ -109,7 +109,7 @@ namespace StatsdClient.Worker
         {
             var waitDuration = MinWaitDuration;
 
-            while (!_terminate)
+            while (true)
             {
                 try
                 {

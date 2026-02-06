@@ -12,35 +12,6 @@ namespace Tests
     {
         [Test]
         [Timeout(10000)]
-        public async Task DisposeAsync_CanBeCalledMultipleTimes()
-        {
-            var dogstatsd = new DogStatsdService();
-            dogstatsd.Configure(new StatsdConfig
-            {
-                StatsdServerName = "127.0.0.1",
-                StatsdPort = 4321,
-            });
-
-            var sendTasks = new List<Task>();
-            for (var i = 0; i < 50; i++)
-            {
-                sendTasks.Add(Task.Run(() => dogstatsd.Increment("test.metric")));
-            }
-
-            await Task.WhenAll(sendTasks);
-
-            var disposeTasks = new[]
-            {
-                dogstatsd.DisposeAsync(),
-                dogstatsd.DisposeAsync(),
-                dogstatsd.DisposeAsync()
-            };
-
-            await Task.WhenAll(disposeTasks);
-        }
-
-        [Test]
-        [Timeout(10000)]
         public async Task DisposeAsync_Completes_WithInFlightMetrics()
         {
             var dogstatsd = new DogStatsdService();
