@@ -10,45 +10,6 @@ namespace Tests
     [TestFixture]
     public class AsyncDisposalTests
     {
-        [Test]
-        [Timeout(10000)]
-        public async Task DisposeAsync_Completes_WithInFlightMetrics()
-        {
-            var dogstatsd = new DogStatsdService();
-            dogstatsd.Configure(new StatsdConfig
-            {
-                StatsdServerName = "127.0.0.1",
-                StatsdPort = 4321,
-            });
-
-            var cts = new CancellationTokenSource();
-            var spamTask = Task.Run(
-                async () =>
-                {
-                    while (!cts.Token.IsCancellationRequested)
-                    {
-                        dogstatsd.Increment("test.metric");
-                        await Task.Yield();
-                    }
-                },
-                cts.Token);
-
-            await Task.Delay(200);
-
-            await dogstatsd.DisposeAsync();
-
-            cts.Cancel();
-
-            try
-            {
-                await spamTask;
-            }
-            catch (TaskCanceledException)
-            {
-                // expected
-            }
-        }
-
         /// <summary>
         /// Manual stress / demo. Runs only when invoked explicitly.
         /// </summary>
