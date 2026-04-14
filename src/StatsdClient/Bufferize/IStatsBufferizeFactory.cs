@@ -12,7 +12,7 @@ namespace StatsdClient.Bufferize
     /// </summary>
     internal interface IStatsBufferizeFactory
     {
-        StatsBufferize CreateStatsBufferize(
+        IStatsBufferize CreateStatsBufferize(
           StatsRouter statsRouter,
           int workerMaxItemCount,
           TimeSpan? blockingQueueTimeout,
@@ -38,6 +38,7 @@ namespace StatsdClient.Bufferize
             TimeSpan flushInterval,
             ITransport transport,
             string[] globalTags,
-            Action<Exception> optionalExceptionHandler);
+            Action<Exception> optionalExceptionHandler,
+            bool synchronousMode = false);
     }
 }

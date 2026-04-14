@@ -7,14 +7,14 @@ namespace StatsdClient
     internal class MetricsSender
     {
         private readonly Telemetry _optionalTelemetry;
-        private readonly StatsBufferize _statsBufferize;
+        private readonly IStatsBufferize _statsBufferize;
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
         private readonly Cardinality? _defaultCardinality;
 
         internal MetricsSender(
-                    StatsBufferize statsBufferize,
+                    IStatsBufferize statsBufferize,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
                     Telemetry optionalTelemetry,

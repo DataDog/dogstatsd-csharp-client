@@ -160,5 +160,15 @@ namespace StatsdClient
         /// This value is used when no cardinality is explicitly specified.
         /// </summary>
         public Cardinality? Cardinality { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the client operates in synchronous mode.
+        /// When enabled, metrics are sent directly on the calling thread without background
+        /// processing. This is recommended for serverless environments (e.g., AWS Lambda)
+        /// where background threads may be frozen between invocations.
+        /// Call Flush() at the end of each invocation to ensure all buffered metrics are sent.
+        /// Default is false.
+        /// </summary>
+        public bool SynchronousMode { get; set; } = false;
     }
 }

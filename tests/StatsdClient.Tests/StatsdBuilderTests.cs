@@ -56,6 +56,13 @@ namespace StatsdClient.Tests
                         });
             _ipEndPoint = null;
 
+            _mock.Setup(m => m.CreateStatsRouter(
+                            It.IsAny<Serializers>(),
+                            It.IsAny<BufferBuilder>(),
+                            It.IsAny<Aggregators>()))
+                            .Returns<Serializers, BufferBuilder, Aggregators>(
+                                (s, b, a) => new StatsRouter(s, b, a));
+
             foreach (var key in _envVarsKeyToRestore)
             {
                 _envVarsToRestore[key] = Environment.GetEnvironmentVariable(key);
@@ -202,7 +209,8 @@ namespace StatsdClient.Tests
                 conf.TelemetryFlushInterval.Value,
                 It.IsAny<ITransport>(),
                 It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags)),
-                Tools.ExceptionHandler));
+                Tools.ExceptionHandler,
+                false));
         }
 
         [Test]
@@ -235,6 +243,56 @@ namespace StatsdClient.Tests
                 It.IsAny<Serializers>(),
                 It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
                 It.IsNotNull<Aggregators>()));
+        }
+
+        [Test]
+        public void SynchronousModeSkipsAsyncBufferize()
+        {
+            var config = new StatsdConfig { };
+            config.SynchronousMode = true;
+            config.Advanced.TelemetryFlushInterval = null;
+
+            BuildStatsData(config);
+
+            // StatsRouter should still be created
+            _mock.Verify(
+                m => m.CreateStatsRouter(
+                It.IsAny<Serializers>(),
+                It.IsAny<BufferBuilder>(),
+                It.IsAny<Aggregators>()),
+                Times.Once);
+
+            // CreateStatsBufferize should NOT be called in synchronous mode
+            _mock.Verify(
+                m => m.CreateStatsBufferize(
+                It.IsAny<StatsRouter>(),
+                It.IsAny<int>(),
+                It.IsAny<TimeSpan?>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<Action<Exception>>()),
+                Times.Never);
+        }
+
+        [Test]
+        public void SynchronousModeTelemetry()
+        {
+            var config = new StatsdConfig { };
+            config.SynchronousMode = true;
+            config.Advanced.TelemetryFlushInterval = TimeSpan.FromMinutes(1);
+
+            BuildStatsData(config);
+
+            // Telemetry should be created with synchronousMode = true
+            _mock.Verify(
+                m => m.CreateTelemetry(
+                It.IsAny<MetricSerializer>(),
+                It.IsAny<string>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<ITransport>(),
+                It.IsAny<string[]>(),
+                It.IsAny<Action<Exception>>(),
+                true),
+                Times.Once);
         }
 
         [Test]

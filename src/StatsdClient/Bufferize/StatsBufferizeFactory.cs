@@ -8,7 +8,7 @@ namespace StatsdClient.Bufferize
 {
     internal class StatsBufferizeFactory : IStatsBufferizeFactory
     {
-        public StatsBufferize CreateStatsBufferize(
+        public IStatsBufferize CreateStatsBufferize(
             StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
@@ -49,9 +49,10 @@ namespace StatsdClient.Bufferize
             TimeSpan flushInterval,
             ITransport transport,
             string[] globalTags,
-            Action<Exception> optionalExceptionHandler)
+            Action<Exception> optionalExceptionHandler,
+            bool synchronousMode = false)
         {
-            return new Telemetry(metricSerializer, assemblyVersion, flushInterval, transport, globalTags, optionalExceptionHandler);
+            return new Telemetry(metricSerializer, assemblyVersion, flushInterval, transport, globalTags, optionalExceptionHandler, synchronousMode);
         }
 
         public ITransport CreateNamedPipeTransport(string pipeName)

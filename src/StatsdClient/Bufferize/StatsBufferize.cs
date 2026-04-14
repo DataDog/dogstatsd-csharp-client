@@ -7,7 +7,7 @@ namespace StatsdClient.Bufferize
     /// <summary>
     /// StatsBufferize bufferizes metrics before sending them.
     /// </summary>
-    internal class StatsBufferize : IDisposable
+    internal class StatsBufferize : IStatsBufferize
     {
         private readonly AsynchronousWorker<Stats> _worker;
 

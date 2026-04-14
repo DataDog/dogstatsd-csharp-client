@@ -7,11 +7,11 @@ namespace StatsdClient
     internal class StatsdData : IDisposable
     {
         private ITransport _transport;
-        private StatsBufferize _statsBufferize;
+        private IStatsBufferize _statsBufferize;
 
         public StatsdData(
             MetricsSender metricsSender,
-            StatsBufferize statsBufferize,
+            IStatsBufferize statsBufferize,
             ITransport transport,
             Telemetry telemetry)
         {
