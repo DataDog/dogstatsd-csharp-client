@@ -281,7 +281,7 @@ namespace StatsdClient
 
             if (synchronousMode)
             {
-                return new SynchronousSender(statsRouter);
+                return new SynchronousSender(statsRouter, optionalExceptionHandler);
             }
 
             return _factory.CreateStatsBufferize(

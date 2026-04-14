@@ -14,11 +14,13 @@ namespace StatsdClient.Bufferize
         private static Stats _threadLocalStats;
 
         private readonly StatsRouter _statsRouter;
+        private readonly Action<Exception> _optionalExceptionHandler;
         private readonly object _lock = new object();
 
-        public SynchronousSender(StatsRouter statsRouter)
+        public SynchronousSender(StatsRouter statsRouter, Action<Exception> optionalExceptionHandler = null)
         {
             _statsRouter = statsRouter ?? throw new ArgumentNullException(nameof(statsRouter));
+            _optionalExceptionHandler = optionalExceptionHandler;
         }
 
         public bool TryDequeueFromPool(out Stats stats)
@@ -34,17 +36,31 @@ namespace StatsdClient.Bufferize
 
         public void Send(Stats stats)
         {
-            lock (_lock)
+            try
             {
-                _statsRouter.Route(stats);
+                lock (_lock)
+                {
+                    _statsRouter.Route(stats);
+                }
+            }
+            catch (Exception e)
+            {
+                _optionalExceptionHandler?.Invoke(e);
             }
         }
 
         public void Flush()
         {
-            lock (_lock)
+            try
             {
-                _statsRouter.Flush();
+                lock (_lock)
+                {
+                    _statsRouter.Flush();
+                }
+            }
+            catch (Exception e)
+            {
+                _optionalExceptionHandler?.Invoke(e);
             }
         }
 

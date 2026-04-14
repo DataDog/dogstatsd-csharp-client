@@ -248,6 +248,40 @@ namespace Tests
             }
         }
 
+        [Test]
+        public void ExceptionsForwardedToHandler()
+        {
+            var throwingHandler = new ThrowingBufferBuilderHandler();
+            var bufferBuilder = new BufferBuilder(throwingHandler, 20, "\n", null);
+            var serializers = new Serializers
+            {
+                MetricSerializer = new MetricSerializer(new SerializerHelper(null, null), string.Empty),
+            };
+            var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
+
+            Exception caughtException = null;
+            Action<Exception> exceptionHandler = e => caughtException = e;
+
+            using (var sender = new SynchronousSender(statsRouter, exceptionHandler))
+            {
+                sender.TryDequeueFromPool(out var stats);
+                stats.Kind = StatsKind.Metric;
+                stats.Metric.MetricType = MetricType.Count;
+                stats.Metric.StatName = "will.fail";
+                stats.Metric.NumericValue = 1;
+                stats.Metric.SampleRate = 1.0;
+                stats.Metric.Tags = null;
+
+                // Send enough data to trigger a buffer flush (buffer is 20 bytes, metric is ~15)
+                sender.Send(stats);
+                sender.Send(stats);
+
+                // Exception should have been caught by the handler, not propagated
+                Assert.IsNotNull(caughtException);
+                Assert.That(caughtException.Message, Does.Contain("Transport error"));
+            }
+        }
+
         /// <summary>
         /// Thread-safe handler that accumulates all buffers for verification.
         /// </summary>
@@ -271,6 +305,17 @@ namespace Tests
                 }
 
                 return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Handler that throws on Handle to simulate transport failures.
+        /// </summary>
+        private class ThrowingBufferBuilderHandler : IBufferBuilderHandler
+        {
+            public void Handle(byte[] buffer, int length)
+            {
+                throw new InvalidOperationException("Transport error");
             }
         }
     }
