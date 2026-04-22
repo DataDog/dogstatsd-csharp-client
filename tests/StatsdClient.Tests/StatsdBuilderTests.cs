@@ -28,7 +28,7 @@ namespace StatsdClient.Tests
             StatsdConfig.VersionEnvVar,
         };
 
-        private Mock<IStatsBufferizeFactory> _mock;
+        private Mock<IStatsSenderFactory> _mock;
         private StatsdBuilder _statsdBuilder;
         private UnixEndPoint _unixEndPoint;
         private IPEndPoint _ipEndPoint;
@@ -36,7 +36,7 @@ namespace StatsdClient.Tests
         [SetUp]
         public void Init()
         {
-            _mock = new Mock<IStatsBufferizeFactory>(MockBehavior.Loose);
+            _mock = new Mock<IStatsSenderFactory>(MockBehavior.Loose);
             _statsdBuilder = new StatsdBuilder(_mock.Object);
             _mock.Setup(m => m.CreateUnixDomainSocketTransport(
                             It.IsAny<UnixEndPoint>(),
@@ -129,7 +129,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void CreateStatsBufferizeUDP()
+        public void CreateAsynchronousBufferizedSenderUDP()
         {
             var config = new StatsdConfig { };
             var conf = config.Advanced;
@@ -141,7 +141,7 @@ namespace StatsdClient.Tests
             conf.DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(4);
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateStatsBufferize(
+            _mock.Verify(m => m.CreateAsynchronousBufferizedSender(
                 It.IsAny<StatsRouter>(),
                 conf.MaxMetricsInAsyncQueue,
                 conf.MaxBlockDuration,
@@ -155,7 +155,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void CreateStatsBufferizeUDS()
+        public void CreateAsynchronousBufferizedSenderUDS()
         {
             // Skip on Windows
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -167,7 +167,7 @@ namespace StatsdClient.Tests
             config.StatsdMaxUnixDomainSocketPacketSize = 20;
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateStatsBufferize(
+            _mock.Verify(m => m.CreateAsynchronousBufferizedSender(
                 It.IsAny<StatsRouter>(),
                 It.IsAny<int>(),
                 null,
@@ -262,9 +262,9 @@ namespace StatsdClient.Tests
                 It.IsAny<Aggregators>()),
                 Times.Once);
 
-            // CreateStatsBufferize should NOT be called in synchronous mode
+            // CreateAsynchronousBufferizedSender should NOT be called in synchronous mode
             _mock.Verify(
-                m => m.CreateStatsBufferize(
+                m => m.CreateAsynchronousBufferizedSender(
                 It.IsAny<StatsRouter>(),
                 It.IsAny<int>(),
                 It.IsAny<TimeSpan?>(),

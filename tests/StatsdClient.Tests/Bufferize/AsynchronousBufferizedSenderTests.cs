@@ -12,11 +12,11 @@ using Tests.Utils;
 namespace Tests
 {
     [TestFixture]
-    public class StatsBufferizeTests
+    public class AsynchronousBufferizedSenderTests
     {
         [Test]
         [Timeout(10000)]
-        public void StatsBufferize()
+        public void AsynchronousBufferizedSender()
         {
             var handler = new BufferBuilderHandlerMock();
             var bufferBuilder = new BufferBuilder(handler, 30, "\n", Tools.ExceptionHandler);
@@ -25,13 +25,13 @@ namespace Tests
                 EventSerializer = new EventSerializer(new SerializerHelper(null, null)),
             };
             var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
-            using (var statsBufferize = new StatsBufferize(statsRouter, 10, null, TimeSpan.Zero, Tools.ExceptionHandler))
+            using (var sender = new AsynchronousBufferizedSender(statsRouter, 10, null, TimeSpan.Zero, Tools.ExceptionHandler))
             {
                 var stats = new Stats { Kind = StatsKind.Event };
                 stats.Event.Text = "test";
                 stats.Event.Title = "title";
 
-                statsBufferize.Send(stats);
+                sender.Send(stats);
                 while (handler.Buffer == null)
                 {
                     Task.Delay(TimeSpan.FromMilliseconds(1)).Wait();

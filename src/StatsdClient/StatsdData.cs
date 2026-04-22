@@ -7,17 +7,17 @@ namespace StatsdClient
     internal class StatsdData : IDisposable
     {
         private ITransport _transport;
-        private IStatsBufferize _statsBufferize;
+        private IStatsSender _statsSender;
 
         public StatsdData(
             MetricsSender metricsSender,
-            IStatsBufferize statsBufferize,
+            IStatsSender statsSender,
             ITransport transport,
             Telemetry telemetry)
         {
             MetricsSender = metricsSender;
             Telemetry = telemetry;
-            _statsBufferize = statsBufferize;
+            _statsSender = statsSender;
             _transport = transport;
         }
 
@@ -27,7 +27,7 @@ namespace StatsdClient
 
         public void Flush(bool flushTelemetry)
         {
-            _statsBufferize?.Flush();
+            _statsSender?.Flush();
             if (flushTelemetry)
             {
                 Telemetry.Flush();
@@ -36,14 +36,14 @@ namespace StatsdClient
 
         public void Dispose()
         {
-            // _statsBufferize and _telemetry must be disposed before _statsSender to make
+            // _statsSender and _telemetry must be disposed before _statsSender to make
             // sure _statsSender does not receive data when it is already disposed.
 
             Telemetry?.Dispose();
             Telemetry = null;
 
-            _statsBufferize?.Dispose();
-            _statsBufferize = null;
+            _statsSender?.Dispose();
+            _statsSender = null;
 
             _transport?.Dispose();
             _transport = null;

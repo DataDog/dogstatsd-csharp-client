@@ -7,12 +7,12 @@ using StatsdClient.Transport;
 namespace StatsdClient.Bufferize
 {
     /// <summary>
-    /// IStatsBufferizeFactory is a factory for StatsBufferize.
-    /// It is used to test StatsBufferize.
+    /// IStatsSenderFactory is a factory for creating IStatsSender instances.
+    /// It is used to test StatsdBuilder.
     /// </summary>
-    internal interface IStatsBufferizeFactory
+    internal interface IStatsSenderFactory
     {
-        IStatsBufferize CreateStatsBufferize(
+        IStatsSender CreateAsynchronousBufferizedSender(
           StatsRouter statsRouter,
           int workerMaxItemCount,
           TimeSpan? blockingQueueTimeout,

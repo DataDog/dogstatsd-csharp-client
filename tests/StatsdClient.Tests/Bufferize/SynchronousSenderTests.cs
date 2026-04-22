@@ -282,6 +282,33 @@ namespace Tests
             }
         }
 
+        [Test]
+        public void ExceptionsRethrowWhenNoHandler()
+        {
+            var throwingHandler = new ThrowingBufferBuilderHandler();
+            var bufferBuilder = new BufferBuilder(throwingHandler, 20, "\n", null);
+            var serializers = new Serializers
+            {
+                MetricSerializer = new MetricSerializer(new SerializerHelper(null, null), string.Empty),
+            };
+            var statsRouter = new StatsRouter(serializers, bufferBuilder, null);
+
+            var sender = new SynchronousSender(statsRouter);
+
+            sender.TryDequeueFromPool(out var stats);
+            stats.Kind = StatsKind.Metric;
+            stats.Metric.MetricType = MetricType.Count;
+            stats.Metric.StatName = "will.fail";
+            stats.Metric.NumericValue = 1;
+            stats.Metric.SampleRate = 1.0;
+            stats.Metric.Tags = null;
+
+            // First send buffers the metric; second triggers a flush which throws
+            sender.Send(stats);
+            var ex = Assert.Throws<InvalidOperationException>(() => sender.Send(stats));
+            Assert.That(ex.Message, Does.Contain("Transport error"));
+        }
+
         /// <summary>
         /// Thread-safe handler that accumulates all buffers for verification.
         /// </summary>

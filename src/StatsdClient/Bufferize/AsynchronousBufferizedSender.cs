@@ -5,13 +5,13 @@ using StatsdClient.Worker;
 namespace StatsdClient.Bufferize
 {
     /// <summary>
-    /// StatsBufferize bufferizes metrics before sending them.
+    /// AsynchronousBufferizedSender bufferizes metrics before sending them.
     /// </summary>
-    internal class StatsBufferize : IStatsBufferize
+    internal class AsynchronousBufferizedSender : IStatsSender
     {
         private readonly AsynchronousWorker<Stats> _worker;
 
-        public StatsBufferize(
+        public AsynchronousBufferizedSender(
             StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,

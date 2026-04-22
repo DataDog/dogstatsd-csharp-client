@@ -8,7 +8,7 @@ namespace StatsdClient.Bufferize
     /// This is intended for serverless environments (e.g., AWS Lambda) where
     /// background threads may be frozen between invocations.
     /// </summary>
-    internal class SynchronousSender : IStatsBufferize
+    internal class SynchronousSender : IStatsSender
     {
         [ThreadStatic]
         private static Stats _threadLocalStats;
@@ -45,7 +45,14 @@ namespace StatsdClient.Bufferize
             }
             catch (Exception e)
             {
-                _optionalExceptionHandler?.Invoke(e);
+                if (_optionalExceptionHandler != null)
+                {
+                    _optionalExceptionHandler.Invoke(e);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
@@ -60,7 +67,14 @@ namespace StatsdClient.Bufferize
             }
             catch (Exception e)
             {
-                _optionalExceptionHandler?.Invoke(e);
+                if (_optionalExceptionHandler != null)
+                {
+                    _optionalExceptionHandler.Invoke(e);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 

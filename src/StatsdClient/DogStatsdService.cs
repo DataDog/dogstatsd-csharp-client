@@ -11,7 +11,7 @@ namespace StatsdClient
     /// </summary>
     public class DogStatsdService : IDogStatsd, IDisposable
     {
-        private StatsdBuilder _statsdBuilder = new StatsdBuilder(new StatsBufferizeFactory());
+        private StatsdBuilder _statsdBuilder = new StatsdBuilder(new StatsSenderFactory());
         private MetricsSender _metricsSender;
         private StatsdData _statsdData;
         private StatsdConfig _config;

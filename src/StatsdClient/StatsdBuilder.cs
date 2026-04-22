@@ -16,9 +16,9 @@ namespace StatsdClient
         public static readonly string UnixDomainSocketPrefix = "unix://";
         private const string _entityIdInternalTagKey = "dd.internal.entity_id";
 
-        private readonly IStatsBufferizeFactory _factory;
+        private readonly IStatsSenderFactory _factory;
 
-        public StatsdBuilder(IStatsBufferizeFactory factory)
+        public StatsdBuilder(IStatsSenderFactory factory)
         {
             _factory = factory;
         }
@@ -33,7 +33,7 @@ namespace StatsdClient
             var originDetectionEnabled = IsOriginDetectionEnabled(config);
             var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue, originDetectionEnabled, config.ContainerID);
             var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler, config.SynchronousMode);
-            var statsBufferize = CreateStatsBufferize(
+            var statsSender = CreateStatsSender(
                 telemetry,
                 transportData.Transport,
                 transportData.BufferCapacity,
@@ -44,13 +44,13 @@ namespace StatsdClient
                 optionalExceptionHandler);
 
             var metricsSender = new MetricsSender(
-                 statsBufferize,
+                 statsSender,
                  new RandomGenerator(),
                  new StopWatchFactory(),
                  telemetry,
                  config.StatsdTruncateIfTooLong,
                  config.Cardinality);
-            return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
+            return new StatsdData(metricsSender, statsSender, transport, telemetry);
         }
 
         private static bool IsOriginDetectionEnabled(StatsdConfig config)
@@ -246,7 +246,7 @@ namespace StatsdClient
             return transportData;
         }
 
-        private IStatsBufferize CreateStatsBufferize(
+        private IStatsSender CreateStatsSender(
             Telemetry telemetry,
             ITransport transport,
             int bufferCapacity,
@@ -284,7 +284,7 @@ namespace StatsdClient
                 return new SynchronousSender(statsRouter, optionalExceptionHandler);
             }
 
-            return _factory.CreateStatsBufferize(
+            return _factory.CreateAsynchronousBufferizedSender(
                 statsRouter,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,

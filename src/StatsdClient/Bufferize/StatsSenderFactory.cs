@@ -6,16 +6,16 @@ using StatsdClient.Transport;
 
 namespace StatsdClient.Bufferize
 {
-    internal class StatsBufferizeFactory : IStatsBufferizeFactory
+    internal class StatsSenderFactory : IStatsSenderFactory
     {
-        public IStatsBufferize CreateStatsBufferize(
+        public IStatsSender CreateAsynchronousBufferizedSender(
             StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending,
             Action<Exception> optionalExceptionHandler)
         {
-            return new StatsBufferize(
+            return new AsynchronousBufferizedSender(
                 statsRouter,
                 workerMaxItemCount,
                 blockingQueueTimeout,

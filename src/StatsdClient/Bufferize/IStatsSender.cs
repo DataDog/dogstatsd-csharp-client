@@ -4,9 +4,9 @@ using StatsdClient.Statistic;
 namespace StatsdClient.Bufferize
 {
     /// <summary>
-    /// IStatsBufferize defines the contract for sending stats to the pipeline.
+    /// IStatsSender defines the contract for sending stats to the pipeline.
     /// </summary>
-    internal interface IStatsBufferize : IDisposable
+    internal interface IStatsSender : IDisposable
     {
         bool TryDequeueFromPool(out Stats stats);
 
