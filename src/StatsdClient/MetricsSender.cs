@@ -7,14 +7,14 @@ namespace StatsdClient
     internal class MetricsSender
     {
         private readonly Telemetry _optionalTelemetry;
-        private readonly StatsBufferize _statsBufferize;
+        private readonly IStatsSender _statsSender;
         private readonly bool _truncateIfTooLong;
         private readonly IStopWatchFactory _stopwatchFactory;
         private readonly IRandomGenerator _randomGenerator;
         private readonly Cardinality? _defaultCardinality;
 
         internal MetricsSender(
-                    StatsBufferize statsBufferize,
+                    IStatsSender statsSender,
                     IRandomGenerator randomGenerator,
                     IStopWatchFactory stopwatchFactory,
                     Telemetry optionalTelemetry,
@@ -22,7 +22,7 @@ namespace StatsdClient
                     Cardinality? defaultCardinality = null)
         {
             _stopwatchFactory = stopwatchFactory;
-            _statsBufferize = statsBufferize;
+            _statsSender = statsSender;
             _randomGenerator = randomGenerator;
             _optionalTelemetry = optionalTelemetry;
             _truncateIfTooLong = truncateIfTooLong;
@@ -142,7 +142,7 @@ namespace StatsdClient
 
         private bool TryDequeueStats(out Stats stats)
         {
-            if (_statsBufferize.TryDequeueFromPool(out stats))
+            if (_statsSender.TryDequeueFromPool(out stats))
             {
                 return true;
             }
@@ -151,6 +151,6 @@ namespace StatsdClient
             return false;
         }
 
-        private void Send(Stats metricFields) => _statsBufferize.Send(metricFields);
+        private void Send(Stats metricFields) => _statsSender.Send(metricFields);
     }
 }

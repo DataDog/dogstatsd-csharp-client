@@ -28,7 +28,7 @@ namespace StatsdClient.Tests
             StatsdConfig.VersionEnvVar,
         };
 
-        private Mock<IStatsBufferizeFactory> _mock;
+        private Mock<IStatsSenderFactory> _mock;
         private StatsdBuilder _statsdBuilder;
         private UnixEndPoint _unixEndPoint;
         private IPEndPoint _ipEndPoint;
@@ -36,7 +36,7 @@ namespace StatsdClient.Tests
         [SetUp]
         public void Init()
         {
-            _mock = new Mock<IStatsBufferizeFactory>(MockBehavior.Loose);
+            _mock = new Mock<IStatsSenderFactory>(MockBehavior.Loose);
             _statsdBuilder = new StatsdBuilder(_mock.Object);
             _mock.Setup(m => m.CreateUnixDomainSocketTransport(
                             It.IsAny<UnixEndPoint>(),
@@ -55,6 +55,13 @@ namespace StatsdClient.Tests
                             return new UDPTransport(e);
                         });
             _ipEndPoint = null;
+
+            _mock.Setup(m => m.CreateStatsRouter(
+                            It.IsAny<Serializers>(),
+                            It.IsAny<BufferBuilder>(),
+                            It.IsAny<Aggregators>()))
+                            .Returns<Serializers, BufferBuilder, Aggregators>(
+                                (s, b, a) => new StatsRouter(s, b, a));
 
             foreach (var key in _envVarsKeyToRestore)
             {
@@ -122,7 +129,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void CreateStatsBufferizeUDP()
+        public void CreateAsynchronousBufferizedSenderUDP()
         {
             var config = new StatsdConfig { };
             var conf = config.Advanced;
@@ -134,7 +141,7 @@ namespace StatsdClient.Tests
             conf.DurationBeforeSendingNotFullBuffer = TimeSpan.FromMilliseconds(4);
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateStatsBufferize(
+            _mock.Verify(m => m.CreateAsynchronousBufferizedSender(
                 It.IsAny<StatsRouter>(),
                 conf.MaxMetricsInAsyncQueue,
                 conf.MaxBlockDuration,
@@ -148,7 +155,7 @@ namespace StatsdClient.Tests
         }
 
         [Test]
-        public void CreateStatsBufferizeUDS()
+        public void CreateAsynchronousBufferizedSenderUDS()
         {
             // Skip on Windows
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -160,7 +167,7 @@ namespace StatsdClient.Tests
             config.StatsdMaxUnixDomainSocketPacketSize = 20;
 
             BuildStatsData(config);
-            _mock.Verify(m => m.CreateStatsBufferize(
+            _mock.Verify(m => m.CreateAsynchronousBufferizedSender(
                 It.IsAny<StatsRouter>(),
                 It.IsAny<int>(),
                 null,
@@ -202,7 +209,8 @@ namespace StatsdClient.Tests
                 conf.TelemetryFlushInterval.Value,
                 It.IsAny<ITransport>(),
                 It.Is<string[]>(tags => Enumerable.SequenceEqual(tags, expectedTags)),
-                Tools.ExceptionHandler));
+                Tools.ExceptionHandler,
+                false));
         }
 
         [Test]
@@ -235,6 +243,56 @@ namespace StatsdClient.Tests
                 It.IsAny<Serializers>(),
                 It.Is<BufferBuilder>(b => b.Capacity == config.StatsdMaxUDPPacketSize),
                 It.IsNotNull<Aggregators>()));
+        }
+
+        [Test]
+        public void SynchronousModeSkipsAsyncBufferize()
+        {
+            var config = new StatsdConfig { };
+            config.SynchronousMode = true;
+            config.Advanced.TelemetryFlushInterval = null;
+
+            BuildStatsData(config);
+
+            // StatsRouter should still be created
+            _mock.Verify(
+                m => m.CreateStatsRouter(
+                It.IsAny<Serializers>(),
+                It.IsAny<BufferBuilder>(),
+                It.IsAny<Aggregators>()),
+                Times.Once);
+
+            // CreateAsynchronousBufferizedSender should NOT be called in synchronous mode
+            _mock.Verify(
+                m => m.CreateAsynchronousBufferizedSender(
+                It.IsAny<StatsRouter>(),
+                It.IsAny<int>(),
+                It.IsAny<TimeSpan?>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<Action<Exception>>()),
+                Times.Never);
+        }
+
+        [Test]
+        public void SynchronousModeTelemetry()
+        {
+            var config = new StatsdConfig { };
+            config.SynchronousMode = true;
+            config.Advanced.TelemetryFlushInterval = TimeSpan.FromMinutes(1);
+
+            BuildStatsData(config);
+
+            // Telemetry should be created with synchronousMode = true
+            _mock.Verify(
+                m => m.CreateTelemetry(
+                It.IsAny<MetricSerializer>(),
+                It.IsAny<string>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<ITransport>(),
+                It.IsAny<string[]>(),
+                It.IsAny<Action<Exception>>(),
+                true),
+                Times.Once);
         }
 
         [Test]

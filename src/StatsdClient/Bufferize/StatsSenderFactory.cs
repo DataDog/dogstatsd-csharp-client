@@ -6,16 +6,16 @@ using StatsdClient.Transport;
 
 namespace StatsdClient.Bufferize
 {
-    internal class StatsBufferizeFactory : IStatsBufferizeFactory
+    internal class StatsSenderFactory : IStatsSenderFactory
     {
-        public StatsBufferize CreateStatsBufferize(
+        public IStatsSender CreateAsynchronousBufferizedSender(
             StatsRouter statsRouter,
             int workerMaxItemCount,
             TimeSpan? blockingQueueTimeout,
             TimeSpan maxIdleWaitBeforeSending,
             Action<Exception> optionalExceptionHandler)
         {
-            return new StatsBufferize(
+            return new AsynchronousBufferizedSender(
                 statsRouter,
                 workerMaxItemCount,
                 blockingQueueTimeout,
@@ -49,9 +49,10 @@ namespace StatsdClient.Bufferize
             TimeSpan flushInterval,
             ITransport transport,
             string[] globalTags,
-            Action<Exception> optionalExceptionHandler)
+            Action<Exception> optionalExceptionHandler,
+            bool synchronousMode = false)
         {
-            return new Telemetry(metricSerializer, assemblyVersion, flushInterval, transport, globalTags, optionalExceptionHandler);
+            return new Telemetry(metricSerializer, assemblyVersion, flushInterval, transport, globalTags, optionalExceptionHandler, synchronousMode);
         }
 
         public ITransport CreateNamedPipeTransport(string pipeName)

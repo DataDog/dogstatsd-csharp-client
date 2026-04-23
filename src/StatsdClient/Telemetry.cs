@@ -40,7 +40,8 @@ namespace StatsdClient
             TimeSpan flushInterval,
             ITransport transport,
             string[] globalTags,
-            Action<Exception> optionalExceptionHandler)
+            Action<Exception> optionalExceptionHandler,
+            bool synchronousMode = false)
         {
             _optionalMetricSerializer = metricSerializer;
             _optionalTransport = transport;
@@ -53,11 +54,14 @@ namespace StatsdClient
             _aggregatedContexts.Add(MetricType.Count, new ValueWithTags(_optionalTags, "metrics_type:count"));
             _aggregatedContexts.Add(MetricType.Set, new ValueWithTags(_optionalTags, "metrics_type:set"));
             _optionalExceptionHandler = optionalExceptionHandler;
-            _optionalTimer = new Timer(
-                _ => Flush(),
-                null,
-                flushInterval,
-                flushInterval);
+            if (!synchronousMode)
+            {
+                _optionalTimer = new Timer(
+                    _ => Flush(),
+                    null,
+                    flushInterval,
+                    flushInterval);
+            }
         }
 
         public static string MetricsMetricName => _telemetryPrefix + "metrics";

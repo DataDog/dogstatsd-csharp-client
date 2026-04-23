@@ -16,9 +16,9 @@ namespace StatsdClient
         public static readonly string UnixDomainSocketPrefix = "unix://";
         private const string _entityIdInternalTagKey = "dd.internal.entity_id";
 
-        private readonly IStatsBufferizeFactory _factory;
+        private readonly IStatsSenderFactory _factory;
 
-        public StatsdBuilder(IStatsBufferizeFactory factory)
+        public StatsdBuilder(IStatsSenderFactory factory)
         {
             _factory = factory;
         }
@@ -32,24 +32,25 @@ namespace StatsdClient
 
             var originDetectionEnabled = IsOriginDetectionEnabled(config);
             var serializers = CreateSerializers(config.Prefix, globalTags, config.Advanced.MaxMetricsInAsyncQueue, originDetectionEnabled, config.ContainerID);
-            var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler);
-            var statsBufferize = CreateStatsBufferize(
+            var telemetry = CreateTelemetry(serializers.MetricSerializer, config, globalTags, endPoint, transportData.Transport, optionalExceptionHandler, config.SynchronousMode);
+            var statsSender = CreateStatsSender(
                 telemetry,
                 transportData.Transport,
                 transportData.BufferCapacity,
                 config.Advanced,
                 serializers,
                 config.ClientSideAggregation,
+                config.SynchronousMode,
                 optionalExceptionHandler);
 
             var metricsSender = new MetricsSender(
-                 statsBufferize,
+                 statsSender,
                  new RandomGenerator(),
                  new StopWatchFactory(),
                  telemetry,
                  config.StatsdTruncateIfTooLong,
                  config.Cardinality);
-            return new StatsdData(metricsSender, statsBufferize, transport, telemetry);
+            return new StatsdData(metricsSender, statsSender, transport, telemetry);
         }
 
         private static bool IsOriginDetectionEnabled(StatsdConfig config)
@@ -179,7 +180,8 @@ namespace StatsdClient
             string[] globalTags,
             DogStatsdEndPoint dogStatsdEndPoint,
             ITransport transport,
-            Action<Exception> optionalExceptionHandler)
+            Action<Exception> optionalExceptionHandler,
+            bool synchronousMode = false)
         {
             var telemetryFlush = config.Advanced.TelemetryFlushInterval;
 
@@ -194,7 +196,7 @@ namespace StatsdClient
                     telemetryTransport = CreateTransport(optionalTelemetryEndPoint, config);
                 }
 
-                return _factory.CreateTelemetry(metricSerializer, version, telemetryFlush.Value, telemetryTransport, globalTags, optionalExceptionHandler);
+                return _factory.CreateTelemetry(metricSerializer, version, telemetryFlush.Value, telemetryTransport, globalTags, optionalExceptionHandler, synchronousMode);
             }
 
             // Telemetry is not enabled
@@ -244,13 +246,14 @@ namespace StatsdClient
             return transportData;
         }
 
-        private StatsBufferize CreateStatsBufferize(
+        private IStatsSender CreateStatsSender(
             Telemetry telemetry,
             ITransport transport,
             int bufferCapacity,
             AdvancedStatsConfig config,
             Serializers serializers,
             ClientSideAggregationConfig optionalClientSideAggregationConfig,
+            bool synchronousMode,
             Action<Exception> optionalExceptionHandler)
         {
             var bufferHandler = new BufferBuilderHandler(telemetry, transport);
@@ -276,14 +279,17 @@ namespace StatsdClient
 
             var statsRouter = _factory.CreateStatsRouter(serializers, bufferBuilder, optionalAggregators);
 
-            var statsBufferize = _factory.CreateStatsBufferize(
+            if (synchronousMode)
+            {
+                return new SynchronousSender(statsRouter, optionalExceptionHandler);
+            }
+
+            return _factory.CreateAsynchronousBufferizedSender(
                 statsRouter,
                 config.MaxMetricsInAsyncQueue,
                 config.MaxBlockDuration,
                 config.DurationBeforeSendingNotFullBuffer,
                 optionalExceptionHandler);
-
-            return statsBufferize;
         }
 
         private ITransport CreateUDPTransport(DogStatsdEndPoint endPoint)
