@@ -25,7 +25,7 @@ git checkout master
 git pull origin master
 ```
 
-Verify the top commit is the release commit (message should be "Release version X.Y.Z"). If it is not, stop and tell the user to ensure the release PR is merged before running this skill.
+Re-read `<PackageVersion>` from `src/StatsdClient/StatsdClient.csproj` and verify it still matches X.Y.Z. If it does not, stop and tell the user to ensure the release PR is merged before running this skill.
 
 ---
 
