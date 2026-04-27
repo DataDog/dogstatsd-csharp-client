@@ -5,7 +5,7 @@ CHANGELOG
 
 ## Changes
 
-* [FEATURE] Add synchronous mode for serverless environments. Set `StatsdConfig.SynchronousMode = true` to bypass the async background worker and send metrics directly on the calling thread, eliminating metric loss on sandbox freeze in AWS Lambda and similar runtimes. See [#227][].
+* [FEATURE] Add synchronous mode for serverless environments. Set `StatsdConfig.SynchronousMode = true` to bypass the async background worker and route metrics on the calling thread. Call `Flush()` at the end of each handler invocation to send any remaining buffered metrics before the sandbox freezes. See [#227][].
 
 # 9.0.0 / 2025-08-18
 
