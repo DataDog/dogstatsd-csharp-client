@@ -12,7 +12,7 @@ Create a release branch with version bump and changelog, then open a PR for revi
 
 ## Step 1: Confirm Version
 
-If the user did not supply a version number, read `src/StatsdClient/StatsdClient.csproj` and show the current `<PackageVersion>`. Ask: "Prepare release for X.Y.Z?" and wait for confirmation before proceeding.
+If the user did not supply a version number, read `src/StatsdClient/StatsdClient.csproj` and show the current version. Use `<PackageVersion>` if present; otherwise fall back to `<Version>`. Ask: "Prepare release for X.Y.Z?" and wait for confirmation before proceeding.
 
 ---
 
