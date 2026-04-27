@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+# 9.1.0 / 2026-04-27
+
+## Changes
+
+* [FEATURE] Add synchronous mode for serverless environments. Set `StatsdConfig.SynchronousMode = true` to bypass the async background worker and send metrics directly on the calling thread, eliminating metric loss on sandbox freeze in AWS Lambda and similar runtimes. See [#227][].
+
 # 9.0.0 / 2025-08-18
 
 ## Breaking Changes
@@ -285,6 +291,10 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#186]: https://github.com/DataDog/dogstatsd-csharp-client/issues/186
 [#187]: https://github.com/DataDog/dogstatsd-csharp-client/issues/187
 [#188]: https://github.com/DataDog/dogstatsd-csharp-client/issues/188
+[#209]: https://github.com/DataDog/dogstatsd-csharp-client/issues/209
+[#211]: https://github.com/DataDog/dogstatsd-csharp-client/issues/211
+[#213]: https://github.com/DataDog/dogstatsd-csharp-client/issues/213
+[#227]: https://github.com/DataDog/dogstatsd-csharp-client/issues/227
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
