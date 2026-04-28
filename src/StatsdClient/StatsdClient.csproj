@@ -4,6 +4,7 @@
     <PackageId>DogStatsD-CSharp-Client</PackageId>
     <TargetFrameworks>net461;netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+    <PackageVersion>9.1.0</PackageVersion>
     <Version>9.0.0</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StatsdClient.snk</AssemblyOriginatorKeyFile>
