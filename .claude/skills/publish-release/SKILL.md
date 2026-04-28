@@ -29,12 +29,23 @@ Re-read `<PackageVersion>` from `src/StatsdClient/StatsdClient.csproj` and verif
 
 ---
 
-## Step 3: Tag the Release
+## Step 3: Tag the Release and Publish GitHub Release
+
+Use `gh release create` — creates the tag, pushes it, and publishes a GitHub Release in one step.
+
+Extract the X.Y.Z section from `CHANGELOG.md` into a temp file (everything between the `## X.Y.Z` heading and the next `## ` heading), then:
 
 ```bash
-git tag X.Y.Z
-git push origin X.Y.Z
+gh release create X.Y.Z --target master --title "X.Y.Z" --notes-file <changelog-section-file>
 ```
+
+If extraction is awkward, fall back to `--generate-notes` (auto from commits/PRs):
+
+```bash
+gh release create X.Y.Z --target master --title "X.Y.Z" --generate-notes
+```
+
+Verify tag pushed: `git fetch --tags && git tag -l X.Y.Z`.
 
 ---
 
@@ -79,7 +90,8 @@ dotnet nuget push artifacts/nuget/DogStatsD-CSharp-Client.X.Y.Z.snupkg \
 ## Summary Checklist
 
 - [ ] On latest master with release commit at HEAD
-- [ ] Git tag X.Y.Z created and pushed
+- [ ] Git tag X.Y.Z created and pushed via `gh release create`
+- [ ] GitHub Release X.Y.Z published with notes
 - [ ] `dotnet pack` succeeded, .nupkg exists
 - [ ] .nupkg pushed to NuGet.org
 - [ ] .snupkg (symbols) pushed to NuGet.org
