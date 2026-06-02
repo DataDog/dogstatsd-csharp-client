@@ -9,8 +9,8 @@ using StatsdClient;
 namespace Tests
 {
     /// <summary>
-    /// Integration tests for the native libfs library on Linux.
-    /// These tests interact directly with the native library rather than mocking.
+    /// Integration tests for the inode lookup (statx P/Invoke) on Linux.
+    /// These tests exercise the real system call rather than mocking.
     /// </summary>
     [TestFixture]
     public class NativeLibraryTests
@@ -26,7 +26,7 @@ namespace Tests
         [Test]
         public void TryStat_WithValidFile_ReturnsTrue()
         {
-            // Only run on Linux where the native library is available
+            // Only run on Linux where statx is available
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 Assert.Ignore("Test only runs on Linux");
@@ -193,7 +193,7 @@ namespace Tests
             Assert.IsTrue(result, "TryStat should succeed for symlink");
             Assert.Greater(inode, 0UL, "Inode should be greater than 0");
 
-            // stat() follows symlinks by default, so we should get the target's inode
+            // statx with flags = 0 follows symlinks, so we should get the target's inode
             // We can't easily verify this without lstat support, but at least verify it works
         }
 

@@ -9,8 +9,6 @@ This is the DogStatsD C# client library (https://github.com/DataDog/dogstatsd-cs
 ## Build and Test Commands
 
 ### Building
-
-#### .NET Library (Cross-platform)
 ```bash
 # Restore dependencies
 dotnet restore
@@ -25,46 +23,6 @@ dotnet build src/StatsdClient/StatsdClient.csproj
 dotnet build src/StatsdClient/StatsdClient.csproj -f netstandard2.0
 ```
 
-#### Native Library (Linux only)
-
-The repository includes a small native C library (`libfs`) for Linux inode operations. See `src/StatsdClient.Native/README.md` for details.
-
-**Using build-and-test.sh (recommended):**
-```bash
-# Build all 4 Linux variants using Docker (linux-x64, linux-musl-x64, linux-arm64, linux-musl-arm64)
-./build-and-test.sh --platform linux
-
-# Build and test all Linux variants
-./build-and-test.sh --test --platform linux
-
-# Build and test .NET for specific framework (native platform, no Docker)
-./build-and-test.sh --test --platform native --framework net8.0
-
-# Build and test .NET for all frameworks sequentially (native platform, no Docker)
-./build-and-test.sh --test --platform native
-```
-
-**Local build (Linux/WSL only):**
-```bash
-# Build for specific RID (outputs to runtimes/{rid}/native/)
-./src/StatsdClient.Native/build.sh linux-x64
-./src/StatsdClient.Native/build.sh linux-musl-x64
-
-# Build for local development (outputs to src/StatsdClient.Native/build/)
-./src/StatsdClient.Native/build.sh
-```
-
-**Output locations:**
-- Docker builds: `runtimes/{rid}/native/libfs.so`
-- Local builds with RID: `runtimes/{rid}/native/libfs.so`
-- Local builds without RID: `src/StatsdClient.Native/build/libfs.so`
-
-**Supported RIDs** (per [official .NET RID catalog](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids)):
-- `linux-x64` (standard x64 Linux with glibc)
-- `linux-musl-x64` (Alpine x64 Linux with musl)
-- `linux-arm64` (standard ARM64 Linux with glibc)
-- `linux-musl-arm64` (Alpine ARM64 Linux with musl)
-
 ### Testing
 
 **IMPORTANT**: Always specify `--framework` when running tests. Running tests without a framework will run all target frameworks in parallel, which causes conflicts due to shared named pipes.
@@ -72,9 +30,6 @@ The repository includes a small native C library (`libfs`) for Linux inode opera
 ```bash
 # Run tests for a specific framework (REQUIRED)
 dotnet test tests/StatsdClient.Tests/ --framework net8.0
-
-# Run only native library tests
-dotnet test tests/StatsdClient.Tests/ --framework net8.0 --filter FullyQualifiedName~NativeLibraryTests
 
 # Run a single test class
 dotnet test tests/StatsdClient.Tests/ --framework net8.0 --filter FullyQualifiedName~DogStatsdServiceMetricsTests
@@ -96,19 +51,11 @@ done
 
 ### Packaging
 
-To build the NuGet package with all native libraries:
-
 ```bash
-# Step 1: Build all native variants using Docker
-./build-and-test.sh --platform linux
-
-# Step 2: Pack the NuGet package
 dotnet pack src/StatsdClient/StatsdClient.csproj -c Release
 
 # Output: src/StatsdClient/bin/Release/*.nupkg
 ```
-
-The package will include all 4 native library variants in the correct RID directories.
 
 ### Benchmarks
 ```bash
