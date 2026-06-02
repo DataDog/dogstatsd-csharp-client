@@ -54,7 +54,7 @@ done
 ```bash
 dotnet pack src/StatsdClient/StatsdClient.csproj -c Release
 
-# Output: src/StatsdClient/bin/Release/*.nupkg
+# Output: artifacts/package/release/*.nupkg (UseArtifactsOutput is enabled in Directory.Build.props)
 ```
 
 ### Benchmarks
@@ -106,13 +106,11 @@ Aggregation window defaults to 2 seconds (configurable via `ClientSideAggregatio
 
 ## Target Frameworks
 
-The library supports:
-- .NET Standard 2.0+
-- .NET Core 2.1, 3.0, 3.1
-- .NET 5.0, 6.0, 7.0, 8.0, 9.0
-- .NET Framework 4.8
+The library (`src/StatsdClient/StatsdClient.csproj`) targets: `net461`, `netstandard2.0`, `netcoreapp3.1`, `net6.0`.
 
-Tests run on all supported frameworks via GitHub Actions (Linux and Windows).
+The test project (`tests/StatsdClient.Tests/StatsdClient.Tests.csproj`) targets a wider range to validate the library on all supported runtimes: netcoreapp2.1, 3.0, 3.1; net5.0 through net10.0; plus net48 on Windows.
+
+Tests run on all test frameworks via GitHub Actions (Linux, Windows, and macOS). See `.github/workflows/build-and-test.yml`.
 
 ## Key Design Patterns
 

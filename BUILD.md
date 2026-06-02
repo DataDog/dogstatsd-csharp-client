@@ -17,6 +17,7 @@ dotnet test --framework net8.0
 
 # Pack the NuGet package
 dotnet pack src/StatsdClient/StatsdClient.csproj -c Release
+# Output: artifacts/package/release/*.nupkg
 ```
 
 ## Building
@@ -93,11 +94,15 @@ Or use the build script:
 ./build-and-test.sh --test
 ```
 
-### Supported Target Frameworks
+### Supported Test Frameworks
+
+The test project runs against:
 
 - .NET Framework 4.8 (Windows only)
 - .NET Core 2.1, 3.0, 3.1
 - .NET 5, 6, 7, 8, 9, 10
+
+The library itself (`src/StatsdClient/StatsdClient.csproj`) targets `net461`, `netstandard2.0`, `netcoreapp3.1`, and `net6.0`.
 
 ## Packaging
 
@@ -106,8 +111,10 @@ To create a NuGet package:
 ```bash
 dotnet pack src/StatsdClient/StatsdClient.csproj -c Release
 
-# Output: src/StatsdClient/bin/Release/*.nupkg
+# Output: artifacts/package/release/*.nupkg
 ```
+
+The build uses .NET's artifacts output layout (`UseArtifactsOutput` in `Directory.Build.props`), so build and package outputs go to the top-level `artifacts/` directory rather than per-project `bin/` and `obj/` folders.
 
 ## Benchmarks
 
@@ -139,6 +146,6 @@ Remove build artifacts:
 # Clean .NET build outputs
 dotnet clean
 
-# Remove NuGet packages
-rm -rf src/StatsdClient/bin/ src/StatsdClient/obj/
+# Remove all build and package outputs
+rm -rf artifacts/
 ```
