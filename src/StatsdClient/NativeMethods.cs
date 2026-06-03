@@ -37,11 +37,15 @@ namespace StatsdClient
         {
             inode = 0;
 
-            if (!IsSupported)
+            if (string.IsNullOrEmpty(path))
             {
                 return false;
             }
 
+            if (!IsSupported)
+            {
+                return false;
+            }
             try
             {
                 // flags = 0 means symlinks are followed, matching stat() behavior (needed for the
