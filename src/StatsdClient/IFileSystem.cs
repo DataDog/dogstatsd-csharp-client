@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace StatsdClient
 {
@@ -81,16 +79,14 @@ namespace StatsdClient
         /// <returns>True if the file stat was successful, false otherwise</returns>
         public bool TryStat(string path, out ulong inode)
         {
-#if !NETFRAMEWORK // Unix Domain Sockets not supported on .NET Framework which always runs on Windows.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return NativeMethods.TryGetInode(path, out inode);
-            }
-#endif
-
-            // Unsupported .NET runtime or OS
+#if !NETFRAMEWORK
+            // Inode lookup is only supported on Linux; TryGetInode performs the platform check.
+            return NativeMethods.TryGetInode(path, out inode);
+#else
+            // Inode lookup is unsupported on .NET Framework, which always runs on Windows.
             inode = 0;
             return false;
+#endif
         }
     }
 }
