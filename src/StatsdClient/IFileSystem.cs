@@ -81,7 +81,7 @@ namespace StatsdClient
         /// <returns>True if the file stat was successful, false otherwise</returns>
         public bool TryStat(string path, out ulong inode)
         {
-#if !NETFRAMEWORK // Unix Domain Sockets not supported on .NET Framework (always runs on Windows).
+#if !NETFRAMEWORK // Unix Domain Sockets not supported on .NET Framework which always runs on Windows.
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return NativeMethods.TryGetInode(path, out inode);
