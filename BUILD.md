@@ -47,16 +47,6 @@ dotnet build src/StatsdClient/StatsdClient.csproj -f netstandard2.0
 
 **Always specify `--framework` when running tests.** Running tests without a framework specification will run all target frameworks in parallel, causing conflicts due to shared named pipes.
 
-### Using build-and-test.sh
-
-```bash
-# Test a specific framework
-./build-and-test.sh --test --framework net8.0
-
-# Test all frameworks sequentially
-./build-and-test.sh --test
-```
-
 ### Using dotnet test
 
 ```bash
@@ -87,11 +77,6 @@ done
 for tfm in net48 netcoreapp2.1 netcoreapp3.0 netcoreapp3.1 net5.0 net6.0 net7.0 net8.0 net9.0 net10.0; do
     dotnet test --framework $tfm
 done
-```
-
-Or use the build script:
-```bash
-./build-and-test.sh --test
 ```
 
 ### Supported Test Frameworks
