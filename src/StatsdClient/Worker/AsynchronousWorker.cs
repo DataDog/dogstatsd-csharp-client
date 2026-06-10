@@ -36,7 +36,7 @@ namespace StatsdClient.Worker
             _optionalExceptionHandler = optionalExceptionHandler;
             for (int i = 0; i < workerThreadCount; ++i)
             {
-                _workers.Add(Task.Factory.StartNew(() => Dequeue(), TaskCreationOptions.LongRunning));
+                _workers.Add(Task.Factory.StartNew(() => Dequeue(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default));
             }
         }
 

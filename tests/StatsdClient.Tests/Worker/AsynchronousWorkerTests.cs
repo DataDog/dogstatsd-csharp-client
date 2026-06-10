@@ -94,6 +94,33 @@ namespace Tests
             }
         }
 
+        // Regression test for https://github.com/DataDog/dogstatsd-csharp-client/issues/204.
+        // The worker must not inherit the caller's TaskScheduler; otherwise a long-running
+        // Dequeue() loop can end up pinned to a UI SynchronizationContext and freeze the app.
+        [Test]
+        [Timeout(5000)]
+        public void WorkerTasksDoNotInheritCallerScheduler()
+        {
+            const int workerThreadCount = 3;
+            var trackingScheduler = new TrackingTaskScheduler();
+
+            var outerTask = Task.Factory.StartNew(
+                () => CreateWorker(workerThreadCount: workerThreadCount),
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                trackingScheduler);
+
+            Assert.IsTrue(outerTask.Wait(TimeSpan.FromSeconds(3)));
+
+            // The only task queued on the tracking scheduler should be the outer task itself.
+            // If AsynchronousWorker inherits TaskScheduler.Current, the worker tasks would be
+            // queued here too, bringing the count up to 1 + workerThreadCount.
+            Assert.AreEqual(
+                1,
+                trackingScheduler.QueueCount,
+                "AsynchronousWorker leaked worker tasks onto the caller's TaskScheduler (issue #204).");
+        }
+
 #if NETFRAMEWORK
         /// <summary>
         /// This test can only fail when run on the .NET Framework in 64-bit release build using RyuJIT.
@@ -125,6 +152,23 @@ namespace Tests
                 Tools.ExceptionHandler);
             _workers.Add(worker);
             return worker;
+        }
+
+        private sealed class TrackingTaskScheduler : TaskScheduler
+        {
+            private int _queueCount;
+
+            public int QueueCount => Volatile.Read(ref _queueCount);
+
+            protected override void QueueTask(Task task)
+            {
+                Interlocked.Increment(ref _queueCount);
+                ThreadPool.UnsafeQueueUserWorkItem(_ => TryExecuteTask(task), null);
+            }
+
+            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => false;
+
+            protected override IEnumerable<Task> GetScheduledTasks() => Array.Empty<Task>();
         }
 
 #if NETFRAMEWORK
