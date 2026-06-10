@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+# 9.2.0 / 2026-06-10
+
+## Changes
+
+* [IMPROVEMENT] Use default scheduler for worker tasks. See [#205][].
+* [IMPROVEMENT] Remove `Mono.Unix` dependency. See [#223][].
+
 # 9.1.0 / 2026-04-27
 
 ## Changes
@@ -291,9 +298,11 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#186]: https://github.com/DataDog/dogstatsd-csharp-client/issues/186
 [#187]: https://github.com/DataDog/dogstatsd-csharp-client/issues/187
 [#188]: https://github.com/DataDog/dogstatsd-csharp-client/issues/188
+[#205]: https://github.com/DataDog/dogstatsd-csharp-client/issues/205
 [#209]: https://github.com/DataDog/dogstatsd-csharp-client/issues/209
 [#211]: https://github.com/DataDog/dogstatsd-csharp-client/issues/211
 [#213]: https://github.com/DataDog/dogstatsd-csharp-client/issues/213
+[#223]: https://github.com/DataDog/dogstatsd-csharp-client/issues/223
 [#227]: https://github.com/DataDog/dogstatsd-csharp-client/issues/227
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
