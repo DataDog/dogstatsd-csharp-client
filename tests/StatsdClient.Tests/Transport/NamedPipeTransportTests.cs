@@ -1,5 +1,6 @@
 #if OS_WINDOWS
 using System;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,6 +77,34 @@ namespace Tests
                     Assert.True(transport.Send(_buffToSend, _buffToSend.Length));
                     CollectionAssert.AreEqual(task.Result, _buffToSend);
                 }
+            }
+        }
+
+        [Test]
+        public void ConnectionCooldownAvoidsRepeatedBlocking()
+        {
+            var connectTimeout = TimeSpan.FromSeconds(1);
+            var cooldown = TimeSpan.FromSeconds(10);
+
+            // No server listens on this pipe, so Connect blocks for the full timeout and fails.
+            using (var transport = new NamedPipeTransport("cooldownPipeNameTest", connectTimeout, cooldown))
+            {
+                var stopwatch = Stopwatch.StartNew();
+                Assert.False(transport.Send(_buffToSend, _buffToSend.Length));
+                var firstSendDuration = stopwatch.Elapsed;
+
+                stopwatch.Restart();
+                for (int i = 0; i < 5; i++)
+                {
+                    Assert.False(transport.Send(_buffToSend, _buffToSend.Length));
+                }
+
+                var cooldownSendsDuration = stopwatch.Elapsed;
+
+                // The first send pays the connect timeout; subsequent sends within the
+                // cooldown fail fast instead of each blocking on Connect again.
+                Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(500)));
+                Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(500)));
             }
         }
 

@@ -14,11 +14,14 @@ namespace StatsdClient
     {
         private static string _telemetryPrefix = "datadog.dogstatsd.client.";
         private readonly Timer _optionalTimer;
+        private readonly TimeSpan _flushInterval;
+        private readonly object _timerLock = new object();
         private readonly string[] _optionalTags;
         private readonly MetricSerializer _optionalMetricSerializer;
         private readonly ITransport _optionalTransport;
         private readonly Dictionary<MetricType, ValueWithTags> _aggregatedContexts = new Dictionary<MetricType, ValueWithTags>();
         private readonly Action<Exception> _optionalExceptionHandler;
+        private bool _disposed;
 
         private int _metricsSent;
         private int _eventsSent;
@@ -54,13 +57,18 @@ namespace StatsdClient
             _aggregatedContexts.Add(MetricType.Count, new ValueWithTags(_optionalTags, "metrics_type:count"));
             _aggregatedContexts.Add(MetricType.Set, new ValueWithTags(_optionalTags, "metrics_type:set"));
             _optionalExceptionHandler = optionalExceptionHandler;
+            _flushInterval = flushInterval;
             if (!synchronousMode)
             {
+                // One-shot timer re-armed at the end of each flush (see OnTimerFlush) so that
+                // at most one flush runs at a time. A periodic timer would keep dispatching
+                // callbacks onto the thread pool even while a flush is blocked on a stalled
+                // transport, growing the thread count without bound.
                 _optionalTimer = new Timer(
-                    _ => Flush(),
+                    _ => OnTimerFlush(),
                     null,
                     flushInterval,
-                    flushInterval);
+                    Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -170,8 +178,33 @@ namespace StatsdClient
 
         public void Dispose()
         {
-            _optionalTimer?.Change(Timeout.Infinite, Timeout.Infinite);
-            _optionalTimer?.Dispose();
+            lock (_timerLock)
+            {
+                _disposed = true;
+                _optionalTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+                _optionalTimer?.Dispose();
+            }
+        }
+
+        private void OnTimerFlush()
+        {
+            try
+            {
+                Flush();
+            }
+            finally
+            {
+                // Re-arm the one-shot timer only after this flush finishes, so flushes cannot overlap.
+                // Dispose sets _disposed and disposes the timer under the same lock, so while _disposed
+                // is false the timer is still alive.
+                lock (_timerLock)
+                {
+                    if (!_disposed)
+                    {
+                        _optionalTimer?.Change(_flushInterval, Timeout.InfiniteTimeSpan);
+                    }
+                }
+            }
         }
 
         private void SendMetricWithTags(string metricName, string[] tags, int value)

@@ -9,14 +9,17 @@ namespace StatsdClient.Transport
     {
         private readonly NamedPipeClientStream _namedPipe;
         private readonly TimeSpan _timeout;
+        private readonly TimeSpan _connectionCooldown;
+        private readonly System.Diagnostics.Stopwatch _connectFailureTimer = new System.Diagnostics.Stopwatch();
         private readonly object _lock = new object();
 
         private byte[] _internalbuffer = Array.Empty<byte>();
 
-        public NamedPipeTransport(string pipeName, TimeSpan? timeout = null)
+        public NamedPipeTransport(string pipeName, TimeSpan? timeout = null, TimeSpan? connectionCooldown = null)
         {
             _namedPipe = new NamedPipeClientStream(".", pipeName, PipeDirection.Out, PipeOptions.Asynchronous);
             _timeout = timeout ?? TimeSpan.FromSeconds(2);
+            _connectionCooldown = connectionCooldown ?? TimeSpan.FromSeconds(5);
         }
 
         public TransportType TransportType => TransportType.NamedPipe;
@@ -51,11 +54,22 @@ namespace StatsdClient.Transport
             {
                 if (!_namedPipe.IsConnected)
                 {
+                    // After a failed connect, avoid blocking on Connect again until the
+                    // cooldown elapses. Otherwise every send re-blocks for the full timeout
+                    // while the pipe is unavailable, starving the worker and (through the
+                    // telemetry timer) inflating the thread count.
+                    if (_connectFailureTimer.IsRunning && _connectFailureTimer.Elapsed < _connectionCooldown)
+                    {
+                        return false;
+                    }
+
                     _namedPipe.Connect((int)_timeout.TotalMilliseconds);
+                    _connectFailureTimer.Reset();
                 }
             }
             catch (TimeoutException)
             {
+                _connectFailureTimer.Restart();
                 return false;
             }
 
