@@ -10,7 +10,7 @@ namespace StatsdClient.Transport
         private readonly NamedPipeClientStream _namedPipe;
         private readonly TimeSpan _timeout;
         private readonly TimeSpan _connectionCooldown;
-        private readonly System.Diagnostics.Stopwatch _connectFailureTimer = new System.Diagnostics.Stopwatch();
+        private readonly System.Diagnostics.Stopwatch _sendFailureTimer = new System.Diagnostics.Stopwatch();
         private readonly object _lock = new object();
 
         private byte[] _internalbuffer = Array.Empty<byte>();
@@ -50,33 +50,42 @@ namespace StatsdClient.Transport
 
         private bool SendBuffer(byte[] buffer, int length, bool allowRetry)
         {
+            // After a failed send, fail fast until the cooldown elapses instead of blocking
+            // again on Connect or Write. Otherwise every send re-blocks for the full timeout
+            // while the pipe is unavailable, starving the worker and (through the telemetry
+            // timer) inflating the thread count. The gate sits ahead of the connection check
+            // so a connected-but-stalled pipe (writes timing out) is throttled too.
+            if (_sendFailureTimer.IsRunning && _sendFailureTimer.Elapsed < _connectionCooldown)
+            {
+                return false;
+            }
+
             try
             {
                 if (!_namedPipe.IsConnected)
                 {
-                    // After a failed connect, avoid blocking on Connect again until the
-                    // cooldown elapses. Otherwise every send re-blocks for the full timeout
-                    // while the pipe is unavailable, starving the worker and (through the
-                    // telemetry timer) inflating the thread count.
-                    if (_connectFailureTimer.IsRunning && _connectFailureTimer.Elapsed < _connectionCooldown)
-                    {
-                        return false;
-                    }
-
                     _namedPipe.Connect((int)_timeout.TotalMilliseconds);
-                    _connectFailureTimer.Reset();
                 }
             }
             catch (TimeoutException)
             {
-                _connectFailureTimer.Restart();
+                _sendFailureTimer.Restart();
                 return false;
             }
 
             try
             {
                 // WriteAsync overload with a CancellationToken instance seems to not work.
-                return _namedPipe.WriteAsync(buffer, 0, length).Wait(_timeout);
+                if (_namedPipe.WriteAsync(buffer, 0, length).Wait(_timeout))
+                {
+                    _sendFailureTimer.Reset();
+                    return true;
+                }
+
+                // The write timed out. The pipe still reports connected, so cool down to
+                // avoid re-blocking for the full timeout on every subsequent send.
+                _sendFailureTimer.Restart();
+                return false;
             }
             catch (IOException)
             {
@@ -93,6 +102,7 @@ namespace StatsdClient.Transport
                 return SendBuffer(buffer, length, allowRetry: false);
             }
 
+            _sendFailureTimer.Restart();
             return false;
         }
     }

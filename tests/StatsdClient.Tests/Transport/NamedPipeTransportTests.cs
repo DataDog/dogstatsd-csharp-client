@@ -108,6 +108,58 @@ namespace Tests
             }
         }
 
+        [Test]
+        public void WriteTimeoutTriggersCooldown()
+        {
+            var timeout = TimeSpan.FromSeconds(1);
+            var cooldown = TimeSpan.FromSeconds(10);
+            var pipeName = "writeCooldownPipeNameTest";
+            var releaseServer = new ManualResetEventSlim(false);
+
+            // The server connects but never reads, so its buffer fills and the client's
+            // write stalls until it times out.
+            var serverTask = Task.Run(() =>
+            {
+                using (var serverStream = new NamedPipeServerStream(
+                            pipeName,
+                            PipeDirection.In,
+                            1,
+                            PipeTransmissionMode.Byte,
+                            PipeOptions.Asynchronous,
+                            _serverBufferSize,
+                            0))
+                {
+                    serverStream.WaitForConnection();
+                    releaseServer.Wait();
+                }
+            });
+
+            using (var transport = new NamedPipeTransport(pipeName, timeout, cooldown))
+            {
+                var buff = new byte[_serverBufferSize * 10];
+
+                var stopwatch = Stopwatch.StartNew();
+                Assert.False(transport.Send(buff, buff.Length));
+                var firstSendDuration = stopwatch.Elapsed;
+
+                stopwatch.Restart();
+                for (int i = 0; i < 5; i++)
+                {
+                    Assert.False(transport.Send(buff, buff.Length));
+                }
+
+                var cooldownSendsDuration = stopwatch.Elapsed;
+
+                // The first send pays the write timeout; subsequent sends within the cooldown
+                // fail fast instead of each blocking on the stalled write again.
+                Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(500)));
+                Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(500)));
+            }
+
+            releaseServer.Set();
+            serverTask.Wait();
+        }
+
         private Task<byte[]> StartServerSingleRead(int bufferSize)
         {
             return StartServer(server =>
