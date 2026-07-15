@@ -87,7 +87,7 @@ namespace Tests
             var cooldown = TimeSpan.FromSeconds(10);
 
             // No server listens on this pipe, so Connect blocks for the full timeout and fails.
-            using (var transport = new NamedPipeTransport("cooldownPipeNameTest", connectTimeout, cooldown))
+            using (var transport = new NamedPipeTransport("cooldownPipeNameTest-" + Guid.NewGuid(), connectTimeout, cooldown))
             {
                 var stopwatch = Stopwatch.StartNew();
                 Assert.False(transport.Send(_buffToSend, _buffToSend.Length));
@@ -114,7 +114,7 @@ namespace Tests
         {
             var timeout = TimeSpan.FromSeconds(1);
             var cooldown = TimeSpan.FromSeconds(10);
-            var pipeName = "writeCooldownPipeNameTest";
+            var pipeName = "writeCooldownPipeNameTest-" + Guid.NewGuid();
             var releaseServer = new ManualResetEventSlim(false);
 
             // The server connects but never reads, so its buffer fills and the client's

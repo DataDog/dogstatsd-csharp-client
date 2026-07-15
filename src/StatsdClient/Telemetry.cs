@@ -21,7 +21,7 @@ namespace StatsdClient
         private readonly ITransport _optionalTransport;
         private readonly Dictionary<MetricType, ValueWithTags> _aggregatedContexts = new Dictionary<MetricType, ValueWithTags>();
         private readonly Action<Exception> _optionalExceptionHandler;
-        private bool _disposed;
+        private volatile bool _disposed;
 
         private int _metricsSent;
         private int _eventsSent;

@@ -48,7 +48,10 @@ namespace StatsdClient.Transport
 
         public void Dispose()
         {
-            _namedPipe.Dispose();
+            lock (_lock)
+            {
+                _namedPipe.Dispose();
+            }
         }
 
         private NamedPipeClientStream CreatePipe()
@@ -62,7 +65,9 @@ namespace StatsdClient.Transport
             // down the disposed pipe does not surface as an unobserved task exception.
             abandonedWrite.ContinueWith(
                 t => { _ = t.Exception; },
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
 
             _namedPipe.Dispose();
             _namedPipe = CreatePipe();

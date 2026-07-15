@@ -205,16 +205,24 @@ namespace Tests
                 Array.Empty<string>(),
                 e => caughtException = e);
 
-            Assert.True(flushStarted.Wait(TimeSpan.FromSeconds(5)), "timer never dispatched a flush");
+            try
+            {
+                Assert.True(flushStarted.Wait(TimeSpan.FromSeconds(5)), "timer never dispatched a flush");
 
-            // Dispose must complete without waiting for the in-flight flush: the flush holds no lock
-            // while blocked in the transport, and the re-arm only takes _timerLock after the flush ends.
-            var disposeThread = new Thread(() => telemetry.Dispose());
-            disposeThread.Start();
-            Assert.True(disposeThread.Join(TimeSpan.FromSeconds(5)), "Dispose deadlocked while a flush was in flight");
+                // Dispose must complete without waiting for the in-flight flush: the flush holds no lock
+                // while blocked in the transport, and the re-arm only takes _timerLock after the flush ends.
+                var disposeThread = new Thread(() => telemetry.Dispose());
+                disposeThread.Start();
+                Assert.True(disposeThread.Join(TimeSpan.FromSeconds(5)), "Dispose deadlocked while a flush was in flight");
+            }
+            finally
+            {
+                // Always release the blocked flush callback so a failed assertion above does not
+                // leave a thread-pool thread parked on releaseFlush for the rest of the run.
+                releaseFlush.Set();
+            }
 
             // Let the in-flight flush finish and attempt to re-arm after Dispose; it must not throw.
-            releaseFlush.Set();
             Thread.Sleep(50);
 
             Assert.IsNull(caughtException);
