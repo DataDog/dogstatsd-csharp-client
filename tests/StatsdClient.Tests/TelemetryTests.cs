@@ -220,6 +220,10 @@ namespace Tests
                 // Always release the blocked flush callback so a failed assertion above does not
                 // leave a thread-pool thread parked on releaseFlush for the rest of the run.
                 releaseFlush.Set();
+
+                // Dispose here too so a failed assertion before the in-test Dispose does not leave
+                // the timer running and leak into subsequent tests. Dispose is idempotent.
+                telemetry.Dispose();
             }
 
             // Let the in-flight flush finish and attempt to re-arm after Dispose; it must not throw.

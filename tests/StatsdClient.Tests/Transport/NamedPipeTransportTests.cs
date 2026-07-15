@@ -101,10 +101,12 @@ namespace Tests
 
                 var cooldownSendsDuration = stopwatch.Elapsed;
 
-                // The first send pays the connect timeout; subsequent sends within the
-                // cooldown fail fast instead of each blocking on Connect again. Assert
-                // relative to the configured timeout so the test tolerates slow/noisy CI.
-                Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(connectTimeout.TotalMilliseconds * 0.5)));
+                // Subsequent sends within the cooldown must fail fast instead of each blocking
+                // on Connect again. Assert the whole batch completes in a small fraction of a
+                // single connect timeout so the test fails if sends keep blocking, without
+                // relying on Connect actually blocking the full timeout (some Windows/.NET
+                // combinations fail a missing pipe quickly).
+                Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(connectTimeout.TotalMilliseconds * 0.5)));
                 Assert.That(cooldownSendsDuration, Is.LessThan(firstSendDuration));
             }
         }
@@ -153,10 +155,10 @@ namespace Tests
 
                     var cooldownSendsDuration = stopwatch.Elapsed;
 
-                    // The first send pays the write timeout; subsequent sends within the cooldown
-                    // fail fast instead of each blocking on the stalled write again. Assert
-                    // relative to the configured timeout so the test tolerates slow/noisy CI.
-                    Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(timeout.TotalMilliseconds * 0.5)));
+                    // Subsequent sends within the cooldown must fail fast instead of each blocking
+                    // on the stalled write again. Assert the whole batch completes in a small
+                    // fraction of a single write timeout so the test fails if sends keep blocking.
+                    Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(timeout.TotalMilliseconds * 0.5)));
                     Assert.That(cooldownSendsDuration, Is.LessThan(firstSendDuration));
                 }
             }

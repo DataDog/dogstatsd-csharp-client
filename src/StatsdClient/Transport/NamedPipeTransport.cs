@@ -97,6 +97,20 @@ namespace StatsdClient.Transport
                 _sendFailureTimer.Restart();
                 return false;
             }
+            catch (IOException)
+            {
+                // A missing or busy pipe fails the connect with IOException rather than
+                // TimeoutException. Start the cooldown so subsequent sends fail fast instead
+                // of re-blocking on Connect.
+                _sendFailureTimer.Restart();
+                return false;
+            }
+            catch (AggregateException e) when (e.InnerException is IOException)
+            {
+                // dotnet6.0 raises AggregateException when an IOException occurs.
+                _sendFailureTimer.Restart();
+                return false;
+            }
 
             try
             {
