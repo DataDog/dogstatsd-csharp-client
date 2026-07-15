@@ -180,6 +180,11 @@ namespace StatsdClient
         {
             lock (_timerLock)
             {
+                if (_disposed)
+                {
+                    return;
+                }
+
                 _disposed = true;
                 _optionalTimer?.Change(Timeout.Infinite, Timeout.Infinite);
                 _optionalTimer?.Dispose();

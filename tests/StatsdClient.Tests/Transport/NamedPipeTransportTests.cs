@@ -91,7 +91,6 @@ namespace Tests
             {
                 var stopwatch = Stopwatch.StartNew();
                 Assert.False(transport.Send(_buffToSend, _buffToSend.Length));
-                var firstSendDuration = stopwatch.Elapsed;
 
                 stopwatch.Restart();
                 for (int i = 0; i < 5; i++)
@@ -107,7 +106,6 @@ namespace Tests
                 // relying on Connect actually blocking the full timeout (some Windows/.NET
                 // combinations fail a missing pipe quickly).
                 Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(connectTimeout.TotalMilliseconds * 0.5)));
-                Assert.That(cooldownSendsDuration, Is.LessThan(firstSendDuration));
             }
         }
 
@@ -141,11 +139,12 @@ namespace Tests
             {
                 using (var transport = new NamedPipeTransport(pipeName, timeout, cooldown))
                 {
-                    var buff = new byte[_serverBufferSize * 10];
+                    // The OS may round the server's requested buffer size up, so use a payload
+                    // far larger than the requested buffer to make the stalled write reliable.
+                    var buff = new byte[_serverBufferSize * 1000];
 
                     var stopwatch = Stopwatch.StartNew();
                     Assert.False(transport.Send(buff, buff.Length));
-                    var firstSendDuration = stopwatch.Elapsed;
 
                     stopwatch.Restart();
                     for (int i = 0; i < 5; i++)
@@ -159,7 +158,6 @@ namespace Tests
                     // on the stalled write again. Assert the whole batch completes in a small
                     // fraction of a single write timeout so the test fails if sends keep blocking.
                     Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(timeout.TotalMilliseconds * 0.5)));
-                    Assert.That(cooldownSendsDuration, Is.LessThan(firstSendDuration));
                 }
             }
             finally
