@@ -188,6 +188,14 @@ namespace StatsdClient
 
         private void OnTimerFlush()
         {
+            // A one-shot callback can already be in flight when Dispose runs, so skip the flush
+            // if the timer has been disposed. The check runs without holding _timerLock so it
+            // never blocks Dispose.
+            if (_disposed)
+            {
+                return;
+            }
+
             try
             {
                 Flush();

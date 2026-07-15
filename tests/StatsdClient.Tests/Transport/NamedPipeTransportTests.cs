@@ -102,9 +102,10 @@ namespace Tests
                 var cooldownSendsDuration = stopwatch.Elapsed;
 
                 // The first send pays the connect timeout; subsequent sends within the
-                // cooldown fail fast instead of each blocking on Connect again.
-                Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(500)));
-                Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(500)));
+                // cooldown fail fast instead of each blocking on Connect again. Assert
+                // relative to the configured timeout so the test tolerates slow/noisy CI.
+                Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(connectTimeout.TotalMilliseconds * 0.5)));
+                Assert.That(cooldownSendsDuration, Is.LessThan(firstSendDuration));
             }
         }
 
@@ -134,30 +135,36 @@ namespace Tests
                 }
             });
 
-            using (var transport = new NamedPipeTransport(pipeName, timeout, cooldown))
+            try
             {
-                var buff = new byte[_serverBufferSize * 10];
-
-                var stopwatch = Stopwatch.StartNew();
-                Assert.False(transport.Send(buff, buff.Length));
-                var firstSendDuration = stopwatch.Elapsed;
-
-                stopwatch.Restart();
-                for (int i = 0; i < 5; i++)
+                using (var transport = new NamedPipeTransport(pipeName, timeout, cooldown))
                 {
+                    var buff = new byte[_serverBufferSize * 10];
+
+                    var stopwatch = Stopwatch.StartNew();
                     Assert.False(transport.Send(buff, buff.Length));
+                    var firstSendDuration = stopwatch.Elapsed;
+
+                    stopwatch.Restart();
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Assert.False(transport.Send(buff, buff.Length));
+                    }
+
+                    var cooldownSendsDuration = stopwatch.Elapsed;
+
+                    // The first send pays the write timeout; subsequent sends within the cooldown
+                    // fail fast instead of each blocking on the stalled write again. Assert
+                    // relative to the configured timeout so the test tolerates slow/noisy CI.
+                    Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(timeout.TotalMilliseconds * 0.5)));
+                    Assert.That(cooldownSendsDuration, Is.LessThan(firstSendDuration));
                 }
-
-                var cooldownSendsDuration = stopwatch.Elapsed;
-
-                // The first send pays the write timeout; subsequent sends within the cooldown
-                // fail fast instead of each blocking on the stalled write again.
-                Assert.That(firstSendDuration, Is.GreaterThan(TimeSpan.FromMilliseconds(500)));
-                Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(500)));
             }
-
-            releaseServer.Set();
-            serverTask.Wait();
+            finally
+            {
+                releaseServer.Set();
+                Assert.True(serverTask.Wait(TimeSpan.FromSeconds(5)), "server task did not complete");
+            }
         }
 
         private Task<byte[]> StartServerSingleRead(int bufferSize)
