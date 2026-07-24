@@ -1,5 +1,6 @@
 #if OS_WINDOWS
 using System;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,6 +77,93 @@ namespace Tests
                     Assert.True(transport.Send(_buffToSend, _buffToSend.Length));
                     CollectionAssert.AreEqual(task.Result, _buffToSend);
                 }
+            }
+        }
+
+        [Test]
+        public void ConnectionCooldownAvoidsRepeatedBlocking()
+        {
+            var connectTimeout = TimeSpan.FromSeconds(1);
+            var cooldown = TimeSpan.FromSeconds(10);
+
+            // No server listens on this pipe, so Connect blocks for the full timeout and fails.
+            using (var transport = new NamedPipeTransport("cooldownPipeNameTest-" + Guid.NewGuid(), connectTimeout, cooldown))
+            {
+                var stopwatch = Stopwatch.StartNew();
+                Assert.False(transport.Send(_buffToSend, _buffToSend.Length));
+
+                stopwatch.Restart();
+                for (int i = 0; i < 5; i++)
+                {
+                    Assert.False(transport.Send(_buffToSend, _buffToSend.Length));
+                }
+
+                var cooldownSendsDuration = stopwatch.Elapsed;
+
+                // Subsequent sends within the cooldown must fail fast instead of each blocking
+                // on Connect again. Assert the whole batch completes in a small fraction of a
+                // single connect timeout so the test fails if sends keep blocking, without
+                // relying on Connect actually blocking the full timeout (some Windows/.NET
+                // combinations fail a missing pipe quickly).
+                Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(connectTimeout.TotalMilliseconds * 0.5)));
+            }
+        }
+
+        [Test]
+        public void WriteTimeoutTriggersCooldown()
+        {
+            var timeout = TimeSpan.FromSeconds(1);
+            var cooldown = TimeSpan.FromSeconds(10);
+            var pipeName = "writeCooldownPipeNameTest-" + Guid.NewGuid();
+            var releaseServer = new ManualResetEventSlim(false);
+
+            // The server connects but never reads, so its buffer fills and the client's
+            // write stalls until it times out.
+            var serverTask = Task.Run(() =>
+            {
+                using (var serverStream = new NamedPipeServerStream(
+                            pipeName,
+                            PipeDirection.In,
+                            1,
+                            PipeTransmissionMode.Byte,
+                            PipeOptions.Asynchronous,
+                            _serverBufferSize,
+                            0))
+                {
+                    serverStream.WaitForConnection();
+                    releaseServer.Wait();
+                }
+            });
+
+            try
+            {
+                using (var transport = new NamedPipeTransport(pipeName, timeout, cooldown))
+                {
+                    // The OS may round the server's requested buffer size up, so use a payload
+                    // far larger than the requested buffer to make the stalled write reliable.
+                    var buff = new byte[_serverBufferSize * 1000];
+
+                    var stopwatch = Stopwatch.StartNew();
+                    Assert.False(transport.Send(buff, buff.Length));
+
+                    stopwatch.Restart();
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Assert.False(transport.Send(buff, buff.Length));
+                    }
+
+                    var cooldownSendsDuration = stopwatch.Elapsed;
+
+                    // Subsequent sends within the cooldown must fail fast instead of each blocking
+                    // on the stalled write again. Assert the whole batch completes in a small
+                    // fraction of a single write timeout so the test fails if sends keep blocking.
+                    Assert.That(cooldownSendsDuration, Is.LessThan(TimeSpan.FromMilliseconds(timeout.TotalMilliseconds * 0.5)));
+                }
+            }
+            finally
+            {
+                releaseServer.Set();
+                Assert.True(serverTask.Wait(TimeSpan.FromSeconds(5)), "server task did not complete");
             }
         }
 
