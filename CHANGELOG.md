@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+# 9.2.1 / 2026-07-24
+
+## Changes
+
+* [BUGFIX] Prevent named pipe write failures from causing unbounded thread growth. The telemetry timer now reschedules itself after each round instead of spawning a new thread every 10s, and backs off after send failures. See [#231][].
+
 # 9.2.0 / 2026-06-10
 
 ## Changes
@@ -304,6 +310,7 @@ DogStatsD-CSharp-Client `2.2.1` is the last version to support .NET Framework 3.
 [#213]: https://github.com/DataDog/dogstatsd-csharp-client/issues/213
 [#223]: https://github.com/DataDog/dogstatsd-csharp-client/issues/223
 [#227]: https://github.com/DataDog/dogstatsd-csharp-client/issues/227
+[#231]: https://github.com/DataDog/dogstatsd-csharp-client/issues/231
 [@DanielVukelich]: https://github.com/DanielVukelich
 [@albertofem]: https://github.com/albertofem
 [@alistair]: https://github.com/alistair
